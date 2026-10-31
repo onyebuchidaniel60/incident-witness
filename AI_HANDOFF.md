@@ -882,16 +882,16 @@ When unauthenticated or after the session disappeared, protected routes could br
 
 ## Phase 8 deployment checkpoint
 
-- **Vercel Preview URL:** https://incident-witness-5kbj8bthc-uhhh2.vercel.app
-- **Preview deployment ID:** `dpl_C9A6ZiM8nffQGnsahx5B9WjmyKAF`
+- **Vercel Preview URL:** https://incident-witness-95smmy2oo-uhhh2.vercel.app
+- **Preview deployment ID:** `dpl_Ggii7Uag1Mtaxrvtakw4YyaQvNq7`
 - **Preview target/status:** `preview`; `READY`; no Deployment Protection.
-- **Source code:** Phase 8 commits `fb95f54`, `8440ce1` and `d2168de`, plus the final duplicate-title cleanup commit; both the Preview and Git-connected production build reported commit `d2168de5c865559aa740b5d795ff9ff86eda19f9` before that cleanup.
-- **Route checks on the Preview:** `/`, `/docs`, `/privacy`, `/terms`, `/verify`, `/robots.txt`, `/sitemap.xml`, `/icon.svg` and `/opengraph-image` returned HTTP 200. `/login` returned 200 with `x-robots-tag: noindex`. `/dashboard`, `/hosts`, `/incidents` and `/settings` returned 307 to `/login?next=…` with `x-robots-tag: noindex`.
+- **Source code SHA:** `3122b3fe9d720982faf8f11f059e275203e8cb7c`, which includes Phase 8 commits `fb95f54`, `8440ce1`, `d2168de`, `78d0444` and the duplicate-title cleanup `3e08d2d`. Vercel Git metadata reports this SHA for the Preview.
+- **Route checks on the current Preview:** `/`, `/docs`, `/privacy`, `/terms`, `/verify` and `/login` returned HTTP 200 and the deployed `/docs` HTML contains the Phase 8 sections. An earlier Preview built at `d2168de` also returned HTTP 200 for `/robots.txt`, `/sitemap.xml`, `/icon.svg` and `/opengraph-image`, and `307` to `/login?next=…` with `x-robots-tag: noindex` for `/dashboard`, `/hosts`, `/incidents` and `/settings`.
 - **Content checks on the Preview:** the deployed `/docs` HTML contains the overview, host-agent, renter-SDK, protocol, limitations and reference sections plus the expected commands; the footer contains `/docs`, `/privacy`, `/terms`, `/verify` and the public GitHub repository link.
 - **External link check:** https://github.com/onyebuchidaniel60/incident-witness and https://github.com/onyebuchidaniel60/incident-witness/blob/main/docs/HOST_AGENT.md returned HTTP 200.
-- **Edge caveat:** repeated automated requests to an unmatched path on the Preview returned Vercel's Security Checkpoint (`HTTP 403`, `x-vercel-mitigated: challenge`) rather than the application 404. The 404 title, links and noindex behaviour pass locally in Playwright; this is an edge challenge, not an application failure.
-- **Git-connected Production deployment (auto-created by pushing `main`):** https://incident-witness-8ol9xv0rt-uhhh2.vercel.app, deployment ID `dpl_GikpnKfPoEQBp69qGkENcA5C6hE1`, target `production`, status `READY`, Git metadata commit `d2168de5c865559aa740b5d795ff9ff86eda19f9` on `main`. Stable alias https://incident-witness.vercel.app serves the Phase 8 `/docs` page (HTTP 200). No separate `vercel deploy --prod` command was run; the deployment was auto-created by the Git integration. Production release approval remains a separate Phase 9/operator decision.
-- **Latest code deployment after duplicate-title cleanup:** https://incident-witness-d6ry01cpu-uhhh2.vercel.app, deployment ID `dpl_B9QFNMJJBeeeGKxMhX45UisnQ7AP`, target `production`, status `READY`, Git metadata commit `3e08d2ddf50ff684b3b08139e4fc60f2dd9d046c`. The stable alias served the Phase 8 documentation, metadata and footer links when checked. Subsequent docs-only handoff commits may auto-deploy without an application-code change.
+- **Edge caveat:** repeated automated requests to unmatched or cached paths occasionally returned Vercel's Security Checkpoint (`HTTP 403`, `x-vercel-mitigated: challenge`) instead of the application response. The 404 title, links and noindex behaviour pass locally in Playwright; this is an edge challenge, not an application failure.
+- **Git-connected Production deployment (auto-created by pushing `main`):** https://incident-witness-fqbgv60f1-uhhh2.vercel.app, deployment ID `dpl_9rdMekQvCtpx8bziWUYFFk8XZVWh`, target `production`, status `READY`, Git metadata commit `3122b3fe9d720982faf8f11f059e275203e8cb7c` on `main`. Stable alias https://incident-witness.vercel.app serves the Phase 8 `/docs` page (HTTP 200). No separate `vercel deploy --prod` command was run; the deployment was auto-created by the Git integration. Production release approval remains a separate Phase 9/operator decision.
+- Subsequent docs-only handoff commits may auto-deploy without an application-code change.
 
 ## Design reference and approval status
 
