@@ -752,6 +752,15 @@ The independent hardening gap was that no Supabase client passed explicit cookie
 - The E2E journey also reloads `/dashboard` and confirms the session persists.
 - A real Supabase email magic link still requires an operator-side inbox click; the local automated seam cannot consume the real email. No Supabase project or redirect configuration was changed.
 
+### Auth fix deployment
+
+- **Preview URL:** https://incident-witness-beilbx6an-uhhh2.vercel.app
+- **Preview deployment ID:** `dpl_EDohrce3YDTRSyLqyfTWiXAYKEq1`
+- **Preview status/target:** `READY`; `preview`
+- **Deployed code SHA:** `75dab4e`
+- The deployed `/login` returned HTTP 200 with the approved UI, and `/auth/callback` without a code returned the expected `307` to `/login?error=invalid_link`. The test-only callback seam is disabled in the production build.
+- A real magic-link inbox click on this Preview remains the operator-side confirmation step.
+
 **Phase 7 visual verification was blocked by this auth bug.** Phase 8 was not started.
 
 ## Design reference and approval status
