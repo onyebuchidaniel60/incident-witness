@@ -1,5 +1,7 @@
 "use client";
 
+import { Icon } from "@/components/ui/icon";
+
 export default function ErrorPage({
   error,
   reset,
@@ -8,25 +10,27 @@ export default function ErrorPage({
   reset: () => void;
 }) {
   return (
-    <div className="mx-auto max-w-2xl py-8">
-      <p className="text-sm font-medium uppercase tracking-wide text-slate-500">Route error</p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
-        This page could not be displayed
-      </h1>
-      <p className="mt-4 text-slate-700">
-        This page encountered an unexpected error. No provider credentials are exposed in the error
-        reference.
-      </p>
-      <p className="mt-2 text-sm text-slate-600">
-        Reference: <code>{error.digest ?? "no digest available"}</code>
-      </p>
-      <button
-        type="button"
-        onClick={reset}
-        className="mt-6 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
-      >
-        Try again
-      </button>
-    </div>
+    <main id="main-content" className="iw-container py-16">
+      <div className="iw-panel max-w-2xl p-6">
+        <p className="iw-eyebrow">
+          <span className="iw-eyebrow-dot" />
+          Route error
+        </p>
+        <h1 className="mt-3 text-2xl leading-tight text-iw-ink">
+          This page could not be displayed
+        </h1>
+        <p className="mt-3 text-[11px] leading-6 text-iw-muted">
+          This page encountered an unexpected error. No provider credentials are exposed in the error
+          reference.
+        </p>
+        <p className="mt-2 font-mono text-[9px] text-iw-faint">
+          Reference: {error.digest ?? "no digest available"}
+        </p>
+        <button type="button" onClick={reset} className="iw-btn iw-btn-primary iw-btn-sm mt-5">
+          <Icon name="activity" size="sm" />
+          Try again
+        </button>
+      </div>
+    </main>
   );
 }

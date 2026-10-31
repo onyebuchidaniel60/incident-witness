@@ -27,10 +27,8 @@ export function ConfirmAction({
         type="button"
         onClick={() => setConfirming(true)}
         disabled={disabled || busy}
-        className={`rounded-md border px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:bg-slate-100 ${
-          destructive
-            ? "border-red-300 bg-white text-red-900 hover:bg-red-50"
-            : "border-slate-300 bg-white text-slate-900 hover:bg-slate-100"
+        className={`iw-btn iw-btn-sm ${
+          destructive ? "iw-btn-danger" : "iw-btn-secondary"
         }`}
       >
         {label}
@@ -39,9 +37,9 @@ export function ConfirmAction({
   }
 
   return (
-    <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">
-      <p className="leading-6">{description}</p>
-      <div className="mt-2 flex flex-wrap gap-2">
+    <div className="iw-notice iw-notice-warning flex-col gap-2">
+      <p className="text-[10.5px] leading-5">{description}</p>
+      <div className="flex flex-wrap gap-2">
         <button
           type="button"
           onClick={() => {
@@ -49,7 +47,7 @@ export function ConfirmAction({
             onConfirm();
           }}
           disabled={busy}
-          className="rounded-md bg-slate-900 px-3 py-2 font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+          className="iw-btn iw-btn-primary iw-btn-sm"
         >
           {busy ? "Working…" : confirmLabel}
         </button>
@@ -57,7 +55,7 @@ export function ConfirmAction({
           type="button"
           onClick={() => setConfirming(false)}
           disabled={busy}
-          className="rounded-md border border-slate-300 bg-white px-3 py-2 font-medium text-slate-900 hover:bg-slate-100 disabled:cursor-not-allowed"
+          className="iw-btn iw-btn-secondary iw-btn-sm"
         >
           Cancel
         </button>

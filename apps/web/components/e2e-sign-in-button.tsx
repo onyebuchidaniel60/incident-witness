@@ -23,9 +23,9 @@ export function E2eSignInButton() {
   }
 
   return (
-    <div className="rounded-md border border-dashed border-slate-400 bg-slate-100 p-4 text-sm">
-      <p className="font-semibold text-slate-950">Local end-to-end test mode</p>
-      <p className="mt-1 text-slate-700">
+    <div className="rounded-[4px] border border-dashed border-iw-border-strong bg-white/[0.02] p-4 text-[11px]">
+      <p className="font-semibold text-iw-ink">Local end-to-end test mode</p>
+      <p className="mt-1 leading-5 text-iw-muted">
         This control is available only in the local test environment. It does not use a Supabase
         email code and is not enabled in production.
       </p>
@@ -33,7 +33,7 @@ export function E2eSignInButton() {
         type="button"
         onClick={signIn}
         disabled={busy}
-        className="mt-3 rounded-md bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-700 disabled:bg-slate-400"
+        className="iw-btn iw-btn-secondary iw-btn-sm mt-3"
       >
         {busy ? "Signing in…" : "Continue as local test provider"}
       </button>

@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { Icon } from "@/components/ui/icon";
+
 type PlaceholderNoticeProps = {
   title?: string;
   children: ReactNode;
@@ -10,9 +12,12 @@ export function PlaceholderNotice({
   children,
 }: PlaceholderNoticeProps) {
   return (
-    <aside className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
-      <p className="font-semibold">{title}</p>
-      <div className="mt-1">{children}</div>
+    <aside className="iw-notice iw-notice-warning flex-col gap-1.5">
+      <p className="flex items-center gap-2 font-semibold">
+        <Icon name="alert" size="sm" />
+        {title}
+      </p>
+      <div className="text-[11px] leading-5">{children}</div>
     </aside>
   );
 }

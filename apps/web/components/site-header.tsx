@@ -1,19 +1,21 @@
 import Link from "next/link";
 
 import { PrimaryNav } from "@/components/primary-nav";
+import { Icon } from "@/components/ui/icon";
 
 export function SiteHeader() {
   return (
-    <header className="border-b border-slate-200 bg-white">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-4 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
-        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <Link href="/" className="text-lg font-semibold tracking-tight text-slate-950">
-            Incident Witness
-          </Link>
-          <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Functional staging workspace
+    <header className="iw-container pt-4">
+      <div className="flex min-h-[62px] items-center gap-5 rounded-[6px] border border-iw-border bg-iw-surface/60 px-4 py-2 shadow-[0_18px_45px_rgba(0,0,0,0.25)] backdrop-blur-xl">
+        <Link href="/" className="iw-logo text-iw-ink">
+          <span className="iw-brand-mark">
+            <Icon name="hash" size="sm" />
           </span>
-        </div>
+          Incident Witness
+        </Link>
+        <span className="hidden border-l border-iw-border pl-5 text-[9px] font-medium uppercase tracking-[0.13em] text-iw-faint xl:inline">
+          Portable incident evidence
+        </span>
         <PrimaryNav />
       </div>
     </header>

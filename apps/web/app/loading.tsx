@@ -1,13 +1,18 @@
 export default function Loading() {
   return (
-    <div role="status" aria-live="polite" className="mx-auto max-w-2xl py-8">
-      <p className="text-sm font-medium uppercase tracking-wide text-slate-500">Loading</p>
-      <div className="mt-4 space-y-3" aria-hidden="true">
-        <div className="h-8 w-2/3 animate-pulse rounded bg-slate-200 motion-reduce:animate-none" />
-        <div className="h-4 w-full animate-pulse rounded bg-slate-200 motion-reduce:animate-none" />
-        <div className="h-4 w-5/6 animate-pulse rounded bg-slate-200 motion-reduce:animate-none" />
+    <main id="main-content" className="iw-container py-16">
+      <div role="status" aria-live="polite" className="max-w-2xl">
+        <p className="iw-eyebrow">
+          <span className="iw-eyebrow-dot" />
+          Loading
+        </p>
+        <div className="mt-5 space-y-2.5" aria-hidden="true">
+          <div className="h-8 w-2/3 animate-pulse rounded-[4px] bg-iw-surface-3 motion-reduce:animate-none" />
+          <div className="h-3 w-full animate-pulse rounded-[4px] bg-iw-surface-2 motion-reduce:animate-none" />
+          <div className="h-3 w-5/6 animate-pulse rounded-[4px] bg-iw-surface-2 motion-reduce:animate-none" />
+        </div>
+        <p className="sr-only">Loading the requested page.</p>
       </div>
-      <p className="sr-only">Loading the requested page.</p>
-    </div>
+    </main>
   );
 }

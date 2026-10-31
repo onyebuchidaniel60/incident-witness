@@ -25,15 +25,11 @@ export function CopyButton({
 
   return (
     <span className="inline-flex flex-wrap items-center gap-2">
-      <button
-        type="button"
-        onClick={() => void copy()}
-        className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-900 hover:bg-slate-100"
-      >
+      <button type="button" onClick={() => void copy()} className="iw-btn iw-btn-secondary iw-btn-sm">
         {status === "copied" ? copiedLabel : label}
       </button>
       {status === "failed" ? (
-        <span role="alert" className="text-sm text-red-800">
+        <span role="alert" className="text-[10px] text-iw-red">
           Copy failed. Select the value manually.
         </span>
       ) : (

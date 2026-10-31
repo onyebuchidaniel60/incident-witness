@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
+import { Icon } from "@/components/ui/icon";
+
 const links = [
   { href: "/", label: "Home" },
   { href: "/dashboard", label: "Workspace" },
@@ -25,23 +27,26 @@ export function PrimaryNav() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div>
+    <div className="relative ml-auto">
       <button
         type="button"
-        className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-900 md:hidden"
+        className="iw-btn iw-btn-secondary iw-btn-sm md:hidden"
         aria-expanded={isOpen}
         aria-controls="primary-navigation"
+        aria-label={isOpen ? "Close menu" : "Open menu"}
         onClick={() => setIsOpen((current) => !current)}
       >
-        {isOpen ? "Close menu" : "Open menu"}
+        <Icon name={isOpen ? "x" : "menu"} />
       </button>
 
       <nav
         id="primary-navigation"
         aria-label="Primary"
-        className={`${isOpen ? "block" : "hidden"} mt-3 md:mt-0 md:block`}
+        className={`${
+          isOpen ? "block" : "hidden"
+        } absolute right-0 top-[calc(100%+0.55rem)] z-40 w-56 rounded-[4px] border border-iw-border-strong bg-iw-surface-2 p-2 shadow-[0_24px_60px_rgba(0,0,0,0.55)] md:static md:ml-4 md:block md:w-auto md:border-0 md:bg-transparent md:p-0 md:shadow-none`}
       >
-        <ul className="flex flex-col gap-1 border-t border-slate-200 pt-3 md:flex-row md:items-center md:gap-5 md:border-0 md:pt-0">
+        <ul className="flex flex-col gap-1 md:flex-row md:items-center md:gap-5">
           {links.map((link) => {
             const current = isCurrentPath(pathname, link.href);
 
@@ -50,8 +55,10 @@ export function PrimaryNav() {
                 <Link
                   href={link.href}
                   aria-current={current ? "page" : undefined}
-                  className={`block rounded px-2 py-1 text-sm font-medium ${
-                    current ? "bg-slate-900 text-white" : "text-slate-700 hover:text-slate-950"
+                  className={`block rounded-[3px] px-2.5 py-1.5 text-[11px] font-medium transition-colors ${
+                    current
+                      ? "bg-iw-green/10 text-iw-green-bright shadow-[inset_0_0_0_1px_rgba(38,209,140,0.22)]"
+                      : "text-iw-muted hover:bg-white/5 hover:text-iw-ink"
                   }`}
                   onClick={() => setIsOpen(false)}
                 >

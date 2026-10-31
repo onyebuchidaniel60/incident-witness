@@ -1,10 +1,17 @@
 import type { ReactNode } from "react";
 
+import { Icon, type IconName } from "@/components/ui/icon";
+
 export function LoadingState({ label = "Loading…" }: { label?: string }) {
   return (
-    <p role="status" aria-live="polite" className="text-sm text-slate-600">
+    <div
+      role="status"
+      aria-live="polite"
+      className="flex items-center gap-2 text-[11px] text-iw-muted"
+    >
+      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-iw-green motion-reduce:animate-none" />
       {label}
-    </p>
+    </div>
   );
 }
 
@@ -18,18 +25,14 @@ export function ErrorState({
   title?: string;
 }) {
   return (
-    <div
-      role="alert"
-      className="rounded-md border border-red-300 bg-red-50 p-4 text-sm text-red-950"
-    >
-      <p className="font-semibold">{title}</p>
-      <p className="mt-1 leading-6">{error.message}</p>
+    <div role="alert" className="iw-notice iw-notice-danger flex-col gap-2">
+      <p className="flex items-center gap-2 font-semibold">
+        <Icon name="alert" size="sm" />
+        {title}
+      </p>
+      <p className="text-[11px] leading-5">{error.message}</p>
       {onRetry ? (
-        <button
-          type="button"
-          onClick={onRetry}
-          className="mt-3 rounded-md border border-red-400 bg-white px-3 py-2 font-medium text-red-950 hover:bg-red-100"
-        >
+        <button type="button" onClick={onRetry} className="iw-btn iw-btn-danger iw-btn-sm mt-1">
           Try again
         </button>
       ) : null}
@@ -39,8 +42,8 @@ export function ErrorState({
 
 export function EmptyState({ title, children }: { title: string; children?: ReactNode }) {
   return (
-    <div className="rounded-md border border-dashed border-slate-300 bg-white p-5 text-sm leading-6 text-slate-700">
-      <p className="font-semibold text-slate-950">{title}</p>
+    <div className="rounded-[4px] border border-dashed border-iw-border-strong bg-white/[0.02] p-4 text-[11px] leading-5 text-iw-muted">
+      <p className="font-semibold text-iw-ink">{title}</p>
       {children ? <div className="mt-2">{children}</div> : null}
     </div>
   );
@@ -49,35 +52,52 @@ export function EmptyState({ title, children }: { title: string; children?: Reac
 type Tone = "neutral" | "success" | "warning" | "danger";
 
 const toneClasses: Record<Tone, string> = {
-  neutral: "border-slate-300 bg-slate-100 text-slate-800",
-  success: "border-emerald-300 bg-emerald-50 text-emerald-950",
-  warning: "border-amber-300 bg-amber-50 text-amber-950",
-  danger: "border-red-300 bg-red-50 text-red-950",
+  neutral: "iw-chip-neutral",
+  success: "iw-chip-success",
+  warning: "iw-chip-warning",
+  danger: "iw-chip-danger",
 };
 
 export function StatusPill({ label, tone = "neutral" }: { label: string; tone?: Tone }) {
-  return (
-    <span
-      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${toneClasses[tone]}`}
-    >
-      {label}
-    </span>
-  );
+  return <span className={`iw-chip ${toneClasses[tone]}`}>{label}</span>;
 }
+
+const noticeToneClasses: Record<Tone, string> = {
+  neutral: "iw-notice",
+  success: "iw-notice iw-notice-success",
+  warning: "iw-notice iw-notice-warning",
+  danger: "iw-notice iw-notice-danger",
+};
+
+const noticeIcons: Record<Tone, IconName> = {
+  neutral: "clock",
+  success: "check",
+  warning: "alert",
+  danger: "alert",
+};
 
 export function InlineNotice({
   tone = "neutral",
   title,
+  icon,
   children,
 }: {
   tone?: Tone;
   title?: string;
+  icon?: IconName;
   children: ReactNode;
 }) {
+  const displayIcon = icon ?? noticeIcons[tone];
+
   return (
-    <div className={`rounded-md border p-4 text-sm leading-6 ${toneClasses[tone]}`}>
-      {title ? <p className="font-semibold">{title}</p> : null}
-      <div className={title ? "mt-1" : undefined}>{children}</div>
+    <div className={`${noticeToneClasses[tone]} flex-col gap-1.5`}>
+      {title ? (
+        <p className="flex items-center gap-2 font-semibold">
+          <Icon name={displayIcon} size="sm" />
+          {title}
+        </p>
+      ) : null}
+      <div className="text-[11px] leading-5">{children}</div>
     </div>
   );
 }
