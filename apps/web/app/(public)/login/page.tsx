@@ -33,14 +33,14 @@ export default async function LoginPage({
         description="Enter your email address and we will send a magic sign-in link. There is no password stored by Incident Witness."
       />
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] lg:items-start">
+      <div className="mx-auto w-full max-w-[420px]">
         <div className="iw-panel p-5">
           <LoginForm initialError={initialError} />
         </div>
 
-        <div className="space-y-4">
+        <div className="mt-4 flex flex-col items-center gap-4 text-center">
           <E2eSignInButton />
-          <div className="flex flex-wrap gap-4 text-[10px] font-medium">
+          <div className="flex flex-wrap justify-center gap-4 text-[10px] font-medium">
             <Link href="/" className="iw-link">
               Return home
             </Link>

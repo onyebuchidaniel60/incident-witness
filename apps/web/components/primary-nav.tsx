@@ -6,9 +6,8 @@ import { useState } from "react";
 
 import { Icon } from "@/components/ui/icon";
 
-const links = [
+const baseLinks = [
   { href: "/", label: "Home" },
-  { href: "/dashboard", label: "Workspace" },
   { href: "/docs", label: "Docs" },
   { href: "/verify", label: "Verify" },
   { href: "/login", label: "Login" },
@@ -22,9 +21,18 @@ function isCurrentPath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function PrimaryNav() {
+export function PrimaryNav({ showWorkspace }: { showWorkspace: boolean }) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const links = showWorkspace
+    ? [
+        { href: "/", label: "Home" },
+        { href: "/dashboard", label: "Workspace" },
+        { href: "/docs", label: "Docs" },
+        { href: "/verify", label: "Verify" },
+        { href: "/login", label: "Login" },
+      ]
+    : baseLinks;
 
   return (
     <div className="relative ml-auto">

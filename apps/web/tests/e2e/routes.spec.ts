@@ -60,6 +60,23 @@ test("login form requests a magic link without a code field", async ({ page }) =
   await expect(page.getByRole("button", { name: "Send login link" })).toBeVisible();
   await expect(page.getByLabel("One-time code")).toHaveCount(0);
   await expect(page.getByText(/Supabase sends the default email login link/i)).toHaveCount(0);
+
+  const formBox = await page.getByLabel("Provider email address").boundingBox();
+  const returnHomeBox = await page.getByRole("link", { name: "Return home" }).boundingBox();
+  expect(formBox).not.toBeNull();
+  expect(returnHomeBox).not.toBeNull();
+  expect(returnHomeBox!.y).toBeGreaterThan(formBox!.y + formBox!.height);
+});
+
+test("obsolete public status warning panels are removed", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByText("Current functionality")).toHaveCount(0);
+
+  await page.goto("/docs");
+  await expect(page.getByText("Current deployment status")).toHaveCount(0);
+  await expect(
+    page.getByText(/A valid signature establishes integrity and provenance/i),
+  ).toBeVisible();
 });
 
 test("invalid auth callback redirects to login with a safe error", async ({ page }) => {

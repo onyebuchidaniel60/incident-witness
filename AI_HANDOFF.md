@@ -4,7 +4,7 @@
 
 **Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**. Phase 6 reference-driven mockups (revision 0.3) are **APPROVED**. Phase 7 final UI implementation is implemented, deployed and **COMPLETE AND CLOSED**; the magic-link session bug and the protected-route API-call race are fixed, verified and accepted. Phase 8 frontend and documentation completeness is implemented, test-verified, deployed and **COMPLETE AND CLOSED**. Phase 9 final regression, security audit and release readiness is **COMPLETE AND GREEN**. The MVP is a release candidate awaiting explicit production release authorization.
 
-**Current phase:** Phase 9 — complete. Awaiting explicit operator production release authorization.
+**Current phase:** Phase 9 — complete. Final operator UI polish corrections applied on 2026-11-01. Awaiting explicit production release authorization.
 
 **Next task:** Obtain explicit production release authorization. Do not deploy Production before it.
 
@@ -946,6 +946,14 @@ The temporary one-click demo sign-in bypass was removed before release at the op
 - **Deployed browser check:** clicking the public-header Workspace link while unauthenticated landed on `/login?next=%2Fdashboard`, rendered “Provider sign-in”, showed no dashboard heading, showed no magic-link notice and made zero provider API requests.
 - **Deployment mechanism:** auto-created by the Git-connected Vercel project after the authorized `git push`. No separate `vercel deploy --prod` command was run. This is a staging-data deployment; production release approval remains a separate operator decision.
 - Subsequent docs-only handoff commits may auto-deploy without an application-code change.
+
+## Final operator UI polish (2026-11-01)
+
+- **Login layout:** changed from a two-column form/links layout to a centered single-column card. The “Return home” and “Read the documentation” links now sit directly underneath the form. The obsolete magic-link implementation notice remains removed.
+- **Removed public warning panels:** deleted the “Current functionality” panel from `/` and the “Current deployment status” panel from `/docs`. The detailed evidence limitations and staging caveats remain in the documentation body and footer.
+- **Auth-aware Workspace link:** `SiteHeader` now checks the server-side session through `createSupabaseServerClient().auth.getUser()` (with the gated E2E session seam). `PrimaryNav` shows Workspace only for authenticated users. Logged-out visitors see Home, Docs, Verify and Login. `proxy.ts` is unchanged and still returns 307 for direct `/dashboard`, `/hosts`, `/incidents` and `/settings` access.
+- Public routes are now dynamic because the header reads request cookies. Metadata, sitemap and robots remain unchanged.
+- Test evidence: `npm run lint --workspace @incident-witness/web` — **PASS**; `npm run typecheck --workspace @incident-witness/web` — **PASS**; `npm run build --workspace @incident-witness/web` — **PASS**; full Playwright — **PASS**: 80 checks, 79 passed and one intentional mobile provider-flow skip. New coverage asserts the login links sit below the form, the obsolete panels are absent, Workspace is hidden when logged out, visible for an injected authenticated session, and direct protected navigation still redirects.
 
 ## Design reference and approval status
 

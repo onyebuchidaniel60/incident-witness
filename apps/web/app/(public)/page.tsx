@@ -137,20 +137,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="iw-panel p-5">
-        <h2 className="flex items-center gap-2 text-sm font-semibold text-iw-ink">
-          <Icon name="alert" size="sm" className="text-iw-yellow" />
-          Current functionality
-        </h2>
-        <p className="mt-2 max-w-4xl text-[11px] leading-6 text-iw-muted">
-          The provider workspace, host/endpoint lifecycle, signed evidence ingestion, deterministic
-          assessment, bundle sealing and local browser/CLI verification are implemented against the
-          staging environment. Provider data is loaded from the authenticated API; there is no
-          fabricated host or evidence status. The API is not yet deployed to Render, and this public
-          site does not operate a production evidence service.
-        </p>
-      </section>
-
       <section aria-labelledby="sources-heading">
         <div className="max-w-2xl">
           <p className="iw-eyebrow">

@@ -20,9 +20,7 @@ test("magic-link callback persists a session cookie and survives refresh", async
   await page.goto("/auth/callback?code=e2e-magic-link");
 
   await expect(page).toHaveURL(/\/dashboard$/);
-  await expect(
-    page.getByRole("heading", { level: 1, name: "Provider dashboard" }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Provider dashboard" })).toBeVisible();
 
   const sessionCookie = (await context.cookies()).find(
     (cookie) => cookie.name === E2E_SESSION_COOKIE,
@@ -33,9 +31,7 @@ test("magic-link callback persists a session cookie and survives refresh", async
 
   await page.reload();
   await expect(page).toHaveURL(/\/dashboard$/);
-  await expect(
-    page.getByRole("heading", { level: 1, name: "Provider dashboard" }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Provider dashboard" })).toBeVisible();
 
   await page.goto("/hosts");
   await expect(page).toHaveURL(/\/hosts$/);
@@ -60,14 +56,17 @@ test("proxy redirects without a session and accepts a test-injected session", as
   await expect(
     anonymousPage.getByRole("heading", { level: 1, name: "Provider sign-in" }),
   ).toBeVisible();
-  await expect(
-    anonymousPage.getByText(/authentication token is invalid/i),
-  ).toHaveCount(0);
+  await expect(anonymousPage.getByText(/authentication token is invalid/i)).toHaveCount(0);
 
   await anonymousPage.goto("/hosts");
   await expect(anonymousPage).toHaveURL(/\/login\?next=%2Fhosts$/);
+  await expect(anonymousPage.getByText(/authentication token is invalid/i)).toHaveCount(0);
+
+  await anonymousPage.goto("/");
   await expect(
-    anonymousPage.getByText(/authentication token is invalid/i),
+    anonymousPage
+      .getByRole("navigation", { name: "Primary" })
+      .getByRole("link", { name: "Workspace" }),
   ).toHaveCount(0);
 
   expect(apiRequests).toEqual([]);
@@ -89,6 +88,11 @@ test("proxy redirects without a session and accepts a test-injected session", as
   await expect(
     authenticatedPage.getByRole("heading", { level: 1, name: "Provider dashboard" }),
   ).toBeVisible();
+
+  await authenticatedPage.goto("/");
+  await expect(
+    authenticatedPage.locator('nav[aria-label="Primary"] a[href="/dashboard"]'),
+  ).toHaveCount(1);
 
   await authenticatedPage.goto("/hosts");
   await expect(authenticatedPage).toHaveURL(/\/hosts$/);
@@ -127,7 +131,7 @@ test("API 401 redirects to login without rendering a raw auth error", async ({ p
   await expect(page.getByText(/authentication token is invalid/i)).toHaveCount(0);
 });
 
-test("clicking Workspace unauthenticated redirects before dashboard content loads", async ({
+test("Workspace is hidden when logged out and direct navigation stays protected", async ({
   page,
 }) => {
   const apiRequests: string[] = [];
@@ -136,22 +140,14 @@ test("clicking Workspace unauthenticated redirects before dashboard content load
   });
 
   await page.goto("/");
-
-  const menuButton = page.getByRole("button", { name: "Open menu" });
-  if (await menuButton.isVisible()) {
-    await menuButton.click();
-  }
-
-  const primaryNavigation = page.getByRole("navigation", { name: "Primary" });
-  await primaryNavigation.getByRole("link", { name: "Workspace" }).click();
-
-  await expect(page).toHaveURL(/\/login\?next=%2Fdashboard$/, { timeout: 10_000 });
   await expect(
-    page.getByRole("heading", { level: 1, name: "Provider sign-in" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { level: 1, name: "Provider dashboard" }),
+    page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Workspace" }),
   ).toHaveCount(0);
+
+  await page.goto("/dashboard");
+  await expect(page).toHaveURL(/\/login\?next=%2Fdashboard$/, { timeout: 10_000 });
+  await expect(page.getByRole("heading", { level: 1, name: "Provider sign-in" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Provider dashboard" })).toHaveCount(0);
   await expect(page.getByText(/authentication token is invalid/i)).toHaveCount(0);
   expect(apiRequests).toEqual([]);
 });

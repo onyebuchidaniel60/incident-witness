@@ -93,7 +93,7 @@ Recorded Phase 9 results on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`, f
 - `npm test` — PASS: 165 unit tests (20 protocol, 11 CLI verifier, 15 correlator, 14 ADR-001, 49 host-agent, 14 renter SDK, 20 probe worker, 22 API).
 - `npm run test:integration --workspace @incident-witness/api` — PASS: 60/60 against staging.
 - `npm run test:integration --workspace @incident-witness/probe-worker` — PASS: 2/2 against staging.
-- `npm run test:e2e` — PASS: 78 Playwright checks, 77 passed and one intentional mobile provider-flow skip. Coverage includes the provider journey, protected-route click redirects with zero API calls, login-page cleanup, metadata, link crawling, accessibility and local verification.
+- `npm run test:e2e` — PASS: 80 Playwright checks, 79 passed and one intentional mobile provider-flow skip. Coverage includes the provider journey, protected-route redirects with zero API calls, the auth-aware Workspace link, login layout, removed status panels, metadata, link crawling, accessibility and local verification.
 - `npm run demo` — PASS: sealed `POWER_RELATED`/`LOW` bundle verified with exit 0; one-byte tampered copy failed with exit 1.
 - `npm audit --omit=dev` — PASS: 0 production vulnerabilities.
 - Secret scan — PASS: no `.env`, private-key or service-role files tracked; no sensitive environment value found in the client static bundle.

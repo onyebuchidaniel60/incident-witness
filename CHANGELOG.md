@@ -23,6 +23,9 @@ All notable changes to Incident Witness are recorded here. The MVP is a release 
 
 - Authentication uses Supabase's default **magic-link email** flow instead of a six-digit OTP. This is an operator-approved deviation that avoids the free-tier custom-SMTP and editable-template requirement.
 - Provider routes are guarded by Next.js 16 `proxy.ts` and a server-side user check before any provider API call. Unauthenticated navigation redirects immediately to `/login?next=…` without flashing dashboard content or raw API errors.
+- The public header now shows the **Workspace** link only when a valid provider session is present. Logged-out visitors see Home, Docs, Verify and Login; direct `/dashboard` navigation remains protected by `proxy.ts`.
+- The login page uses a single-column layout with the form and ancillary links centered underneath it.
+- Obsolete defensive status panels were removed from the public home and documentation pages. The detailed limitation text remains in `/docs` and the footer.
 - The final visual design applies the operator-approved Satoshi/emerald command-surface direction with desktop/mobile layouts and text-backed status indicators.
 
 ### Removed

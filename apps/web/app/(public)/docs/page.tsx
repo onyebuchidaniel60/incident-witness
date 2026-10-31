@@ -127,19 +127,6 @@ export default function DocsPage() {
         </div>
       </PageIntro>
 
-      <section className="iw-notice iw-notice-warning flex-col gap-1.5" aria-labelledby="docs-status">
-        <h2 id="docs-status" className="flex items-center gap-2 font-semibold">
-          <Icon name="alert" size="sm" />
-          Current deployment status
-        </h2>
-        <p className="text-[11px] leading-6">
-          The signed evidence protocol, host agent, renter SDK, platform probe worker, deterministic
-          correlator and sealed-bundle lifecycle are implemented. The provider workspace is
-          connected to the staging API. No production API, worker, legal policy or support channel
-          is live, and no production evidence service is claimed. Use test data only.
-        </p>
-      </section>
-
       <div className="grid min-w-0 gap-5 lg:grid-cols-[210px_minmax(0,1fr)] lg:items-start">
         <nav
           aria-label="Documentation sections"
