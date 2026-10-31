@@ -18,7 +18,46 @@ export type ErrorCode =
   | "VALIDATION_ERROR"
   | "RATE_LIMITED"
   | "DEPENDENCY_UNAVAILABLE"
-  | "INTERNAL_ERROR";
+  | "INTERNAL_ERROR"
+  | "RESOURCE_CONFLICT"
+  | "IDEMPOTENCY_CONFLICT"
+  | "HOST_NOT_READY"
+  | "HOST_ALREADY_ENROLLED"
+  | "HOST_HAS_ACTIVE_INCIDENT"
+  | "ENDPOINT_CHALLENGE_EXPIRED"
+  | "ENDPOINT_CHALLENGE_CONSUMED"
+  | "ENDPOINT_CHALLENGE_ATTEMPTS_EXCEEDED"
+  | "ENDPOINT_UNSAFE_TARGET"
+  | "ENDPOINT_VERIFICATION_FAILED"
+  | "ENROLLMENT_INVALID"
+  | "ENROLLMENT_ALREADY_REDEEMED"
+  | "INVITATION_INVALID"
+  | "INVITATION_ALREADY_REDEEMED"
+  | "INCIDENT_NOT_COLLECTING"
+  | "INCIDENT_LIMIT_REACHED"
+  | "RENTER_ALREADY_ENROLLED"
+  | "KEY_SCOPE_MISMATCH"
+  | "PRESENCE_REPLAY"
+  | "PRESENCE_STALE";
+
+export class ApiError extends Error {
+  readonly statusCode: number;
+  readonly code: ErrorCode;
+  readonly details: Record<string, unknown>;
+
+  constructor(
+    statusCode: number,
+    code: ErrorCode,
+    message: string,
+    details: Record<string, unknown> = {},
+  ) {
+    super(message);
+    this.name = "ApiError";
+    this.statusCode = statusCode;
+    this.code = code;
+    this.details = details;
+  }
+}
 
 export function errorBody(
   code: ErrorCode,

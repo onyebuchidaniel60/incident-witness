@@ -19,15 +19,29 @@ import type { Pool } from "pg";
 
 import { createRemoteJwtVerifier, type JwtVerifier } from "./auth/jwt.js";
 import { config as defaultConfig, type AppConfig } from "./config.js";
-import { sendError } from "./errors.js";
+import { ApiError, sendError } from "./errors.js";
+import { startLifecycleSweeper } from "./lifecycle/sweeper.js";
 import { requireAuth } from "./plugins/auth.js";
+import { registerAgentRoutes } from "./routes/agent.js";
+import { registerHostRoutes } from "./routes/hosts.js";
+import { registerIncidentRoutes } from "./routes/incidents.js";
+import { registerKeyRoutes } from "./routes/keys.js";
+import { registerRenterRoutes } from "./routes/renter.js";
+import { NodeDnsResolver, type DnsResolver } from "./services/dns.js";
+import {
+  HttpsEndpointChecker,
+  type EndpointChecker,
+} from "./services/endpoint.js";
 
-const expectedMigration = "0008_ledger_revoke_defaults";
+const expectedMigration = "0012_phase3b_enroll_incident_lock";
 
 export type BuildAppOptions = {
   config?: AppConfig;
   apiPool?: Pool;
   jwtVerifier?: JwtVerifier;
+  dnsResolver?: DnsResolver;
+  endpointChecker?: EndpointChecker;
+  enableSweeper?: boolean;
   logger?: boolean;
 };
 
@@ -62,8 +76,11 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   const jwtVerifier =
     options.jwtVerifier ??
     createRemoteJwtVerifier(config.supabaseJwksUrl, config.supabaseJwtIssuer);
+  const dnsResolver = options.dnsResolver ?? new NodeDnsResolver();
+  const endpointChecker = options.endpointChecker ?? new HttpsEndpointChecker();
 
   const app = Fastify({
+    bodyLimit: 32 * 1024,
     logger:
       options.logger === false
         ? false
@@ -92,6 +109,15 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   });
 
   app.decorateRequest("authUser", null);
+  app.decorate("requireAuth", requireAuth(jwtVerifier));
+
+  app.addContentTypeParser(
+    "application/vnd.incident-witness.presence+json",
+    { parseAs: "buffer", bodyLimit: 4 * 1024 },
+    (_request, body, done) => {
+      done(null, body);
+    },
+  );
 
   await app.register(helmet, { contentSecurityPolicy: false });
   await app.register(cors, {
@@ -102,13 +128,13 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       }
       callback(null, false);
     },
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["authorization", "content-type", "x-request-id"],
+    methods: ["GET", "POST", "PATCH", "OPTIONS"],
+    allowedHeaders: ["authorization", "content-type", "idempotency-key", "x-request-id"],
     credentials: false,
   });
   await app.register(rateLimit, {
     global: true,
-    max: 120,
+    max: config.nodeEnv === "test" ? 10_000 : 120,
     timeWindow: "1 minute",
   });
 
@@ -119,6 +145,17 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
 
   app.setErrorHandler((error: FastifyError, request, reply) => {
     if (reply.sent) return;
+
+    if (error instanceof ApiError) {
+      return sendError(
+        reply,
+        request.id,
+        error.statusCode,
+        error.code,
+        error.message,
+        error.details,
+      );
+    }
 
     if (error.validation) {
       return sendError(
@@ -220,7 +257,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
 
   app.get(
     "/v1/me",
-    { preHandler: requireAuth(jwtVerifier) },
+    { preHandler: app.requireAuth },
     async (request, reply) => {
       const user = request.authUser;
       if (!user) {
@@ -261,13 +298,26 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
     },
   );
 
+  const routeContext = { config, apiPool, dnsResolver, endpointChecker };
+  await registerHostRoutes(app, routeContext);
+  await registerAgentRoutes(app, routeContext);
+  await registerIncidentRoutes(app, routeContext);
+  await registerRenterRoutes(app, routeContext);
+  await registerKeyRoutes(app, routeContext);
+
+  let stopSweeper: (() => void) | undefined;
+
   app.addHook("onReady", async () => {
     if (!options.apiPool) {
       await assertRuntimeRole(apiPool, "iw_api");
     }
+    if (options.enableSweeper !== false) {
+      stopSweeper = startLifecycleSweeper({ pool: apiPool, logger: app.log });
+    }
   });
 
   app.addHook("onClose", async () => {
+    stopSweeper?.();
     if (!options.apiPool) {
       await apiPool.end();
     }
