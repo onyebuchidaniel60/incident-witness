@@ -2,9 +2,9 @@
 
 **Last updated:** 2026-10-31
 
-**Project status:** Phase 0, Phase 1, Phase 2, Phase 3A, Phase 3B, Phase 3C and Phase 3D are complete and accepted. Phase 3E renter SDK and platform probe worker are implemented and tested; the Phase 3E checkpoint is pending operator acceptance.
+**Project status:** Phase 0, Phase 1, Phase 2, Phase 3A, Phase 3B, Phase 3C, Phase 3D and Phase 3E are complete and accepted. Phase 3E renter SDK and platform probe worker are accepted and closed.
 
-**Current phase:** Phase 3E — IMPLEMENTED, PENDING OPERATOR ACCEPTANCE.
+**Current phase:** Phase 3E — COMPLETE AND CLOSED.
 
 **Next task:** Phase 3F only — awaiting explicit operator authorization.
 
@@ -15,6 +15,8 @@
 **Phase 3C acceptance:** Operator reviewed the Phase 3C checkpoint report and accepted it on 2026-10-31. The correlation engine, canonical signed-event ingestion and transactional sealing meet the Phase 3C requirements. Phase 3C is **COMPLETE AND CLOSED**.
 
 **Phase 3D acceptance:** Operator reviewed the Phase 3D checkpoint report and accepted it on 2026-10-31. The explicit `--incident <uuid>` flag for the host agent was accepted as a valid MVP implementation detail. Phase 3D is **COMPLETE AND CLOSED**.
+
+**Phase 3E acceptance:** Operator reviewed the Phase 3E checkpoint report and accepted it on 2026-10-31. The explicit `endpointHostname` requirement and the missing live probe key setup are accepted and documented. Phase 3E is **COMPLETE AND CLOSED**.
 
 ## Project
 
@@ -228,7 +230,7 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
   `INCIDENT_CLOSED`, credential rejection, event signature verification, graceful stop, log redaction
   and an end-to-end local HTTP mock of enroll → presence → signed event upload → outage retry.
 
-## Completed in Phase 3E (pending operator acceptance)
+## Completed in Phase 3E (accepted and closed 2026-10-31)
 
 ### Renter SDK (`packages/renter-sdk`)
 
@@ -401,8 +403,7 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 
 ## Known risks and operator actions
 
-1. **Phase 3E pending acceptance:** renter SDK and probe worker are implemented/tested but not operator-accepted. Do not start Phase 3F.
-2. **No live probe deployment/key:** the current `.env` has no platform-probe key ID/private key and staging has no `platform_probe` witness row. Run `npm run db:provision-probe-key` with operator-provided secrets before starting the Render worker.
+1. **No live probe deployment/key:** the current `.env` has no platform-probe key ID/private key and staging has no `platform_probe` witness row. Run `npm run db:provision-probe-key` with operator-provided secrets before starting the Render worker.
 3. **No live renter integration:** the SDK has not been used against a live staging invitation. Its end-to-end tests use a local mock API. The enrollment API does not return the provider endpoint hostname, so the integrator must supply `endpointHostname` from the invitation context; Phase 4 must surface it.
 4. **No real public probe:** SSRF/DNS-rebinding behavior is proven with injected resolvers/transports and private-address unit tests, not against a live provider endpoint. The worker is not deployed to Render.
 5. **Probe key provisioning sensitivity:** `db:provision-probe-key` is an operator-only script that reads both the probe private key and the API root signing key to create the certificate. It runs offline/one-time; the worker runtime never receives the root key. Do not expose it as a service endpoint.
