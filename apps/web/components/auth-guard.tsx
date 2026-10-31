@@ -1,15 +1,19 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import type { ReactNode } from "react";
 
 import { E2E_SESSION_COOKIE, e2eServerAuthEnabled, e2eSessionToken } from "@/lib/e2e-auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export async function AuthGuard({ children }: Readonly<{ children: ReactNode }>) {
+/**
+ * Server-only authorization boundary. Call this before returning any
+ * protected layout or page tree so client components never mount for an
+ * unauthenticated request.
+ */
+export async function requireAuthenticatedUser(): Promise<void> {
   if (e2eServerAuthEnabled()) {
     const cookieStore = await cookies();
     if (cookieStore.get(E2E_SESSION_COOKIE)?.value === e2eSessionToken()) {
-      return <>{children}</>;
+      return;
     }
   }
 
@@ -21,6 +25,4 @@ export async function AuthGuard({ children }: Readonly<{ children: ReactNode }>)
   if (!user) {
     redirect("/login");
   }
-
-  return <>{children}</>;
 }

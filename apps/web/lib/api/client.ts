@@ -46,6 +46,7 @@ async function accessToken(refresh = false): Promise<string> {
   if (refresh) {
     const { data, error } = await supabase.auth.refreshSession();
     if (error || !data.session?.access_token) {
+      redirectToLogin();
       throw new ApiError("Your session has expired.", 401, "AUTH_REQUIRED");
     }
     return data.session.access_token;
@@ -55,15 +56,35 @@ async function accessToken(refresh = false): Promise<string> {
     data: { session },
   } = await supabase.auth.getSession();
   if (!session?.access_token) {
+    redirectToLogin();
     throw new ApiError("Authentication is required.", 401, "AUTH_REQUIRED");
   }
+
+  // A stale access token must be refreshed before it is sent. Otherwise the
+  // API returns a raw invalid-token error that can flash before the redirect.
+  if (session.expires_at && session.expires_at * 1000 <= Date.now() + 30_000) {
+    const { data, error } = await supabase.auth.refreshSession();
+    if (error || !data.session?.access_token) {
+      redirectToLogin();
+      throw new ApiError("Your session has expired.", 401, "AUTH_REQUIRED");
+    }
+    return data.session.access_token;
+  }
+
   return session.access_token;
 }
 
+let redirectingToLogin = false;
+
 function redirectToLogin(): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || redirectingToLogin) return;
+  redirectingToLogin = true;
   const next = `${window.location.pathname}${window.location.search}`;
   window.location.replace(`/login?next=${encodeURIComponent(next)}`);
+}
+
+export function isAuthRedirectError(error: unknown): boolean {
+  return error instanceof ApiError && error.status === 401 && error.code === "AUTH_REQUIRED";
 }
 
 async function parseError(response: Response): Promise<ApiError> {
@@ -136,6 +157,7 @@ async function authorizedFetch(
     });
     if (response.status === 401 || response.status === 403) {
       redirectToLogin();
+      throw new ApiError("Your session has expired.", 401, "AUTH_REQUIRED");
     }
   }
 

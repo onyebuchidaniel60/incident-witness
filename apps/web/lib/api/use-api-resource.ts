@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { apiRequest } from "./client";
+import { apiRequest, isAuthRedirectError } from "./client";
 
 export type ApiResource<T> = {
   data: T | null;
@@ -48,6 +48,13 @@ export function useApiResource<T>(
         }
       } catch (cause) {
         if (active) {
+          if (isAuthRedirectError(cause)) {
+            // The API client has already triggered a hard redirect. Do not
+            // render a raw API error while the browser is navigating to login.
+            setError(null);
+            setData(null);
+            return;
+          }
           setError(cause instanceof Error ? cause : new Error("Request failed"));
         }
       } finally {

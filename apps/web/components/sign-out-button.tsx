@@ -1,13 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { e2eClientAuthEnabled, E2E_SESSION_COOKIE } from "@/lib/e2e-auth";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export function SignOutButton() {
-  const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,8 +16,7 @@ export function SignOutButton() {
     try {
       if (e2eClientAuthEnabled()) {
         document.cookie = `${E2E_SESSION_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax`;
-        router.replace("/");
-        router.refresh();
+        window.location.replace("/");
         return;
       }
 
@@ -29,8 +26,10 @@ export function SignOutButton() {
         setError("Sign-out could not be completed. Try again.");
         return;
       }
-      router.replace("/");
-      router.refresh();
+
+      // A full navigation clears the client router cache so a protected RSC
+      // payload cannot be reused after the session is removed.
+      window.location.replace("/");
     } catch {
       setError("Authentication is not configured for this deployment.");
     } finally {
