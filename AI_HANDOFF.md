@@ -253,6 +253,7 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - `npm test` — **PASS**: 20/20 protocol tests, 12/12 correlator tests, 14/14 ADR-001 staging tests, 49/49 host-agent tests, 17/17 API unit tests (112 total).
 - `npm test --workspace @incident-witness/host-agent` — **PASS**: 49/49 host-agent tests across 9 files.
 - `node packages/host-agent/dist/cli.js version` — **PASS**: `iw-agent 0.1.0`; help output renders.
+- `setpriv --reuid=nobody --regid=nogroup --clear-groups node .../cli.js version|status` — **PASS**: the built CLI opened an enrolled test configuration and SQLite spool as an unprivileged user; config directory `0700`, all files `0600`. This proves basic operation does not require root in this test environment.
 - `npm audit --omit=dev` — **PASS**: 0 production vulnerabilities.
 - Full dependency audit still reports 20 moderate development-only advisories (ESLint/esbuild tooling); no non-breaking fix is available without a forced breaking downgrade.
 - `npm run test:integration --workspace @incident-witness/api` — **NOT RE-RUN in Phase 3D**: no API, DB, protocol or web files changed. The Phase 3C run remains 57/57 PASS.

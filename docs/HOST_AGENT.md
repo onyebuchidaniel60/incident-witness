@@ -27,7 +27,8 @@ truth.
 - Outbound HTTPS access to the Incident Witness API.
 - A host already registered, DNS-verified and put into `pending_enrollment` by the provider.
 - Local permissions to run the agent and read supported telemetry. Basic operation does **not**
-  require root or sudo.
+  require root or sudo. The built CLI and spool have been exercised as an unprivileged account with
+  an owner-only test configuration.
 - Optional: NVIDIA driver and `nvidia-smi` for a GPU summary.
 - Optional: Network UPS Tools (`upsc`) and a configured UPS device alias.
 
