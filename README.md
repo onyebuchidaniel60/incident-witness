@@ -2,282 +2,254 @@
 
 **When infrastructure fails, evidence speaks.**
 
-Incident Witness is a portable incident-evidence protocol for decentralized compute. It collects signed observations from a GPU host, a renter-side workload client and a separately operated platform probe; correlates them into a time-ordered record; and seals a JSON evidence bundle that can be checked locally for integrity and signatures.
+Incident Witness is a portable incident-evidence protocol for decentralized compute. It collects signed observations from a GPU host, a renter-side workload client and a separately operated platform probe; correlates them into a bounded, time-ordered record; and seals a JSON evidence bundle that can be checked locally for integrity and signatures.
 
-> **Important limitation:** a valid signature proves that data has not changed after it was signed by a particular key. It does not prove that a sensor was truthful, a host was uncompromised or an inferred cause is correct. Incident Witness reports evidence patterns and unknowns; it does not adjudicate a marketplace dispute or automatically excuse downtime.
+> **Important limitation:** a valid signature proves that data has not changed after it was signed by a particular key. It does not prove that a sensor was truthful, a host was uncompromised or an inferred cause is correct. Incident Witness reports evidence patterns and unknowns; it does not adjudicate a marketplace dispute, change a reliability score or automatically excuse downtime. The platform probe is operated by Incident Witness, not by an independent third party.
 
 ## Project status
 
-Phase 3C API-side signed event ingestion, deterministic correlation and bundle sealing are accepted
-and closed. The API accepts canonical Ed25519-signed host and renter events, enforces incident time
-windows and atomic evidence budgets, runs the pure `@incident-witness/correlator` rule engine, seals
-an immutable bundle in one transaction, and serves the exact bundle to its owner.
+Phases 0–7 are complete and accepted. Phase 8 frontend and documentation completeness is implemented and test-verified; operator acceptance is pending.
 
-Phase 3D adds the accepted Linux x86_64 host agent in `packages/host-agent`: interactive enrollment
-with a local Ed25519 key, owner-only key/credential storage, a 50 MiB SQLite spool with durable event
-and presence sequences, signed operational-presence heartbeats, evidence heartbeats, fixed-argument
-`nvidia-smi`/`upsc` collectors, and bounded retry/backoff.
+Phase 8 adds:
 
-Phase 3E adds the accepted renter SDK in `packages/renter-sdk` and the separate secure platform probe
-worker in `apps/probe-worker`. The SDK redeems a one-use invitation, signs 30-second heartbeats and
-60-second/state-change endpoint observations into a bounded 5 MiB queue. The worker leases
-`probe_jobs`, resolves and pins the provider IP, enforces SSRF/DNS-rebinding controls, performs the
-fixed HTTPS health check, signs `platform_probe_result` events and appends them as the restricted
-`iw_worker` role.
+- a real in-app documentation destination at `/docs` covering quick start, host-agent installation and enrollment, renter SDK integration, the signed evidence protocol and limitations;
+- real `/privacy` and `/terms` routes that state clearly that operator-approved legal review is pending;
+- page titles, descriptions, canonical URLs, a favicon, OpenGraph/Twitter metadata, `robots.txt` and `sitemap.xml`;
+- `noindex` rules for authenticated provider routes and the sign-in page, with public-only sitemap entries;
+- working footer links to Documentation, Privacy, Terms, Verify and the public GitHub repository;
+- styled 404 and error states with links back to safety;
+- keyboard, accessible-name, focus and status-text checks, plus link-crawl coverage.
 
-Phase 3F adds the offline `iw-verify` CLI in `tools/iw-verify` and the synthetic end-to-end demo
-harness in `tools/demo-harness`. The CLI validates schema/version, manifest digest, pinned platform
-key/signature, source certificates, event signatures/digests and deterministic ordering without any
-network request. The harness runs a fully labelled simulated power-pattern lifecycle against the
-staging database, seals/downloads the bundle, verifies it and demonstrates one-byte tamper detection.
-Phase 3F is accepted and closed.
+Phase 8 does **not** change business logic, API contracts, database schemas, the cryptographic protocol or verifier behaviour.
 
-Phase 4 connects the provider workspace to the staging API: Supabase-authenticated API calls, host
-list/create/detail, DNS challenge and endpoint verification, enrollment-code display, host key
-revocation and archival, evidence-session list/create/detail, renter invitations, source health,
-timeline, end/seal/download and the local browser bundle verifier. The API is still not deployed to
-Render.
+Current deployment: the Next.js web app is deployed on Vercel against the staging Supabase project. The Fastify API and probe worker are **not deployed to Render** from this repository state. Provider data pages therefore require a locally running or otherwise reachable API origin configured through `NEXT_PUBLIC_API_BASE_URL`.
 
-Phase 6 collected operator-supplied visual references and produced the approved dark emerald
-command-center mockups. Phase 7 applies that approved direction to the functional web app: locally
-bundled Satoshi, the `#26D18C` emerald token set, 4px control/card geometry, a floating glass
-workspace shell, source-specific timeline chips and the approved mobile top-bar/stacked-card
-layouts. Business logic, API contracts, database schemas and the local-only verifier are unchanged.
+## Quick start
 
-Phase 5 hardens the MVP gate: platform-probe source certificates can be read by the seal transaction,
-event sequence rollback is rejected, probe observations stop at the effective capture end, stale
-source polling is visibly labelled, and UPS/GPU `unavailable` telemetry is shown in the timeline.
-`render.yaml` now describes the API Render service using Infrastructure as Code.
+### Prerequisites
 
-Phase 3B host/incident domain APIs are accepted and closed. The API supports owner-scoped host CRUD,
-DNS TXT endpoint verification with public-IP/SSRF checks, host enrollment and signed operational
-presence, bounded incident creation/end with a lifecycle sweeper, renter invitations and scoped
-enrollment, key revocation, host archival, audit events and `Idempotency-Key` handling.
+- Node.js 26.13.0 (pinned in `.node-version`) and npm 11.20.0.
+- A Supabase staging project with Postgres and Auth enabled.
+- Network access to the staging database for migrations and integration tests.
+- Optional: NVIDIA `nvidia-smi` and Network UPS Tools `upsc` on a Linux x86_64 host.
 
-Phase 2 backend/data/auth foundations remain in place: the Fastify API foundation, the Drizzle
-schema and SQL migrations for the 14 approved tables, restricted `iw_api`/`iw_worker` roles, RLS
-policies, Supabase JWT verification and Supabase email OTP sign-in. Provider routes are protected by
-the web auth guard and now use real API data.
-
-Public routes are `/`, `/login`, `/verify`, `/docs`, `/privacy`, `/terms`, and the not-found route.
-Protected placeholder routes are `/dashboard`, `/hosts`, `/hosts/new`, `/hosts/[hostId]`,
-`/incidents`, `/incidents/new`, `/incidents/[incidentId]` and `/settings`; unauthenticated requests
-are redirected to `/login`. The data-backed pages remain explicitly labelled placeholders.
-
-## Source-of-truth documentation
-
-- [`PROJECT_SPEC.md`](./PROJECT_SPEC.md) — product definition, MVP scope, roles, flows, business rules, acceptance criteria and UI structure.
-- [`ARCHITECTURE.md`](./ARCHITECTURE.md) — stack, database, API, cryptographic protocol, security, deployment and operations.
-- [`IMPLEMENTATION_PLAN.md`](./IMPLEMENTATION_PLAN.md) — one-phase-at-a-time implementation sequence and hard gates.
-- [`AGENTS.md`](./AGENTS.md) — mandatory instructions for AI coding agents.
-- [`AI_HANDOFF.md`](./AI_HANDOFF.md) — current phase, preview, tests, approval status and exact next task.
-- [`docs/`](./docs/) — supporting research, setup, protocol, operational and user documentation.
-- [`docs/SOURCE_TRACEABILITY.md`](./docs/SOURCE_TRACEABILITY.md) — maps decisions to supplied source material and engineering judgement.
-
-## Planned MVP
-
-A provider should be able to register a Linux host, prove control of a public HTTPS hostname, enroll a local host agent, create a bounded evidence session, invite a renter-side client, collect signed observations, seal a deterministic evidence bundle and verify that bundle offline. The first supported host target is Linux x86_64. A public HTTPS health endpoint is required; NAT-only hosts are not supported by this initial scope.
-
-## Planned technology
-
-Node.js 26.13.0 LTS (released 2026-10-28), TypeScript, npm workspaces, Next.js 16.4.x App Router (16.4.3 current stable checked 2026-10-30), Tailwind CSS 4.x, Fastify 5, Supabase Postgres/Auth, `@supabase/ssr` (beta; pinned behind an adapter), Drizzle, `pg`, `jose`, RFC 8785 canonical JSON, Ed25519, a SQLite host-agent spool, a renter TypeScript SDK, a Render probe worker, Vercel frontend deployment, Vitest, Playwright and pgTAP. See `ARCHITECTURE.md` for responsibilities and security constraints.
-
-## Development commands
-
-The repository uses Node.js 26.13.0 and npm workspaces. The local interface is:
+### Install and configure
 
 ```bash
 npm ci
+cp .env.example .env
+```
+
+Fill `.env` with local/staging values. Never commit `.env`, database URLs, signing keys, service-role keys or credentials. Browser-visible values must be limited to the `NEXT_PUBLIC_*` entries. The web app reads the root `.env`; `apps/web/.env.local.example` lists the relevant public names.
+
+Database and platform-key provisioning:
+
+```bash
 npm run db:provision-roles
 npm run db:migrate
 npm run db:provision-platform-key
 npm run db:migrate:status
+```
+
+The migration runner uses `DATABASE_URL_MIGRATOR`. The API uses `DATABASE_URL_IW_API`; the probe worker uses `DATABASE_URL_IW_WORKER`. Both runtime roles are non-superuser and do not bypass RLS. See [`docs/CONFIGURATION.md`](./docs/CONFIGURATION.md) and the accepted ADR in [`docs/adr/`](./docs/adr/).
+
+### Run locally
+
+```bash
+# Terminal 1 — Fastify API
 npm run dev:api
+
+# Terminal 2 — Next.js web app
 npm run dev
+```
+
+The web app runs at `http://localhost:3000`; the API defaults to `http://localhost:4000`. Set `IW_ALLOWED_WEB_ORIGINS` and `NEXT_PUBLIC_API_BASE_URL` consistently.
+
+### Authentication
+
+The provider login uses Supabase's default **magic-link email** flow rather than a six-digit OTP. This is an operator-approved deviation from the original OTP wording: it avoids the Supabase free-tier custom-SMTP and editable-template requirement.
+
+- The form calls `signInWithOtp` with `emailRedirectTo=/auth/callback`.
+- `/auth/callback` exchanges the code for a session, writes the Supabase cookies onto the redirect response and sends the provider to `/dashboard`.
+- A failed callback redirects to `/login?error=invalid_link`.
+- Every deployment origin and `/auth/callback` must be allow-listed in Supabase Auth redirect settings.
+- Authenticated routes are protected by `proxy.ts` and a server-side user check before any provider API call. Unauthenticated requests redirect to `/login?next=…` without flashing an API error.
+
+No custom SMTP, external identity provider or service-role key is used in the web runtime.
+
+## Testing
+
+```bash
 npm run lint
 npm run typecheck
 npm run build
 npm test
 npm run test:integration --workspace @incident-witness/api
+npm run test:integration --workspace @incident-witness/probe-worker
 npm run test:e2e
+npm run demo        # staging-only synthetic lifecycle
+npm run verify -- path/to/bundle.json
 ```
 
-`npm test` runs the protocol, correlator, ADR-001 database, host-agent, renter SDK, probe worker and
-API unit suites. The Phase 3B API integration suite is run explicitly with
-`npm run test:integration --workspace @incident-witness/api` because it requires staging
-credentials and must never be run against production. The probe-worker database/RLS integration test
-runs explicitly with `npm run test:integration --workspace @incident-witness/probe-worker`.
-`npm run test:e2e` starts a local test-mode API and Next.js development server, then runs the
-Playwright public-route, auth-redirect, navigation, footer, provider lifecycle and local-verifier
-checks at desktop and mobile viewport sizes. The E2E servers use test-only authentication and DNS
-adapters (`IW_E2E_*`/`NEXT_PUBLIC_IW_E2E_*`) that are unavailable in production mode; they never use
-production credentials or production data.
+Recorded Phase 8 results on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 
-The database migration runner uses `DATABASE_URL_MIGRATOR`. The API and probe worker use the
-restricted `DATABASE_URL_IW_API` and `DATABASE_URL_IW_WORKER` roles. See `docs/CONFIGURATION.md`
-and the accepted ADR for the role/GUC design.
+- `npm run lint` — PASS across all workspaces.
+- `npm run typecheck` — PASS across all workspaces.
+- `npm run build` — PASS across the monorepo, including the Next.js 16.4.3 production build.
+- `npm test` — PASS: 164 unit tests (20 protocol, 11 CLI verifier, 15 correlator, 14 ADR-001, 49 host-agent, 14 renter SDK, 20 probe worker, 21 API).
+- `npm run test:integration --workspace @incident-witness/api` — PASS: 60/60 against staging.
+- `npm run test:integration --workspace @incident-witness/probe-worker` — PASS: 2/2 against staging.
+- `npm run test:e2e` — PASS: 76 Playwright checks, 75 passed and one intentional mobile provider-flow skip. Coverage includes public metadata, `robots.txt`/`sitemap.xml`, noindex on private routes, the docs sections and commands, a full public link crawl, footer destinations, skip-link keyboard focus and accessible names.
+- `npm run test:integration --workspace @incident-witness/demo-harness` and `npm run demo` were last recorded as PASS in Phase 5 and were not re-run for this frontend/documentation-only phase.
 
-Local Phase 3C verification on 2026-10-31 passed lint, typecheck, build, 20 protocol tests,
-12 correlator tests, 14 ADR-001 database tests, 17 API unit tests, 57 API integration tests and
-36 Playwright checks. Phase 3D added 49 host-agent tests. Phase 3E added 14 renter-SDK tests,
-20 probe-worker unit tests, one probe-worker database/RLS integration test and one correlator
-regression check for probe-service errors. Phase 3F added 11 CLI verifier tests and two staging demo
-harness tests. Phase 4 adds four API test-seam guard tests and a full-stack Playwright provider flow
-plus local-verifier checks. Phase 5 adds platform-probe sealing, sequence-rollback, readiness, worker
-effective-end and telemetry/stale UI coverage. Final results: 164 unit tests, 60 API integration
-tests, 2 probe-worker integration tests, 44 Playwright checks (43 passed, one intentional mobile
-provider-flow skip) and a clean demo harness. Actual results and remaining blockers are recorded in
-`AI_HANDOFF.md`.
+E2E uses test-only `IW_E2E_*`/`NEXT_PUBLIC_IW_E2E_*` seams for a static test session and file-backed DNS resolver. The API seam is disabled unless `NODE_ENV=test` and the explicit flag are both set; the web seam is disabled in production builds. These are test infrastructure, not production authentication or SSRF bypasses.
 
-### Renter SDK and probe worker
+## Documentation
+
+- In-app documentation: `/docs`
+- Repository documentation index: [`docs/README.md`](./docs/README.md)
+- [Provider user guide](./docs/USER_GUIDE.md)
+- [Host agent operator guide](./docs/HOST_AGENT.md)
+- [Renter SDK integration guide](./docs/RENTER_SDK.md)
+- [Protocol v1](./docs/PROTOCOL.md)
+- [API reference](./docs/API_REFERENCE.md)
+- [Configuration](./docs/CONFIGURATION.md)
+- [Deployment](./docs/DEPLOYMENT.md)
+- [Operations](./docs/OPERATIONS.md)
+- [Troubleshooting](./docs/TROUBLESHOOTING.md)
+- [Privacy and security model](./docs/PRIVACY_SECURITY.md)
+
+Source-of-truth project files: [`PROJECT_SPEC.md`](./PROJECT_SPEC.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`IMPLEMENTATION_PLAN.md`](./IMPLEMENTATION_PLAN.md), [`AGENTS.md`](./AGENTS.md) and [`AI_HANDOFF.md`](./AI_HANDOFF.md).
+
+## Host agent
+
+Build from the repository (there is no published binary or installer in the MVP):
+
+```bash
+npm run build --workspace @incident-witness/protocol
+npm run build --workspace @incident-witness/host-agent
+```
+
+Issue a one-time enrollment code in the provider dashboard, then enroll and run:
+
+```bash
+iw-agent enroll --api-url https://<incident-witness-api>
+iw-agent run --incident <incident-uuid>
+iw-agent status
+```
+
+The agent runs as an unprivileged Linux x86_64 user, generates its Ed25519 key locally, stores key/credential/spool files `0600` in a `0700` directory, and never accepts the enrollment code as an argument. It uses fixed `execFile` calls for `nvidia-smi` and `upsc`; GPU collection currently covers device index 0. The operator must supply the incident ID explicitly because there is no agent-side session discovery. See [`docs/HOST_AGENT.md`](./docs/HOST_AGENT.md).
+
+## Renter SDK
 
 ```bash
 npm run build --workspace @incident-witness/renter-sdk
-npm run build --workspace @incident-witness/probe-worker
-npm run test --workspace @incident-witness/renter-sdk
-npm run test --workspace @incident-witness/probe-worker
-npm run test:integration --workspace @incident-witness/probe-worker
 ```
 
-See [`docs/RENTER_SDK.md`](./docs/RENTER_SDK.md) and
-[`docs/PROBE_WORKER.md`](./docs/PROBE_WORKER.md). The probe key must be provisioned before a live
-worker can start.
+```ts
+import { RenterClient } from "@incident-witness/renter-sdk";
 
-### Platform probe key provisioning
+const client = await RenterClient.enroll({
+  apiBaseUrl: "https://<incident-witness-api>",
+  invitationToken: invitationFromProvider,
+  endpointHostname: providerHostnameFromInvitation,
+  workloadRef: "job-123",
+  stateDir: "/run/incident-witness-renter",
+});
 
-`npm run db:provision-probe-key` registers the platform-probe public key, fingerprint and
-platform-signed `platform_probe` certificate in `witness_keys`. It never writes the private key to the
-database or prints it.
+client.start();
+// ... workload runs ...
+await client.stop();
+```
 
-To generate a new probe keypair locally (the private key is written only to the requested file with
-mode `0600`, and the public half is registered):
+Invitations are single use and expire after 15 minutes. The SDK records signed heartbeats and fixed endpoint observations only; it does not collect workload content. `endpointHostname` must come from the provider invitation context. See [`docs/RENTER_SDK.md`](./docs/RENTER_SDK.md).
+
+## Probe worker and platform key
+
+The probe worker is a separate Render background process using the restricted `iw_worker` role. It leases probe jobs, resolves and pins a validated public IP, performs the fixed HTTPS health check, signs `platform_probe_result` events and appends them with incident counters.
+
+Before a live worker can start, provision a platform-probe key:
 
 ```bash
 export IW_PLATFORM_PROBE_KEY_ID="<witness_keys UUID>"
 npm run db:provision-probe-key -- --generate --out secrets/probe-worker.pk8
 ```
 
-`secrets/` is git-ignored. Put the generated file's base64 contents into the worker-only
-`IW_PLATFORM_PROBE_PRIVATE_KEY` secret; never commit it or expose it to the web/API runtime. To
-provision an operator-managed key instead, set `IW_PLATFORM_PROBE_PRIVATE_KEY` (base64 PKCS8 DER
-Ed25519) and run `npm run db:provision-probe-key` without `--generate`. A key ID with different
-existing key material is rejected rather than replaced.
+The private half is written only to the requested `0600` file and must be stored in the worker-only `IW_PLATFORM_PROBE_PRIVATE_KEY` secret. Never commit it, expose it to the web/API runtime or print it. `secrets/` is git-ignored. The staging environment currently has no live probe key or worker deployment. See [`docs/PROBE_WORKER.md`](./docs/PROBE_WORKER.md).
 
-### Host agent
+## Bundle verification
 
-The Phase 3D Linux host agent is built with:
+Verification is anchored to pinned platform public keys; a key included inside a bundle is not trusted merely because the file contains it.
 
-```bash
-npm run build --workspace @incident-witness/host-agent
-node packages/host-agent/dist/cli.js version
-```
+Browser: open `/verify` and select a sealed JSON bundle. The File API reads it locally; no bundle content is uploaded and no API request is made.
 
-Enrollment prompts for the one-time code on standard input; the code is never accepted as an
-argument or environment variable. See [`docs/HOST_AGENT.md`](./docs/HOST_AGENT.md) for enrollment,
-configuration permissions, spool/quota behaviour, fixed collectors and limitations.
-
-### Database setup
-
-1. Provision the restricted roles from the configured URLs with `npm run db:provision-roles`.
-2. Apply the versioned migrations with `npm run db:migrate`.
-3. Register the platform public key with `npm run db:provision-platform-key`.
-4. Provision the platform-probe source key with `npm run db:provision-probe-key` before starting the
-   probe worker.
-5. Confirm migration status with `npm run db:migrate:status`.
-
-Migrations are in `packages/db/migrations/`. The migration ledger is `iw_schema_migrations`.
-Supabase's `auth` schema is owned by `supabase_admin`; because the staging migrator cannot grant
-schema usage to `iw_api`, the RLS policies use a narrow security-definer `public.iw_uid()` wrapper
-that calls `auth.uid()`. No `SET ROLE authenticated` or service-role connection is used. This
-environment-specific detail is recorded in `AI_HANDOFF.md`.
-
-### Authentication setup
-
-The web login uses Supabase magic-link email through the pinned `@supabase/ssr` adapter. The form
-calls `signInWithOtp` with `emailRedirectTo` set to `/auth/callback`; that route exchanges the code
-for a session and redirects to `/dashboard`. The local/Preview/production origins and the
-`/auth/callback` path must be allow-listed in Supabase Auth redirect settings. Those dashboard
-settings are not verifiable from the repository and remain an operational prerequisite for live
-email delivery. No custom SMTP or external email service is used.
-
-## Configuration
-
-See [Environment and configuration](./docs/CONFIGURATION.md). Secrets belong in local ignored `.env` files or the approved hosting secret manager. `.env.example` must contain placeholders only. Never commit Supabase service-role/secret keys, database URLs, platform signing keys, host credentials, renter credentials, enrollment/invitation tokens or private keys.
-
-## Verification model
-
-The protocol uses RFC 8785 JSON Canonicalization Scheme via pinned `canonicalize@5.1.0`, SHA-256 and Ed25519. The shared protocol package has explicit Node and browser entry points: Node services/agents use built-in `node:crypto` for signing and verification; the browser verifier uses `@noble/ed25519` 3.2.x for public-key verification only. Shared RFC 8785 canonicalization test vectors and RFC 8032 Ed25519 golden vectors must prove cross-runtime parity. Web verification is local to the browser; bundle contents are not uploaded for checking. Trust is anchored to a versioned, pinned platform public-key set. A valid result establishes integrity and signatures relative to those keys—not the truth of underlying readings.
-
-### Offline CLI verifier
-
-The Phase 3F CLI verifies a downloaded bundle without uploading it or making any network request:
+CLI:
 
 ```bash
 npm run build --workspace @incident-witness/cli-verifier
 node tools/iw-verify/dist/cli.js path/to/incident-witness-bundle.json
-# or:
+# or
 npm run verify -- path/to/incident-witness-bundle.json
 ```
 
-Exit code `0` means the schema, versions, manifest digest, pinned platform key/signature, source
-certificates, event signatures/digests and sequence/order checks all pass. Exit code `1` means the
-bundle is invalid or was modified. Exit code `2` means the bundle file is missing/unparseable or the
-trust set cannot be loaded. The pinned public-key set is
-[`tools/iw-verify/trusted-platform-keys.json`](./tools/iw-verify/trusted-platform-keys.json); it
-contains public keys only. Use `--trust <path>` for a separately operated trust set.
+Exit codes: `0` fully valid, `1` invalid/tampered, `2` missing/unreadable/unparseable file or unusable trust set. The CLI trust set is [`tools/iw-verify/trusted-platform-keys.json`](./tools/iw-verify/trusted-platform-keys.json); the browser trust set is `apps/web/lib/verify/trusted-platform-keys.ts`. Both contain public keys only.
 
-The public `/verify` page uses the same protocol browser export and a pinned public-key set in
-`apps/web/lib/verify/trusted-platform-keys.ts`. It reads the selected file with the browser File API
-and performs all checks locally; it does not upload the bundle or call the API. The page reports
-schema, manifest digest, pinned platform key/signature, source certificates, event
-signatures/digests, ordering and bundle consistency separately, and always shows the limitations.
+The protocol uses RFC 8785 JCS through pinned `canonicalize@5.1.0`, SHA-256 and Ed25519. Node services use `node:crypto`; the browser verifier uses `@noble/ed25519` through the browser-safe package export. No private platform key is present in browser code.
 
-### Synthetic integration demo
+## Deployment
 
-The Phase 3F demo harness runs the full local lifecycle against the configured staging database: a
-disposable provider, host, simulated host agent and renter enrollment, a labelled demo session,
-signed synthetic power/reachability events, end, seal, bundle download, CLI verification and a
-one-byte tamper check.
+### Frontend (Vercel)
 
-```bash
-npm run demo
-npm run test:demo
-```
+- Framework preset: Next.js. Build from the repository root with the normal workspace install/build.
+- Required public variables: `NEXT_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+- Optional canonical origin: `NEXT_PUBLIC_SITE_URL`. When omitted, metadata falls back to the stable production alias.
+- Add every deployment origin and `/auth/callback` to the Supabase Auth redirect allow-list.
+- Preview and Production must use staging/sandbox data and separate secrets. Never put server-only secrets in `NEXT_PUBLIC_*` variables.
 
-Every generated event carries `simulation_mode: true`, the session is created with `demoMode: true`,
-and the sealed manifest has `simulation_present: true` with a grade capped at `LOW`. The harness does
-not collect real GPU, UPS or renter workload telemetry. It seeds a disposable staging auth user with
-the migrator role and uses an in-process API instance; it does not use production data or deploy
-anything.
+### API and worker (Render)
 
-## Render API deployment
+`render.yaml` defines the `incident-witness-api` web service and builds `apps/api/dist/index.js`. The service is **not linked or verified** from this repository state. To enable it:
 
-The repository root contains `render.yaml` for the `incident-witness-api` web service. It builds the
-protocol, correlator, database and API workspaces, then starts `node apps/api/dist/index.js`.
-The API entrypoint imports the existing Fastify server entrypoint so the Render start command and
-the package's local `node dist/server.js` command remain compatible.
-
-Before the service can become ready:
-
-1. Link `render.yaml` in the Render dashboard.
-2. Set the required server-only environment variables from
-   [`docs/CONFIGURATION.md`](./docs/CONFIGURATION.md), including the staging/production Supabase
-   values, `DATABASE_URL_IW_API`, `IW_TOKEN_PEPPER`, `IW_PLATFORM_SIGNING_PRIVATE_KEY`,
-   `IW_PLATFORM_KEY_ID`, `APP_BASE_URL`, `IW_ALLOWED_WEB_ORIGINS` and `IW_HEALTHCHECK_TOKEN`.
-3. Apply migrations through `0022` with `npm run db:migrate` using `DATABASE_URL_MIGRATOR`.
+1. Link `render.yaml` in Render.
+2. Set the server-only environment variables from [`docs/CONFIGURATION.md`](./docs/CONFIGURATION.md), including `DATABASE_URL_IW_API`, `IW_TOKEN_PEPPER`, `IW_PLATFORM_SIGNING_PRIVATE_KEY`, `IW_PLATFORM_KEY_ID`, `APP_BASE_URL`, `IW_ALLOWED_WEB_ORIGINS` and `IW_HEALTHCHECK_TOKEN`.
+3. Apply migrations through `0022` with `DATABASE_URL_MIGRATOR`.
 4. Set the Vercel `NEXT_PUBLIC_API_BASE_URL` to the deployed API origin and redeploy the web app.
 
-The API readiness endpoint checks the migration ledger and returns 503 until the expected migration
-is applied. Do not put server-only secrets in `NEXT_PUBLIC_*` variables.
+The API readiness endpoint checks the migration ledger and returns 503 until the expected migration is applied. Production release requires separate explicit operator authorization and the Phase 9 gate. See [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md).
 
-## Deployment lifecycle
+## Security and evidence boundaries
 
-The first implementation milestone was a navigable skeletal frontend deployed to a stable Preview URL. The Preview must use staging/test data only and be updated at each verified checkpoint. Phase 2 authentication uses Supabase Auth; no production database or production secrets are used in Preview. Core functionality must pass end-to-end before final visual design begins. Final design requires operator-approved references and mockups. Production deployment requires separate explicit operator authorization. See `IMPLEMENTATION_PLAN.md`.
+- Every API operation checks authentication, permission and resource ownership on the server. Non-owned resources return 404.
+- Runtime database roles do not have superuser or `BYPASSRLS`; grants and RLS are tested from the actual roles.
+- Event payloads are typed and bounded. No free-form logs, prompts, datasets, credentials, arbitrary commands or raw network addresses are accepted.
+- The host agent uses fixed binaries and fixed argument arrays with `execFile`; it runs unprivileged.
+- The probe worker performs DNS resolution, rejects private/reserved/link-local/metadata and IPv4-mapped addresses, pins the validated IP and does not follow redirects or use proxy environment variables.
+- Evidence events are append-only; sealed bundles are immutable. Key revocation prevents new events but does not invalidate valid historic signatures.
+- Simulation and demo evidence is permanently labelled and capped at `LOW`.
+- Assessments are deterministic, versioned and explainable. There is no LLM, probability score, payment, token, blockchain or marketplace integration.
+
+Report suspected vulnerabilities privately to the repository owner; no public support address or legal contact has been approved for publication.
+
+## Repository layout
+
+```text
+apps/web              Next.js 16 App Router frontend
+apps/api              Fastify 5 API
+apps/probe-worker     Render background probe worker
+packages/protocol     Signed event and bundle protocol
+packages/correlator   Deterministic rule engine
+packages/db           Drizzle schema, SQL migrations, DB scripts
+packages/host-agent   Linux x86_64 host agent
+packages/renter-sdk   Incident-scoped renter SDK
+tools/iw-verify       Offline CLI verifier
+tools/demo-harness    Labelled synthetic staging lifecycle
+docs/                 Product, protocol, operator and security documentation
+```
 
 ## Contributions and AI coding agents
 
-Read `AGENTS.md` before making changes. Implement one assigned phase/task only, test it, inspect the diff, commit, update `AI_HANDOFF.md`, report evidence and stop. Do not change architecture, product behaviour, business rules or security without operator approval.
+Read [`AGENTS.md`](./AGENTS.md) before changing anything. Implement one assigned phase/task only, add or update tests, run focused and broader checks, inspect the diff for secrets and unrelated changes, commit, update [`AI_HANDOFF.md`](./AI_HANDOFF.md) and stop. Architecture, product behaviour, business rules, security and evidence claims require operator approval before change.
 
 ## Research and validation status
 
-The source research found a plausible infrastructure evidence gap and adjacent tooling, but user demand, marketplace acceptance, willingness to pay and full novelty are unresolved. The project is selected for implementation by the operator; that decision does not convert these open research questions into validated claims. Read [`docs/RESEARCH_AND_ASSUMPTIONS.md`](./docs/RESEARCH_AND_ASSUMPTIONS.md).
+The source research found a plausible infrastructure-evidence gap and adjacent tooling, but user demand, marketplace acceptance, willingness to pay and full novelty remain unresolved. The project is selected for implementation by the operator; that decision does not convert open research questions into validated claims. See [`docs/RESEARCH_AND_ASSUMPTIONS.md`](./docs/RESEARCH_AND_ASSUMPTIONS.md).
