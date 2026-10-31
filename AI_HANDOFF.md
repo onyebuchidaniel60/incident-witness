@@ -4,9 +4,9 @@
 
 **Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**.
 
-**Current phase:** Phase 5 is **COMPLETE AND CLOSED**. Phase 6 has not yet started.
+**Current phase:** Phase 5 is **COMPLETE AND CLOSED**. Phase 6 — design reference collection is in progress; operator design direction is pending.
 
-**Next task:** Phase 6 only — determine operator design direction before any mockups or final UI work.
+**Next task:** Phase 6 only — after the operator selects a design direction, create desktop/mobile structural mockups for all principal screens and states; no UI code until explicit approval.
 
 **Phase 2 acceptance:** Operator accepted the Phase 2 checkpoint and approved the `public.iw_uid()` security-definer wrapper on 2026-10-31.
 
@@ -677,9 +677,10 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 ## Design reference and approval status
 
 - **Final visual design:** NOT STARTED.
-- **Design references:** NOT COLLECTED/APPROVED.
-- **Mockups:** NOT CREATED.
+- **Design references:** CANDIDATES PROPOSED — Direction A (technical/data-dense), Direction B (clean/modern SaaS) and Direction C (operator-supplied); operator selection is PENDING.
+- **Mockups:** NOT CREATED — blocked on reference selection.
 - **Operator approval:** NOT GRANTED.
+- Phase 6 scope and candidate directions are recorded in `docs/DESIGN_DECISIONS.md`; no final styling or UI code has been written.
 - Phase 3C, Phase 3D, Phase 3E and Phase 3F did not change frontend styling or visual behaviour.
 - Phase 4/5 connect functional UI and state handling but retain temporary structural styling; final visual design is still not approved or implemented.
 - Phase 4 connects functional UI but keeps temporary structural styling; final visual design is still not approved or implemented.
@@ -739,5 +740,5 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 
 ## Exact next task
 
-**Phase 6 — Design references and mockups — awaiting explicit operator authorization.**
-Do not begin until the Phase 5 checkpoint is accepted and Phase 6 is authorized.
+**Phase 6 — Design references and mockups — awaiting operator design direction.**
+Phase 5 is accepted and closed. Candidate directions are recorded in `docs/DESIGN_DECISIONS.md`. Do not create mockups, final CSS, Tailwind styling or UI code until the operator selects a direction; then present all principal desktop/mobile mockups and stop again for explicit mockup approval.
