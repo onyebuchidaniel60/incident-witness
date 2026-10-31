@@ -2,17 +2,19 @@
 
 **Last updated:** 2026-10-31
 
-**Project status:** Phase 0, Phase 1, Phase 2, Phase 3A, Phase 3B and Phase 3C are complete and accepted. Phase 3D Linux host agent is implemented and locally tested; the Phase 3D checkpoint is pending operator acceptance.
+**Project status:** Phase 0, Phase 1, Phase 2, Phase 3A, Phase 3B, Phase 3C and Phase 3D are complete and accepted. Phase 3E renter SDK and platform probe worker implementation is in progress under explicit operator authorization.
 
-**Current phase:** Phase 3D — IMPLEMENTED, PENDING OPERATOR ACCEPTANCE.
+**Current phase:** Phase 3E — Renter SDK and platform probe worker — IN PROGRESS.
 
-**Next task:** Phase 3E only — awaiting explicit operator authorization.
+**Next task:** Complete Phase 3E only; do not start Phase 3F.
 
 **Phase 2 acceptance:** Operator accepted the Phase 2 checkpoint and approved the `public.iw_uid()` security-definer wrapper on 2026-10-31.
 
 **Phase 3B acceptance:** Operator accepted the Phase 3B checkpoint on 2026-10-31 and explicitly approved the recorded deviations: the generated staging platform key, migrations `0009`–`0012` (grants/RLS only, no table/column changes), and the `endedAt` vs `captureEndsAt` manual-end constraint.
 
 **Phase 3C acceptance:** Operator reviewed the Phase 3C checkpoint report and accepted it on 2026-10-31. The correlation engine, canonical signed-event ingestion and transactional sealing meet the Phase 3C requirements. Phase 3C is **COMPLETE AND CLOSED**.
+
+**Phase 3D acceptance:** Operator reviewed the Phase 3D checkpoint report and accepted it on 2026-10-31. The explicit `--incident <uuid>` flag for the host agent was accepted as a valid MVP implementation detail. Phase 3D is **COMPLETE AND CLOSED**.
 
 ## Project
 
@@ -144,7 +146,7 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 - Migrations `0013`–`0017` add only grants/RLS policies for machine event reads, scoped incident locks, provider/system bundle inserts, platform-key lookup, system finalization visibility and the auto-end transition. No table or column definitions changed.
 - The machine incident policy avoids RLS recursion and prevents a host key from locking another host's incident; renter key scope is validated before the incident lock.
 
-## Completed in Phase 3D (pending operator acceptance)
+## Completed in Phase 3D (accepted and closed 2026-10-31)
 
 ### Package and CLI
 
@@ -324,7 +326,7 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 
 ## Known risks and operator actions
 
-1. **Phase 3D pending acceptance:** host agent enrollment, spool, presence/evidence loops, collectors and upload are implemented and locally tested; the operator has not accepted the checkpoint. Do not start Phase 3E.
+1. **Phase 3D accepted:** host-agent enrollment, spool, presence/evidence loops, collectors and upload were accepted by the operator on 2026-10-31. The explicit `--incident <uuid>` flag is accepted as an MVP implementation detail.
 2. **No agent session discovery:** the API has no agent-scoped route that lists active incidents. The operator must pass `--incident <uuid>` to `iw-agent run`. Phase 4 must integrate this value into the provider UI; do not hide the manual step or claim automatic session detection.
 3. **No live host acceptance:** no disposable DNS-verified host with a public HTTPS endpoint was available. Enrollment/upload was verified against a local HTTP mock of the documented contracts. Real `nvidia-smi`/`upsc` execution and real staging enrollment remain unverified.
 4. **No release packaging:** there is no signed binary, installer or systemd unit. The agent is built from the repository and run as a foreground process under the operator's supervisor.
@@ -353,5 +355,5 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 
 ## Exact next task
 
-**Phase 3E only — renter SDK and platform probe worker — awaiting explicit operator authorization.**
-Do not start Phase 3E from this checkpoint.
+**Phase 3E only — renter SDK and platform probe worker — in progress under explicit operator
+authorization.** Do not start Phase 3F.
