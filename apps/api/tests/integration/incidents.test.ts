@@ -6,6 +6,7 @@ import { runLifecycleSweep } from "../../src/lifecycle/sweeper.js";
 import { activateHost, createIncident } from "./helpers.js";
 import {
   apiPool,
+  appConfig,
   idempotencyHeaders,
   inject,
   migrator,
@@ -220,7 +221,7 @@ describe("incident lifecycle APIs", () => {
       [futureJob, incidentId],
     );
 
-    const swept = await runLifecycleSweep(apiPool);
+    const swept = await runLifecycleSweep(apiPool, appConfig);
     expect(swept).toBeGreaterThanOrEqual(1);
 
     const row = await migrator.query<{ status: string; ended_at: Date | null }>(

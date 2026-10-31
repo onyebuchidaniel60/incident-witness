@@ -1,5 +1,11 @@
 import { generateKeyPairSync, randomUUID, type KeyObject } from "node:crypto";
 
+import {
+  canonicalJsonBytes,
+  type EventBody,
+  type EventEnvelope,
+} from "@incident-witness/protocol";
+import { signEvent } from "@incident-witness/protocol/node";
 import { expect } from "vitest";
 
 import {
@@ -10,6 +16,8 @@ import {
   publicKeyBase64Url,
   tokenA,
 } from "./harness.js";
+
+export const EVENT_CONTENT_TYPE = "application/vnd.incident-witness.event+json";
 
 export const PUBLIC_TEST_ADDRESS = "93.184.216.34";
 
@@ -166,6 +174,69 @@ export async function enrollRenter(invitationToken: string) {
     privateKey: pair.privateKey,
     publicKey: pair.publicKey,
   };
+}
+
+export type TestEventInput = {
+  incidentId: string;
+  sourceKeyId: string;
+  sourceType: "host_agent" | "renter_client";
+  privateKey: KeyObject;
+  eventType: string;
+  payload: Record<string, unknown>;
+  sequence: number;
+  observedAt: string;
+  simulationMode?: boolean;
+  eventId?: string;
+};
+
+export function buildSignedEvent(input: TestEventInput): {
+  envelope: EventEnvelope;
+  raw: Buffer;
+} {
+  const body = {
+    protocol_version: "1.0",
+    event_id: input.eventId ?? randomUUID(),
+    incident_id: input.incidentId,
+    source_key_id: input.sourceKeyId,
+    source_type: input.sourceType,
+    event_type: input.eventType,
+    sequence: input.sequence,
+    observed_at: input.observedAt,
+    payload: input.payload,
+    simulation_mode: input.simulationMode ?? false,
+    canonicalization: "RFC8785-JCS",
+    signature_algorithm: "Ed25519",
+  } as EventBody;
+
+  const envelope = signEvent(body, input.privateKey);
+  return {
+    envelope,
+    raw: Buffer.from(canonicalJsonBytes(envelope)),
+  };
+}
+
+export async function sendSignedEvent(
+  path: "/v1/agent/events" | "/v1/renter/events",
+  credential: string,
+  input: TestEventInput,
+) {
+  const event = buildSignedEvent(input);
+  const response = await inject("POST", path, null, event.raw, {
+    authorization: `Bearer ${credential}`,
+    "content-type": EVENT_CONTENT_TYPE,
+  });
+  return { ...event, response };
+}
+
+export async function sendRawEvent(
+  path: "/v1/agent/events" | "/v1/renter/events",
+  credential: string,
+  raw: Buffer | string,
+) {
+  return inject("POST", path, null, raw, {
+    authorization: `Bearer ${credential}`,
+    "content-type": EVENT_CONTENT_TYPE,
+  });
 }
 
 export { tokenA };

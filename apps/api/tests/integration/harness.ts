@@ -1,4 +1,6 @@
 import {
+  createHash,
+  createPublicKey,
   generateKeyPairSync,
   randomUUID,
   sign,
@@ -76,6 +78,7 @@ export let migrator: Pool;
 export let apiPool: Pool;
 export let platformPrivateKey: KeyObject;
 export let platformPublicKey: KeyObject;
+export let appConfig: AppConfig;
 
 const jwtVerifier: JwtVerifier = async (token) => {
   const id = token === tokenA ? userA : token === tokenB ? userB : null;
@@ -290,8 +293,28 @@ export async function setupIntegration(): Promise<void> {
   platformPrivateKey = pair.privateKey;
   platformPublicKey = pair.publicKey;
 
+  const rawPublicKey = createPublicKey(platformPrivateKey).export({ format: "jwk" }) as {
+    x?: string;
+  };
+  if (!rawPublicKey.x) throw new Error("test platform key has no raw public key");
+  const platformPublicKeyBytes = Buffer.from(rawPublicKey.x, "base64url");
+  const platformFingerprint = createHash("sha256")
+    .update(platformPublicKeyBytes)
+    .digest("base64url");
+  await migrator.query(
+    `insert into platform_signing_keys
+       (key_id, public_key, fingerprint, algorithm, status, not_before)
+     values ('integration-platform-key', $1, $2, 'Ed25519', 'active', now())
+     on conflict (key_id) do update
+       set public_key = excluded.public_key,
+           fingerprint = excluded.fingerprint,
+           status = 'active'`,
+    [platformPublicKeyBytes, platformFingerprint],
+  );
+
+  appConfig = testConfig();
   app = await buildApp({
-    config: testConfig(),
+    config: appConfig,
     apiPool,
     jwtVerifier,
     dnsResolver: dns,
@@ -307,6 +330,9 @@ export async function teardownIntegration(): Promise<void> {
   const client = await migrator.connect();
   try {
     await client.query("begin");
+    await client.query(
+      `delete from platform_signing_keys where key_id = 'integration-platform-key'`,
+    );
     await client.query(`delete from profiles where id = any($1::uuid[])`, [testUsers]);
     await client.query(`delete from auth.users where id = any($1::uuid[])`, [testUsers]);
     await client.query("commit");
