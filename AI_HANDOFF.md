@@ -2,11 +2,11 @@
 
 **Last updated:** 2026-10-31
 
-**Project status:** Phase 0, Phase 1, Phase 2, Phase 3A, Phase 3B, Phase 3C, Phase 3D and Phase 3E are complete and accepted. Phase 3F CLI verifier and integration demo harness are implemented and tested; the Phase 3F checkpoint is pending operator acceptance.
+**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is authorized and in progress.
 
-**Current phase:** Phase 3F — IMPLEMENTED, PENDING OPERATOR ACCEPTANCE.
+**Current phase:** Phase 4 — FUNCTIONAL FRONTEND INTEGRATION.
 
-**Next task:** Phase 4 only — awaiting explicit operator authorization.
+**Next task:** Phase 5 only — awaiting explicit operator authorization after the Phase 4 checkpoint.
 
 **Phase 2 acceptance:** Operator accepted the Phase 2 checkpoint and approved the `public.iw_uid()` security-definer wrapper on 2026-10-31.
 
@@ -17,6 +17,8 @@
 **Phase 3D acceptance:** Operator reviewed the Phase 3D checkpoint report and accepted it on 2026-10-31. The explicit `--incident <uuid>` flag for the host agent was accepted as a valid MVP implementation detail. Phase 3D is **COMPLETE AND CLOSED**.
 
 **Phase 3E acceptance:** Operator reviewed the Phase 3E checkpoint report and accepted it on 2026-10-31. The explicit `endpointHostname` requirement and the missing live probe key setup are accepted and documented. Phase 3E is **COMPLETE AND CLOSED**.
+
+**Phase 3F acceptance:** Operator reviewed the Phase 3F checkpoint report and accepted it on 2026-10-31. The offline CLI verifier and the staging E2E demo-harness proof are accepted. Phase 3F is **COMPLETE AND CLOSED**, and Phase 3 is entirely **COMPLETE**.
 
 ## Project
 
@@ -283,7 +285,7 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 - `0019_phase3e_worker_counter_select.sql`: grants only for worker reads of accepted-event counters.
 - No table or column definitions changed; no existing policy was weakened.
 
-## Completed in Phase 3F (implemented and tested; pending operator acceptance)
+## Completed in Phase 3F (accepted and closed 2026-10-31)
 
 ### Offline CLI verifier (`tools/iw-verify`)
 
