@@ -2,11 +2,11 @@
 
 **Last updated:** 2026-10-31
 
-**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**. Phase 6 reference-driven mockups (revision 0.3) are **APPROVED**. Phase 7 final UI implementation is in progress.
+**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**. Phase 6 reference-driven mockups (revision 0.3) are **APPROVED**. Phase 7 final UI implementation is implemented, tested and deployed; operator acceptance is pending.
 
-**Current phase:** Phase 7 — implementing the approved visual system on top of the existing functional web app. No business logic, API contract or schema change is authorized.
+**Current phase:** Phase 7 — implemented, tested and deployed. Awaiting operator acceptance; Phase 8 is not authorized.
 
-**Next task:** Complete Phase 7 implementation, run lint/build/E2E, verify the deployed Preview and stop for operator acceptance.
+**Next task:** Operator acceptance of the Phase 7 checkpoint. Phase 8 only after explicit authorization.
 
 **Phase 2 acceptance:** Operator accepted the Phase 2 checkpoint and approved the `public.iw_uid()` security-definer wrapper on 2026-10-31.
 
@@ -694,12 +694,25 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - Timeline now distinguishes Host agent (emerald), Renter client (blue) and platform-operated probe (cyan), with mono event types, UTC times and sequence numbers.
 - No business logic, API contract, database schema, evidence wording or verifier behaviour changed.
 - Phase 7 implementation deviations are recorded in `docs/DESIGN_DECISIONS.md`.
-- Test evidence: `npm run test:e2e` — **PASS**, 44 checks, 43 passed and one intentional mobile provider-flow skip; `npm run lint --workspace @incident-witness/web` — **PASS**; `npm run typecheck --workspace @incident-witness/web` — **PASS**; `npm run build --workspace @incident-witness/web` — **PASS**.
-- Preview/deployment verification remains pending at the time of this entry.
+- Test evidence: `npm run test:e2e` — **PASS**, 44 checks, 43 passed and one intentional mobile provider-flow skip; `npm run lint` — **PASS** across all workspaces; `npm run typecheck` — **PASS** across all workspaces; `npm run build` — **PASS** across the monorepo.
+- Preview/deployment verification: a Vercel Preview deployment is READY at the URL below. One successful browser load of the deployed `/` returned HTTP 200, loaded Satoshi, applied the 4px button geometry and reported no overflow or console errors. Subsequent automated requests to the Preview were met by Vercel's security checkpoint (`HTTP 403`, `x-vercel-mitigated: challenge`), so repeated automated browser checks are blocked at the edge. Local build and E2E verification cover the same code.
+
+## Phase 7 deployment checkpoint
+
+- **Vercel Preview URL:** https://incident-witness-jf4ijpod8-uhhh2.vercel.app
+- **Preview deployment ID:** `dpl_ELyy5qehHQ91kaUTxG1rUnKVCGki`
+- **Preview target/status:** `preview`; `READY`; built from repository commit `0b99c8d`.
+- **Vercel Production deployment (auto-created by the Git-connected project on push):** https://incident-witness-hzg263jb4-uhhh2.vercel.app
+- **Production deployment ID:** `dpl_Xd1ZXAnHGX9H5JgCgbHybGVekMvX`
+- **Production target/status:** `production`; `READY`; built from repository commit `0b99c8d`.
+- **Stable aliases:** https://incident-witness.vercel.app, https://incident-witness-uhhh2.vercel.app and https://incident-witness-git-main-uhhh2.vercel.app.
+- **Preview verification result:** one browser load of `/` returned HTTP 200, `document.fonts.check("16px Satoshi")` was true, the first action button computed to a 4px radius, and there was no horizontal overflow or console error. The Preview subsequently returned Vercel's security checkpoint to automated requests; this is an edge challenge, not an application authentication failure.
+- **Safe staging:** the Preview uses the existing staging Supabase configuration; no production database, platform private signing key, host credential or renter credential is exposed. The local browser verifier remains local-only.
+- **Production note:** no separate `vercel deploy --prod` was run. The Git-connected project auto-created the production deployment from the authorized push. Production release approval remains a separate operator decision under the project rules.
 
 ## Design reference and approval status
 
-- **Final visual design:** **APPROVED** (revision 0.3).
+- **Final visual design:** **APPROVED and IMPLEMENTED** (revision 0.3; Phase 7 acceptance pending).
 - **Approved design direction:** Reference-driven dark emerald command center with Satoshi, sharp 4px geometry and `#26D18C` emerald.
 - **Design references:** OPERATOR-SUPPLIED — `docs/design-references/incident-reference 1.webp` and `incident-reference 2.webp`. No reference imagery, logos, avatars or copy is embedded in the mockups.
 - **Mockups:** v0.3 **APPROVED** on 2026-10-31.
@@ -727,7 +740,7 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - `.env.example` includes conservative probe-worker defaults and key-provisioning guidance.
 - `/docs` route and footer Documentation/GitHub links remain unchanged and reachable from Phase 2.
 - `/privacy` and `/terms` remain clearly labelled placeholders; no legal copy is approved.
-- `docs/DESIGN_DECISIONS.md` records the rejected 0.1 hybrid, the operator-supplied references, the reference analysis/translation, Satoshi/4px revision 0.3 refinements, intentional deviations and pending final approval.
+- `docs/DESIGN_DECISIONS.md` records the rejected 0.1 hybrid, the operator-supplied references, the reference analysis/translation, Satoshi/4px revision 0.3 refinements, the explicit approval, Phase 7 implementation deviations and the pending Phase 7 acceptance.
 - `docs/mockups/README.md` explains how to open and review the reference-driven mockup set; `docs/mockups/index.html` is the local review entry point. Font attribution/license is in `docs/mockups/assets/fonts/FONT_LICENSE.md`.
 
 ## Known risks and operator actions
@@ -767,5 +780,5 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 
 ## Exact next task
 
-**Phase 7 — Implement the approved visual system, verify it, and stop for operator acceptance.**
-Apply the approved Satoshi/4px/emerald design to the existing functional web app without changing business logic, API contracts, database schemas, evidence language or the local-only verifier. Run lint, build and the full E2E suite, verify the deployed Preview, then stop. Do not begin Phase 8.
+**Phase 7 — Operator acceptance checkpoint.**
+The approved visual system is implemented, tested and deployed. Wait for operator acceptance. Do not begin Phase 8 without explicit authorization.
