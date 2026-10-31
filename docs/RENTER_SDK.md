@@ -1,7 +1,7 @@
 # Renter SDK — Integration Guide
 
-**Status:** Phase 3E implementation in `packages/renter-sdk`. Not published as a signed package yet.
-Phase 3E is pending operator acceptance.
+**Status:** Phase 3E implementation in `packages/renter-sdk`, accepted on 2026-10-31. Not published
+as a signed package yet.
 
 ## Purpose
 

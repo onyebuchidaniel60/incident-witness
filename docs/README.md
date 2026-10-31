@@ -1,6 +1,9 @@
 # Incident Witness — Documentation Index
 
-This is the source folder for the public `/docs` experience and developer/operator documentation. It is a blueprint at this stage; commands and links that depend on the released software must be added only after implementation is verified.
+The in-app `/docs` page (`apps/web/app/(public)/docs/page.tsx`) is the public documentation
+destination. It summarizes the implemented protocol, host-agent installation, renter SDK
+integration, bundle verification and limitations. These repository documents are the detailed source
+of truth behind it.
 
 ## Product and user documentation
 
@@ -26,9 +29,10 @@ This is the source folder for the public `/docs` experience and developer/operat
 ## Documentation maintenance rules
 
 - Update these documents when API, business rules, protocol, installation or deployment behaviour changes.
+- Keep the in-app `/docs` route consistent with `HOST_AGENT.md`, `RENTER_SDK.md` and `PROTOCOL.md`.
 - Do not publish guessed commands, endpoint URLs, service credentials, repository links or company/legal details.
-- The in-app `/docs` route must lead to a real reachable page.
-- If the root repository is public and the operator approves disclosure, the website footer may link to the actual GitHub repo. If private or inappropriate, record the reason and ask before omission/alternative.
+- Legal pages must state clearly that operator-approved legal review is pending; do not present placeholder text as a policy or contract.
+- The website footer links to the actual public repository. Re-check the destination before any public release.
 - Final documentation links must be checked on the deployed Preview and Production before release.
 
 ## Source methodology

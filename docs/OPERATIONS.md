@@ -1,7 +1,7 @@
 # Operations Runbook
 
-**Status:** Operational design; production services are not deployed. Phase 3E worker is implemented
-but not deployed.
+**Status:** Operational design; production services are not deployed. The Phase 3E worker is
+implemented and accepted but not deployed.
 
 ## Service components
 

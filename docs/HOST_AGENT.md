@@ -1,8 +1,7 @@
 # Provider Host Agent — Operator Guide
 
-**Status:** Phase 3D implementation in `packages/host-agent`. Linux x86_64 only. The agent is not a
-published binary or signed release yet; build it from this repository. Phase 3D is pending operator
-acceptance.
+**Status:** Phase 3D implementation in `packages/host-agent`, accepted on 2026-10-31. Linux x86_64
+only. The agent is not a published binary or signed release yet; build it from this repository.
 
 ## What the agent does
 

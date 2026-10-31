@@ -1,6 +1,6 @@
 # Environment and Configuration Guide
 
-**Status:** Blueprint. Exact variable values are created only after the operator selects and provisions staging/production services.
+**Status:** Implemented configuration reference. Values for local, staging and production environments are supplied by the operator; never commit real secrets.
 
 ## General rules
 

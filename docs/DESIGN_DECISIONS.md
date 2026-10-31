@@ -1,6 +1,8 @@
 # UI Design Decisions and Operator Approval Record
 
-**Status:** Revision 0.3 is **APPROVED** by the operator on 2026-10-31 and **IMPLEMENTED** in Phase 7. The implementation is awaiting operator acceptance. No business logic, API contract or database schema change is approved by this visual approval.
+**Status:** Revision 0.3 is **APPROVED** by the operator on 2026-10-31, **IMPLEMENTED** in Phase 7
+and accepted with the Phase 7 checkpoint. No business logic, API contract or database schema change
+is approved by this visual approval.
 
 ## History
 

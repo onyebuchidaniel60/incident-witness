@@ -1,7 +1,7 @@
 # Platform Probe Worker — Operator Guide
 
-**Status:** Phase 3E implementation in `apps/probe-worker`. A separate Render background worker; no
-public listener. Not deployed. Phase 3E is pending operator acceptance.
+**Status:** Phase 3E implementation in `apps/probe-worker`, accepted on 2026-10-31. A separate
+Render background worker; no public listener. Not deployed.
 
 The worker is operated by Incident Witness. It is **not** an independent third-party observation
 source. It checks the provider's verified public HTTPS health endpoint and signs the result as a

@@ -1,6 +1,8 @@
 # Deployment Guide
 
-**Status:** Deployment plan; no services or URLs have been confirmed. Never fill placeholders with guessed URLs.
+**Status:** Deployment guide. The Vercel web deployment and staging Supabase project exist; the
+Render API and probe worker have not been linked or verified. Never fill placeholders with guessed
+URLs.
 
 ## Environments
 

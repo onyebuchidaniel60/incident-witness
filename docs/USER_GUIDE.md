@@ -1,6 +1,6 @@
-# Provider User Guide (MVP — Planned)
+# Provider User Guide (MVP)
 
-**Status:** Product workflow guide; screens are not yet implemented.
+**Status:** Provider workflow guide for the implemented Phase 8 staging workspace.
 
 ## 1. Understand an evidence session
 
