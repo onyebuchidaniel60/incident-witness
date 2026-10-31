@@ -72,6 +72,8 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
   - `95ec4c7` — `feat(web): add local browser bundle verifier`
   - `83c8e8d` — `test(web): add full-stack provider and verifier journeys`
   - `3bd6df7` — `feat(web): connect host list, enrollment and lifecycle controls`
+  - `18c852c` — `docs(phase4): record functional web integration checkpoint`
+  - `f22458d` — `fix(web): build protocol package before next build`
 - **Phase 3E commits:**
   - `d810d5c` — `feat(db): add phase 3e worker probe access`
   - `0d5a9ea` — `feat(sdk): add renter client`
@@ -104,6 +106,16 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 - **Preview:** no separate Preview URL was created for this commit; the Git-connected `main` deployment targets Production.
 - **Safe staging:** web deployment uses public Supabase URL/publishable-key configuration for the staging project; no server-only secrets, database URLs, platform signing keys or host credentials are available to the browser.
 - **Phase 3C deployment:** no frontend files changed, so no new Vercel deployment was made. The Phase 3C API is verified locally against staging; Render deployment remains outstanding.
+
+## Phase 4 deployment checkpoint
+
+- **Vercel deployment URL:** https://incident-witness-fn3z7ifx3-uhhh2.vercel.app
+- **Stable aliases:** https://incident-witness.vercel.app, https://incident-witness-uhhh2.vercel.app and https://incident-witness-git-main-uhhh2.vercel.app
+- **Deployment ID:** `dpl_7XDDxK3FL3zdxeFKZ87UKuZ3SXor`
+- **Deployed code SHA:** `f22458dab3bb10adadc78de44d8722b370bf7d03` (`fix(web): build protocol package before next build`), Git metadata matched `main`.
+- **Status:** `READY`; Production, auto-created by the Git-connected Vercel project after the authorized `git push`. HTTP checks: `/` 200, `/login` 200, `/verify` 200.
+- **Safe staging:** deployment uses the staging Supabase public URL/publishable key; no server-only secrets or platform private keys are in the browser bundle.
+- **Blocker:** the Fastify API is still not deployed to Render. Host/incident pages on the hosted deployment cannot load provider data until a safe API origin exists; the local browser verifier and public pages can run without the API. The production deployment is therefore not a complete functional Preview for provider journeys.
 
 ## Completed in Phase 3B (accepted and closed)
 
@@ -630,4 +642,4 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 
 **Phase 5 only — MVP functionality completion and E2E verification gate — awaiting explicit
 operator authorization.**
-Do not begin until the Phase 3F checkpoint is accepted and Phase 4 is authorized.
+Do not begin until the Phase 4 checkpoint is accepted and Phase 5 is authorized.
