@@ -1,4 +1,7 @@
-import { createPrivateKey, createPublicKey } from "node:crypto";
+import { generateKeyPairSync, createPrivateKey, createPublicKey, type KeyObject } from "node:crypto";
+import { mkdir, unlink, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
+import { parseArgs } from "node:util";
 
 import { loadEnvironment, requireEnvironment } from "@incident-witness/db";
 import { createSourceKeyCertificate, publicKeyFingerprint } from "@incident-witness/protocol/node";
@@ -8,7 +11,33 @@ loadEnvironment();
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-function parseKey(encoded: string, name: string) {
+type ProvisionArgs = {
+  generate: boolean;
+  out: string | undefined;
+};
+
+function parseProvisionArgs(): ProvisionArgs {
+  const parsed = parseArgs({
+    args: process.argv.slice(2),
+    options: {
+      generate: { type: "boolean", default: false },
+      out: { type: "string" },
+    },
+    strict: true,
+  });
+
+  const generate = parsed.values.generate ?? false;
+  const out = parsed.values.out;
+  if (out !== undefined && !generate) {
+    throw new Error("--out is only valid with --generate");
+  }
+  if (generate && !out) {
+    throw new Error("--generate requires --out <private-key-file>");
+  }
+  return { generate, out };
+}
+
+function parseKey(encoded: string, name: string): KeyObject {
   try {
     const key = createPrivateKey({
       key: Buffer.from(encoded, "base64"),
@@ -23,15 +52,46 @@ function parseKey(encoded: string, name: string) {
 }
 
 async function main(): Promise<void> {
+  const args = parseProvisionArgs();
   const keyId = requireEnvironment("IW_PLATFORM_PROBE_KEY_ID");
   if (!UUID_PATTERN.test(keyId)) {
     throw new Error("IW_PLATFORM_PROBE_KEY_ID must be a UUID matching the witness_keys id");
   }
 
-  const probePrivateKey = parseKey(
-    requireEnvironment("IW_PLATFORM_PROBE_PRIVATE_KEY"),
-    "IW_PLATFORM_PROBE_PRIVATE_KEY",
-  );
+  let probePrivateKey: KeyObject;
+  let generatedPrivateKeyFile: string | null = null;
+
+  if (args.generate) {
+    if (process.env.IW_PLATFORM_PROBE_PRIVATE_KEY) {
+      throw new Error(
+        "--generate cannot be combined with IW_PLATFORM_PROBE_PRIVATE_KEY; unset it or provision the existing key without --generate",
+      );
+    }
+
+    generatedPrivateKeyFile = resolve(args.out as string);
+    await mkdir(dirname(generatedPrivateKeyFile), { recursive: true, mode: 0o700 });
+    const pair = generateKeyPairSync("ed25519");
+    probePrivateKey = pair.privateKey;
+    const encoded = Buffer.from(
+      pair.privateKey.export({ format: "der", type: "pkcs8" }),
+    ).toString("base64");
+    try {
+      await writeFile(generatedPrivateKeyFile, `${encoded}\n`, {
+        mode: 0o600,
+        flag: "wx",
+      });
+    } catch {
+      throw new Error(
+        `Cannot write generated probe private key to ${generatedPrivateKeyFile}; it must not already exist`,
+      );
+    }
+  } else {
+    probePrivateKey = parseKey(
+      requireEnvironment("IW_PLATFORM_PROBE_PRIVATE_KEY"),
+      "IW_PLATFORM_PROBE_PRIVATE_KEY",
+    );
+  }
+
   const platformPrivateKey = parseKey(
     requireEnvironment("IW_PLATFORM_SIGNING_PRIVATE_KEY"),
     "IW_PLATFORM_SIGNING_PRIVATE_KEY",
@@ -102,7 +162,19 @@ async function main(): Promise<void> {
       throw new Error("witness_keys already has a different platform probe key for this ID");
     }
 
-    console.log(JSON.stringify({ keyId, publicKey, fingerprint }));
+    console.log(
+      JSON.stringify({
+        keyId,
+        publicKey,
+        fingerprint,
+        ...(generatedPrivateKeyFile === null ? {} : { privateKeyFile: generatedPrivateKeyFile }),
+      }),
+    );
+  } catch (error) {
+    if (generatedPrivateKeyFile !== null) {
+      await unlink(generatedPrivateKeyFile).catch(() => undefined);
+    }
+    throw error;
   } finally {
     await pool.end();
   }
