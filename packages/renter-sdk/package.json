@@ -1,0 +1,36 @@
+{
+  "name": "@incident-witness/renter-sdk",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Incident Witness incident-scoped renter client SDK",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "pretest": "npm run build --workspace @incident-witness/protocol",
+    "test": "vitest run --config vitest.config.ts"
+  },
+  "dependencies": {
+    "@incident-witness/protocol": "0.1.0",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "eslint": "9.39.5",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.72.1",
+    "vitest": "5.0.5"
+  }
+}
