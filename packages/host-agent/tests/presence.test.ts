@@ -5,7 +5,11 @@ import { base64UrlToBytes, canonicalJsonBytes } from "@incident-witness/protocol
 import { afterEach, describe, expect, it } from "vitest";
 
 import type { PresenceResult, PresenceTransport } from "../src/api.js";
-import { generateAgentKeyPair, PRESENCE_SIGNATURE_DOMAIN, type SignedPresence } from "../src/crypto.js";
+import {
+  generateAgentKeyPair,
+  PRESENCE_SIGNATURE_DOMAIN,
+  type SignedPresence,
+} from "../src/crypto.js";
 import { PresenceReporter } from "../src/presence.js";
 import { EventSpool } from "../src/spool.js";
 import { captureLogger, makeTempDir, removeTempDir } from "./helpers.js";
@@ -20,10 +24,7 @@ function verifyPresence(presence: SignedPresence, publicKeyBase64Url: string): b
     format: "der",
     type: "spki",
   });
-  const message = Buffer.concat([
-    PRESENCE_SIGNATURE_DOMAIN,
-    Buffer.from(canonicalJsonBytes(body)),
-  ]);
+  const message = Buffer.concat([PRESENCE_SIGNATURE_DOMAIN, Buffer.from(canonicalJsonBytes(body))]);
 
   return verify(null, message, publicKey, Buffer.from(base64UrlToBytes(signature)));
 }

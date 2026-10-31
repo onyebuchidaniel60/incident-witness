@@ -65,9 +65,7 @@ export function parseUpscOutput(stdout: string): UpsReading {
   return {
     state,
     ...(chargePercent === undefined ? {} : { chargePercent }),
-    ...(runtimeSeconds === undefined
-      ? {}
-      : { runtimeSeconds: Math.floor(runtimeSeconds) }),
+    ...(runtimeSeconds === undefined ? {} : { runtimeSeconds: Math.floor(runtimeSeconds) }),
   };
 }
 
@@ -91,7 +89,9 @@ export class UpscCollector {
         ups_alias: this.device,
         state: reading.state,
         ...(reading.chargePercent === undefined ? {} : { charge_percent: reading.chargePercent }),
-        ...(reading.runtimeSeconds === undefined ? {} : { runtime_seconds: reading.runtimeSeconds }),
+        ...(reading.runtimeSeconds === undefined
+          ? {}
+          : { runtime_seconds: reading.runtimeSeconds }),
       };
     } catch {
       return { ups_alias: this.device, state: "unavailable" };

@@ -19,8 +19,7 @@ import {
 } from "../src/collectors/ups.js";
 
 describe("nvidia-smi collector", () => {
-  const validLine =
-    "0, NVIDIA GeForce RTX 4090, 55, 91, 1024, 24564, 301.25, 550.54";
+  const validLine = "0, NVIDIA GeForce RTX 4090, 55, 91, 1024, 24564, 301.25, 550.54";
 
   it("parses the fixed summary fields", () => {
     expect(parseNvidiaSmiOutput(validLine)).toEqual({
@@ -38,17 +37,15 @@ describe("nvidia-smi collector", () => {
   });
 
   it("represents unavailable values as partial or unavailable instead of normal", () => {
-    const partial = parseNvidiaSmiOutput(
-      "0, NVIDIA A100, [N/A], 0, 100, 40000, [N/A], 535.104",
-    );
+    const partial = parseNvidiaSmiOutput("0, NVIDIA A100, [N/A], 0, 100, 40000, [N/A], 535.104");
     expect(partial.collection_status).toBe("partial");
     expect(partial.temperature_c).toBeUndefined();
     expect(partial.power_draw_w).toBeUndefined();
     expect(partial.utilization_percent).toBe(0);
 
-    expect(parseNvidiaSmiOutput("[N/A], [N/A], [N/A], [N/A], [N/A], [N/A], [N/A], [N/A]")).toEqual(
-      { collection_status: "unavailable" },
-    );
+    expect(parseNvidiaSmiOutput("[N/A], [N/A], [N/A], [N/A], [N/A], [N/A], [N/A], [N/A]")).toEqual({
+      collection_status: "unavailable",
+    });
     expect(parseNvidiaSmiOutput("")).toEqual({ collection_status: "unavailable" });
     expect(parseNvidiaSmiOutput("malformed output")).toEqual({ collection_status: "unavailable" });
   });
@@ -81,9 +78,9 @@ describe("nvidia-smi collector", () => {
 
 describe("upsc collector", () => {
   it("parses allow-listed NUT values", () => {
-    expect(
-      parseUpscOutput("ups.status: OL\nbattery.charge: 100\nbattery.runtime: 3600\n"),
-    ).toEqual({ state: "online", chargePercent: 100, runtimeSeconds: 3600 });
+    expect(parseUpscOutput("ups.status: OL\nbattery.charge: 100\nbattery.runtime: 3600\n")).toEqual(
+      { state: "online", chargePercent: 100, runtimeSeconds: 3600 },
+    );
 
     expect(parseUpscOutput("ups.status: OB LB\nbattery.charge: 4.5\n")).toEqual({
       state: "low_battery",

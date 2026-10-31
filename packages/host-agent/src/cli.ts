@@ -119,7 +119,10 @@ async function readEnrollmentCode(): Promise<string> {
       stdin.pause();
     };
 
-    const onKeypress = (text: string | undefined, key: { name?: string; ctrl?: boolean; meta?: boolean }): void => {
+    const onKeypress = (
+      text: string | undefined,
+      key: { name?: string; ctrl?: boolean; meta?: boolean },
+    ): void => {
       if (key.ctrl && key.name === "c") {
         cleanup();
         stdout.write("\n");
@@ -284,7 +287,9 @@ main(process.argv.slice(2))
     } else if (error instanceof CliError) {
       process.stderr.write(`${error.message}\n`);
     } else {
-      process.stderr.write("The host agent command failed. Check the local configuration and logs.\n");
+      process.stderr.write(
+        "The host agent command failed. Check the local configuration and logs.\n",
+      );
     }
     process.exitCode = 1;
   });

@@ -169,9 +169,7 @@ export class HostAgent {
     this.incidentId = options.incidentId ?? null;
 
     const upsDevice = options.upsDevice ?? this.config.ups_device;
-    this.upsCollector = upsDevice
-      ? (options.upsCollector ?? new UpscCollector(upsDevice))
-      : null;
+    this.upsCollector = upsDevice ? (options.upsCollector ?? new UpscCollector(upsDevice)) : null;
     this.gpuCollector = options.gpuCollector ?? new NvidiaSmiCollector();
 
     this.spool = new EventSpool(configPaths(options.configDir).spoolFile, {
@@ -225,19 +223,14 @@ export class HostAgent {
       this.producer.queueHostAgentStatus(this.incidentId, "started");
     }
 
-    this.presenceLoop = createLoop(
-      "presence",
-      this.intervals.presenceMs,
-      this.logger,
-      async () => {
-        const result = await this.presenceReporter.tick();
-        if (result.kind === "halted") {
-          this.logger.error("Operational presence stopped", {
-            code: result.code ?? "PRESENCE_HALTED",
-          });
-        }
-      },
-    );
+    this.presenceLoop = createLoop("presence", this.intervals.presenceMs, this.logger, async () => {
+      const result = await this.presenceReporter.tick();
+      if (result.kind === "halted") {
+        this.logger.error("Operational presence stopped", {
+          code: result.code ?? "PRESENCE_HALTED",
+        });
+      }
+    });
 
     this.scheduleUpload(0);
 

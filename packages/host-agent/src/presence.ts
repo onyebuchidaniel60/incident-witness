@@ -57,11 +57,14 @@ export class PresenceReporter {
     }
 
     if (result.kind === "retryable") {
-      this.options.logger.warn("Operational presence heartbeat was not accepted; sequence consumed", {
-        sequence,
-        code: result.code ?? "RETRYABLE_ERROR",
-        status: result.status ?? 0,
-      });
+      this.options.logger.warn(
+        "Operational presence heartbeat was not accepted; sequence consumed",
+        {
+          sequence,
+          code: result.code ?? "RETRYABLE_ERROR",
+          status: result.status ?? 0,
+        },
+      );
       return { kind: "retryable", sequence, code: result.code ?? "RETRYABLE_ERROR" };
     }
 

@@ -141,7 +141,10 @@ describe("enrollAgent", () => {
         apiBaseUrl: server.url,
         enrollmentCode: "bad-code",
       }),
-    ).rejects.toMatchObject({ code: "ENROLLMENT_INVALID", status: 401 } satisfies Partial<EnrollmentError>);
+    ).rejects.toMatchObject({
+      code: "ENROLLMENT_INVALID",
+      status: 401,
+    } satisfies Partial<EnrollmentError>);
   });
 
   it("rejects a certificate that does not match the local public key", async () => {

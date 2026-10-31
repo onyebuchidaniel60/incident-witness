@@ -107,10 +107,7 @@ export class EvidenceProducer {
     return this.enqueue(incidentId, "host_power_state", payload, critical);
   }
 
-  queueHostAgentStatus(
-    incidentId: string,
-    status: HostAgentStatusPayload["status"],
-  ): QueueOutcome {
+  queueHostAgentStatus(incidentId: string, status: HostAgentStatusPayload["status"]): QueueOutcome {
     return this.enqueue(
       incidentId,
       "host_agent_status",

@@ -12,11 +12,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { HostAgent } from "../src/agent.js";
 import type { EventResult, PresenceResult } from "../src/api.js";
 import { writeEnrollmentFiles, type AgentConfig } from "../src/config.js";
-import {
-  generateAgentKeyPair,
-  type AgentKeyPair,
-  type SignedPresence,
-} from "../src/crypto.js";
+import { generateAgentKeyPair, type AgentKeyPair, type SignedPresence } from "../src/crypto.js";
 import { createLogger } from "../src/log.js";
 import { makeTempDir, removeTempDir } from "./helpers.js";
 
@@ -184,7 +180,11 @@ describe("HostAgent", () => {
   it("resumes an offline backlog after a restart without reusing a sequence", async () => {
     const directory = configDir();
     const offlineTransport = new RecordingTransport();
-    offlineTransport.eventResult = { kind: "retryable", status: 503, code: "DEPENDENCY_UNAVAILABLE" };
+    offlineTransport.eventResult = {
+      kind: "retryable",
+      status: 503,
+      code: "DEPENDENCY_UNAVAILABLE",
+    };
 
     const offline = makeAgent(directory, offlineTransport, {
       incidentId: INCIDENT_ID,

@@ -30,8 +30,7 @@ export type SpoolEvent = {
 };
 
 export type EnqueueResult =
-  | { inserted: true; dropped: number }
-  | { inserted: false; reason: "quota" };
+  { inserted: true; dropped: number } | { inserted: false; reason: "quota" };
 
 export type BlockedIncident = {
   incidentId: string;
@@ -181,9 +180,9 @@ export class EventSpool {
     }
   }
 
-  private getMeta(key: string): string | null {    const row = this.db.prepare("select value from spool_meta where key = ?").get(key) as
-      | { value: string }
-      | undefined;
+  private getMeta(key: string): string | null {
+    const row = this.db.prepare("select value from spool_meta where key = ?").get(key) as
+      { value: string } | undefined;
     return row?.value ?? null;
   }
 
@@ -326,7 +325,11 @@ export class EventSpool {
     })();
   }
 
-  blockIncident(incidentId: string, reasonCode: string, blockedAt = new Date().toISOString()): void {
+  blockIncident(
+    incidentId: string,
+    reasonCode: string,
+    blockedAt = new Date().toISOString(),
+  ): void {
     this.db
       .prepare(
         `insert into blocked_incidents (incident_id, reason_code, blocked_at)

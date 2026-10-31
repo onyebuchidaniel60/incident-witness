@@ -37,7 +37,9 @@ function formatLine(level: LogLevel, message: string, fields?: LogFields): strin
   return `${timestamp} ${level.toUpperCase()} ${message}${suffix}`;
 }
 
-export function createLogger(options: { level?: LogLevel; sink?: (line: string) => void } = {}): Logger {
+export function createLogger(
+  options: { level?: LogLevel; sink?: (line: string) => void } = {},
+): Logger {
   const minimum = LEVEL_WEIGHT[options.level ?? "info"];
   const sink = options.sink ?? ((line: string) => console.log(line));
 

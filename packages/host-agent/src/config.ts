@@ -133,7 +133,9 @@ export function validateApiBaseUrl(value: string): string {
   }
 
   if (url.username || url.password || url.search || url.hash) {
-    throw new ConfigSecurityError("The API base URL must not contain credentials, query or fragment");
+    throw new ConfigSecurityError(
+      "The API base URL must not contain credentials, query or fragment",
+    );
   }
   if (url.protocol !== "https:" && url.protocol !== "http:") {
     throw new ConfigSecurityError("The API base URL must use HTTPS");
