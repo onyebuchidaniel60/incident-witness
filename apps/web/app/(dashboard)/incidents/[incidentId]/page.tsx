@@ -1,10 +1,8 @@
-import Link from "next/link";
-
 import { PageIntro } from "@/components/page-intro";
-import { PlaceholderNotice } from "@/components/placeholder-notice";
+import { IncidentDetailView } from "@/components/views/incident-detail-view";
 
 export const metadata = {
-  title: "Evidence session detail placeholder",
+  title: "Evidence session detail",
 };
 
 export default async function IncidentDetailPage({
@@ -18,26 +16,10 @@ export default async function IncidentDetailPage({
     <div className="space-y-8">
       <PageIntro
         eyebrow="Evidence sessions / detail"
-        title="Session timeline placeholder"
-        description="This route will show a deterministic source-attributed timeline, gaps, source health, lifecycle controls, assessment language and sealed bundle download."
+        title="Evidence session"
+        description="Source-attributed observations, lifecycle controls and sealed-bundle download for one owned evidence session."
       />
-
-      <PlaceholderNotice title="No evidence timeline exists">
-        <p>
-          The URL contains the route parameter <code className="font-mono">{incidentId}</code>, but
-          no session or evidence record is queried. No assessment, status or verified state is
-          fabricated.
-        </p>
-      </PlaceholderNotice>
-
-      <div className="flex flex-wrap gap-4 text-sm">
-        <Link href="/incidents" className="font-medium underline">
-          Back to session list placeholder
-        </Link>
-        <Link href="/docs" className="font-medium underline">
-          Documentation
-        </Link>
-      </div>
+      <IncidentDetailView incidentId={incidentId} />
     </div>
   );
 }
