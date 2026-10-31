@@ -125,6 +125,7 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 - **Safe staging:** deployment uses the staging Supabase public URL/publishable key; no server-only secrets or platform private keys are in the browser bundle.
 - **Blocker:** the Fastify API is still not deployed to Render. Host/incident pages on the hosted deployment cannot load provider data until a safe API origin exists; the local browser verifier and public pages can run without the API. The production deployment is therefore not a complete functional Preview for provider journeys.
 - **Phase 5 Render config:** `render.yaml` now defines the API service and `apps/api/dist/index.js` entrypoint. The service has not been linked or verified in Render from this environment; required secrets and migrations through `0022` remain operator prerequisites.
+- **Phase 5 Vercel deployment:** https://incident-witness-772jl2xxk-uhhh2.vercel.app (`dpl_6rucc3QBDKwuzY1mwgPknuhwFfwi`), Git SHA `5d8eec2acb511f09d44722f3db2de13e0273fe22`, status `READY`; `/` and `/verify` return HTTP 200 on the stable alias. The hosted provider workspace still requires a deployed Render API and `NEXT_PUBLIC_API_BASE_URL`.
 
 ## Completed in Phase 3B (accepted and closed)
 
