@@ -1,6 +1,6 @@
 # API Reference Index
 
-**Status:** Phase 3C API-side event ingestion, deterministic correlation and bundle sealing implemented and tested against staging. Phase 3D Linux host agent accepted. Phase 3E renter SDK and platform probe worker accepted. Phase 3F offline CLI verifier and synthetic demo harness accepted. Phase 4 connects the web workspace and local browser verifier to these existing contracts; no public API route or contract changed.
+**Status:** Phase 3C API-side event ingestion, deterministic correlation and bundle sealing implemented and tested against staging. Phase 3D Linux host agent accepted. Phase 3E renter SDK and platform probe worker accepted. Phase 3F offline CLI verifier and synthetic demo harness accepted. Phase 4 connects the web workspace and local browser verifier to these existing contracts. Phase 5 adds the owner-visible bounded payload to the incident-detail timeline and hardens sealing/readiness; no public API route was added.
 
 Base path: `/v1`. Common response/error shape and detailed request validation are defined in `ARCHITECTURE.md`, section 10.
 
@@ -23,6 +23,8 @@ Base path: `/v1`. Common response/error shape and detailed request validation ar
 | POST | `/v1/incidents` | JWT + owner + `Idempotency-Key` | Create a 2–240 minute collecting session |
 | GET | `/v1/incidents` | JWT + owner | List owned sessions with status/host filters |
 | GET | `/v1/incidents/:incidentId` | JWT + owner | Read session metadata, sources, timeline summary and sealed assessment |
+
+The incident-detail timeline returns the first 50 accepted events with `eventId`, `sourceKeyId`, `sourceType`, `eventType`, `sequence`, `observedAt`, `receivedAt`, the owner-visible bounded `payload` and `simulationMode`. Payloads support UI availability states such as UPS/GPU `unavailable` and do not expose any other incident or provider data.
 | POST | `/v1/incidents/:incidentId/end` | JWT + owner | `collecting → awaiting_finalize`; cancel future probe jobs |
 | POST | `/v1/incidents/:incidentId/seal` | JWT + owner | Seal an immutable evidence bundle |
 | GET | `/v1/incidents/:incidentId/bundle` | JWT + owner | Download the exact sealed JSON bundle |

@@ -33,6 +33,7 @@ If no deployment provider access is available, report the exact missing permissi
 
 ## Render API and worker
 
+- The repository root [`render.yaml`](../render.yaml) defines the API Web Service, build command and `node apps/api/dist/index.js` start command. Link it in the Render dashboard, then add the server-only environment variables and apply migrations through `0022`.
 - API is an HTTPS Web Service, configured to listen on assigned `PORT`. Configure the host liveness check to use public `/health/live` only. `/health/ready` is protected and must be called only through a private/authenticated check mechanism supported by the host; never expose `IW_HEALTHCHECK_TOKEN` as a public health-check URL parameter.
 - Worker is a Background Worker with no public inbound listener, started with `npm run start --workspace @incident-witness/probe-worker`.
 - API and worker have separate DB roles and environment variables; worker has only required probe/signing access.

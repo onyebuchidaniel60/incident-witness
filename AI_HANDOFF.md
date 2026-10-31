@@ -2,11 +2,11 @@
 
 **Last updated:** 2026-10-31
 
-**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and tested; the Phase 4 checkpoint is pending operator acceptance.
+**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented and tested; the Phase 5 checkpoint is pending operator acceptance.
 
-**Current phase:** Phase 4 — IMPLEMENTED, PENDING OPERATOR ACCEPTANCE.
+**Current phase:** Phase 5 — IMPLEMENTED, PENDING OPERATOR ACCEPTANCE.
 
-**Next task:** Phase 5 only — awaiting explicit operator authorization.
+**Next task:** Phase 6 only — awaiting explicit operator authorization.
 
 **Phase 2 acceptance:** Operator accepted the Phase 2 checkpoint and approved the `public.iw_uid()` security-definer wrapper on 2026-10-31.
 
@@ -51,6 +51,7 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 - `@incident-witness/renter-sdk` implements one-use invitation redemption, an in-memory/optional durable incident-scoped Ed25519 key, 5 MiB bounded queue, `renter_heartbeat` and `renter_endpoint_result` emission, deadline/closed-incident handling and scoped event signing.
 - `apps/probe-worker` is a separate `iw_worker` background process: `FOR UPDATE SKIP LOCKED` job leases, 30-second lease recovery, a custom DNS-resolving and IP-pinned HTTPS client with SSRF/DNS-rebinding controls, fixed health-check validation, platform-probe event signing and direct DB append with incident counters.
 - `tools/iw-verify` is an offline Node CLI using the shared protocol package. It validates strict schema/versions, manifest digest, a locally pinned platform public key/signature, source certificates, event signatures/digests, sequence/order and bundle consistency with exit codes 0/1/2. It performs no network request.
+- `render.yaml` defines the Render API Web Service, build sequence and `node apps/api/dist/index.js` start command; `apps/api/src/index.ts` preserves the existing server entrypoint.
 - `tools/demo-harness` runs a labelled synthetic power-pattern incident against the configured staging database through a locally constructed API instance, seals/downloads a bundle, verifies it with the CLI and demonstrates one-byte tamper detection.
 - `apps/web` now uses a typed authenticated API client for host/incident data, Supabase bearer sessions and 401/403 refresh-or-login handling. Provider routes load real data, host DNS/enrollment/key/archive controls are connected, incident lifecycle/invitation/timeline/download controls are connected, and `/verify` runs the full browser bundle verifier locally with no bundle upload.
 
@@ -74,6 +75,12 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
   - `3bd6df7` — `feat(web): connect host list, enrollment and lifecycle controls`
   - `18c852c` — `docs(phase4): record functional web integration checkpoint`
   - `f22458d` — `fix(web): build protocol package before next build`
+- **Phase 5 commits:**
+  - `c7b508e` — `chore: add render.yaml deployment config`
+  - `50570e0` — `fix(api): seal probe evidence and reject sequence rollback`
+  - `ac38325` — `fix(worker): stop observations after effective capture end`
+  - `1393793` — `fix(web): surface stale data and unavailable telemetry`
+  - `ebdcd32` — `fix(api): register sequence rollback error code`
 - **Phase 3E commits:**
   - `d810d5c` — `feat(db): add phase 3e worker probe access`
   - `0d5a9ea` — `feat(sdk): add renter client`
@@ -116,6 +123,7 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 - **Status:** `READY`; Production, auto-created by the Git-connected Vercel project after the authorized `git push`. HTTP checks: `/` 200, `/login` 200, `/verify` 200.
 - **Safe staging:** deployment uses the staging Supabase public URL/publishable key; no server-only secrets or platform private keys are in the browser bundle.
 - **Blocker:** the Fastify API is still not deployed to Render. Host/incident pages on the hosted deployment cannot load provider data until a safe API origin exists; the local browser verifier and public pages can run without the API. The production deployment is therefore not a complete functional Preview for provider journeys.
+- **Phase 5 Render config:** `render.yaml` now defines the API service and `apps/api/dist/index.js` entrypoint. The service has not been linked or verified in Render from this environment; required secrets and migrations through `0022` remain operator prerequisites.
 
 ## Completed in Phase 3B (accepted and closed)
 
@@ -439,6 +447,81 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
   explicit flag are both set; the web seam is disabled in production. These are test infrastructure,
   not production authentication or SSRF bypasses.
 
+## Completed in Phase 5 (MVP hardening and E2E gate; pending operator acceptance)
+
+### Render Infrastructure as Code
+
+- Added root `render.yaml` exactly for the `incident-witness-api` Web Service with the requested
+  build command, `node apps/api/dist/index.js` start command and `PORT=10000`.
+- Added root `tsup` and `typescript` devDependencies so `npm ci --include=dev` installs build tools.
+- Added `apps/api/src/index.ts` as a thin deployment entrypoint importing the existing
+  `server.js`; the existing `node dist/server.js` path remains valid.
+- API readiness now expects migration `0022_phase5_worker_ended_at_grant`.
+
+### Adversarial review findings and fixes
+
+1. **P1 — Render start command targeted a missing file.** `render.yaml` referenced
+   `apps/api/dist/index.js`, while the API only built `dist/server.js`. Fixed with the thin
+   `index.ts` entrypoint; build verified `apps/api/dist/index.js` exists and starts the server.
+2. **P1 — Platform-probe incidents could not be sealed.** Provider/system RLS could not read the
+   `platform_probe` key/certificate, so incidents containing probe observations failed with
+   “An event has no source key.” Fixed with migration
+   `0020_phase5_platform_probe_seal_access.sql` and corrected in
+   `0021_phase5_fix_probe_seal_policy.sql` to avoid recursive RLS. Platform probe public keys and
+   certificates are public bundle material; no private key is exposed.
+3. **P1 — Event sequence rollback was accepted.** The API checked only uniqueness, so a source could
+   submit sequence 5 and then a new sequence 4. Fixed by comparing against the maximum accepted
+   sequence for the source key under the incident lock; lower sequences now return
+   `EVENT_SEQUENCE_ROLLBACK` (409), while exact duplicate retries remain idempotent.
+4. **P1 — Probe worker could append after manual end.** The worker checked only scheduled
+   `capture_ends_at` and allowed `awaiting_finalize`, so an in-flight observation could be appended
+   after the provider manually ended the session. Fixed to require `collecting` and compare against
+   the effective end (`min(ended_at, capture_ends_at)`) plus the ingestion deadline. Added worker
+   `SELECT (ended_at)` grant in migration `0022`.
+5. **P1 — Stale polling looked current.** The incident detail page used render time for “Last
+   refreshed” and hid polling errors when data already existed. Fixed by tracking the last successful
+   fetch and showing a “Showing stale data” alert with retry.
+6. **P1 — UPS/GPU unavailable telemetry was not visible in the UI.** The summarized timeline omitted
+   event payloads. Fixed by returning the owner-visible payload in the incident timeline and rendering
+   explicit `UNAVAILABLE` / `PARTIAL` labels for UPS/GPU collection status.
+7. **P1 — API readiness was pinned to an old migration.** `/health/ready` expected
+   `0019_phase3e_worker_counter_select`; after Phase 5 migrations it would return 503 even with a
+   correct schema. Fixed to expect `0022` and added an integration readiness test.
+8. **P2 — Worker retry/dead transitions do not check lease ownership.** A stale worker can mutate job
+   bookkeeping after lease expiry; deterministic event IDs still prevent duplicate evidence. Recorded
+   as a remaining P2; retry semantics were not changed in this pass.
+
+### Edge-case verification
+
+- Host agent collectors already emit `collection_status: "unavailable"` for GPU failure and
+  `state: "unavailable"` for UPS failure; the API timeline now exposes those payload fields and the
+  Playwright journey asserts `UNAVAILABLE` is rendered.
+- Correlator tests cover no observations (`UNKNOWN`/`INSUFFICIENT`), only a heartbeat (`UNKNOWN`),
+  UPS `online` alone, UPS `unavailable`, a later heartbeat contradicting a power transition, probe
+  infrastructure errors and unsupported rule versions.
+- Incident detail polling failure is covered by Playwright with an aborted detail request; the page
+  shows “Showing stale data”, states that source status may be out of date, and clears the alert after
+  a successful retry.
+- Platform probe sealing and timeline payloads are covered by API integration tests; the bundle
+  verifies with the platform public key and source event signature.
+- API readiness is covered against migration ledger `0022`.
+- Existing IDOR, 4,000-event budget, 7 MiB budget, duplicate/sequence, seal-vs-ingest, SSRF and
+  DNS-rebinding regression tests remain green.
+
+### Phase 5 test evidence
+
+- `npm run test:integration --workspace @incident-witness/api` — **PASS**: 60/60.
+- `npm run test:integration --workspace @incident-witness/probe-worker` — **PASS**: 2/2.
+- `npm test` — **PASS**: 162/162 unit tests.
+- `npm run test:e2e` — **PASS**: 42 Playwright checks, 41 passed and one intentional mobile
+  provider-flow skip. The desktop journey covers host/DNS/enrollment, demo incident, renter
+  invitation, synthetic events including `gpu_telemetry` unavailable, end/seal/download, stale
+  polling warning/retry and the local verifier valid/tampered checks.
+- `npm run demo` — **PASS**: valid bundle exit 0 and one-byte tampered bundle exit 1; assessment
+  `POWER_RELATED`/`LOW`, `simulation_present=true`.
+- `npm run lint`, `npm run typecheck` and `npm run build` — **PASS** across the monorepo.
+- Migration `0020`–`0022` applied to staging; API readiness expected migration updated to `0022`.
+
 ## Visible behaviour vs placeholders
 
 **Functional locally (staging API or local mock):**
@@ -453,10 +536,11 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 - Owner isolation for bundles and incidents.
 - Host-agent enrollment, owner-only key/credential storage, signed operational presence, evidence spooling, fixed GPU/UPS collectors and upload/retry against a local mock of the documented API. Signed events verify against the generated public key.
 - Renter SDK one-use enrollment, scoped signed heartbeats/endpoint results, 5 MiB queue recovery, deadline/`INCIDENT_CLOSED` handling and endpoint state-change emission against a local mock API.
-- Probe worker SSRF/DNS-rebinding unit tests, signed `platform_probe_result` events, lease-expiry recovery/retry/dead-letter and a real staging `iw_worker` integration test for claim, event insert, counter update and next-job scheduling.
+- Probe worker SSRF/DNS-rebinding unit tests, signed `platform_probe_result` events, lease-expiry recovery/retry/dead-letter, effective-capture-end enforcement and a real staging `iw_worker` integration test for claim, event insert, counter update and next-job scheduling.
 - Offline `iw-verify` CLI validation of valid, modified, unknown-key and unsupported-version bundles with stable exit codes, plus CLI/browser manifest-verifier parity fixtures.
 - Synthetic end-to-end demo harness against staging: provider/host/agent/renter enrollment, labelled power-pattern events, end, seal, download, CLI pass and one-byte tamper failure.
-- Authenticated provider web workspace with real host, session, source, timeline and bundle data; host DNS/enrollment/key/archive controls; incident invitation/end/seal/download controls; local browser bundle verification.
+- Authenticated provider web workspace with real host, session, source, timeline and bundle data; host DNS/enrollment/key/archive controls; incident invitation/end/seal/download controls; local browser bundle verification; stale-polling warning and UPS/GPU unavailable labels.
+- Platform-probe source certificates are included in provider and system seal transactions; lower event sequences are rejected; readiness checks migration `0022`; `render.yaml` defines the API service.
 
 **Placeholder or unverified:**
 
@@ -469,7 +553,7 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 - The probe worker has not run against a real public provider endpoint and is not deployed to Render. SSRF/DNS-rebinding behavior is proven with injected resolvers/transports; the real network path is unverified.
 - The Phase 3D agent has not enrolled a real disposable host or reached a live staging incident. Its end-to-end test uses a local HTTP mock; real `nvidia-smi` and `upsc` execution is not run in CI.
 - No real platform-probe observations or worker leases are produced in normal staging operation; probe-lease behavior is tested with disposable seeded rows.
-- API is not deployed to Render; no new Vercel deployment for Phase 3C/3D/3E/3F/4.
+- `render.yaml` exists, but the operator still has to link it and configure server-only environment variables. No API Render deployment has been verified from this environment.
 - Source-certificate verification uses the current configured platform key. Platform-key rotation with old source certificates is not yet exercised.
 
 ## Tests and evidence
@@ -486,9 +570,9 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - `npm test --workspace @incident-witness/host-agent` — **PASS**: 49/49.
 - `npm test --workspace @incident-witness/renter-sdk` — **PASS**: 14/14.
 - `npm test --workspace @incident-witness/probe-worker` — **PASS**: 20/20.
-- `npm run test:integration --workspace @incident-witness/api` — **PASS**: 57/57 (Phase 4 re-run).
-- `npm run test:integration --workspace @incident-witness/probe-worker` — **PASS**: 1/1 staging `iw_worker` lease/insert/counter/schedule test.
-- `npm run test:e2e` — **PASS**: 42 Playwright checks, 41 passed and one intentional mobile provider-flow skip. The desktop journey covers test login → host creation/DNS → enrollment → demo incident → renter invitation/events → end/seal/download; verifier tests run on desktop and mobile.
+- `npm run test:integration --workspace @incident-witness/api` — **PASS**: 60/60 (Phase 5 re-run).
+- `npm run test:integration --workspace @incident-witness/probe-worker` — **PASS**: 2/2 staging `iw_worker` lease/insert/counter/schedule and effective-capture-end tests.
+- `npm run test:e2e` — **PASS**: 42 Playwright checks, 41 passed and one intentional mobile provider-flow skip. The desktop journey covers test login → host creation/DNS → enrollment → demo incident → renter invitation/events (including `gpu_telemetry: unavailable`) → end/seal/download → stale-poll warning/retry; verifier tests run on desktop and mobile.
 - `npm run db:provision-probe-key -- --generate --out <temp>` — **PASS** against staging with a disposable random key ID: file mode `0600`, `platform_probe` row active, row and file removed afterwards.
 - `node tools/iw-verify/dist/cli.js --version` and `node_modules/.bin/iw-verify --version` — **PASS**.
 - `npm audit --omit=dev` — **PASS**: 0 production vulnerabilities. 20 moderate development-only advisories remain.
@@ -570,7 +654,7 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 
 - **Staging database:** Supabase Postgres 17.11.
 - **Migration ledger:** `iw_schema_migrations`.
-- **Applied migrations:** `0001_phase2_schema` through `0019_phase3e_worker_counter_select`.
+- **Applied migrations:** `0001_phase2_schema` through `0022_phase5_worker_ended_at_grant`.
 - **Roles:** `iw_api` and `iw_worker` are login roles with `NOSUPERUSER`, `NOBYPASSRLS`, `NOCREATEDB`, `NOCREATEROLE`.
 - **Schema decision:** `public.iw_uid()` security-definer wrapper remains approved and in use.
 - **Platform key:** `iw-platform-staging-1` registered in `platform_signing_keys`; private key only in ignored `.env`.
@@ -578,6 +662,7 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - **Phase 3E schema:** no table or column changes; migrations `0018`–`0019` add grants/RLS only.
 - **Phase 3F schema:** no migrations or table/column changes.
 - **Phase 4 schema:** no migrations, table/column or API contract changes. Only the test-only API runtime seam was added, guarded by `NODE_ENV=test` and `IW_E2E_TEST_AUTH=true`.
+- **Phase 5 schema:** migrations `0020`–`0022` add RLS/grants only; no table or column definitions change. The incident-detail timeline response now includes the owner-visible event `payload` and `simulationMode` fields. API readiness expects `0022`.
 
 ## Design reference and approval status
 
@@ -586,6 +671,7 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - **Mockups:** NOT CREATED.
 - **Operator approval:** NOT GRANTED.
 - Phase 3C, Phase 3D, Phase 3E and Phase 3F did not change frontend styling or visual behaviour.
+- Phase 4/5 connect functional UI and state handling but retain temporary structural styling; final visual design is still not approved or implemented.
 - Phase 4 connects functional UI but keeps temporary structural styling; final visual design is still not approved or implemented.
 
 ## Documentation/footer status
@@ -599,7 +685,8 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - `README.md` updated with Phase 3F CLI/demo commands, probe-key generation and test counts.
 - `docs/PROTOCOL.md` updated to record the Phase 3F CLI verifier status.
 - `docs/PROBE_WORKER.md` updated for generated-key provisioning.
-- `README.md` updated for Phase 4 web integration, local browser verification and full-stack Playwright tests.
+- `README.md` updated for Phase 4 web integration, local browser verification, full-stack Playwright tests, `render.yaml` and Phase 5 hardening.
+- `docs/DEPLOYMENT.md` updated with the Render `render.yaml` linking and migration prerequisites.
 - `docs/PROTOCOL.md` and `docs/API_REFERENCE.md` updated for the Phase 4 browser verifier and connected workspace.
 - `.env.example` includes conservative probe-worker defaults and key-provisioning guidance.
 - `/docs` route and footer Documentation/GitHub links remain unchanged and reachable from Phase 2.
@@ -621,11 +708,12 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 12. **Platform-key rotation:** source certificates are verified against the current configured platform key. A future rotation must preserve old certificate verification or re-enroll source keys; this is not yet exercised. The CLI trust set and the web verifier trust set must both be updated with the new public key before verification.
 13. **Manual end clamp:** `endedAt` is clamped to the latest accepted observation to keep the capture window consistent. `captureEndsAt` remains the bounded scheduled end due the Phase 2 minimum-2-minute constraint.
 14. **Demo cap:** demo sessions are labelled and capped at `LOW` even when their events are real; this is conservative and matches the permanent simulation-label requirement.
-15. **API not deployed:** no Render API/worker deployment or new Vercel deployment for Phase 3C/3D/3E/3F/4. Local/staging verification only.
+15. **Render service not linked:** `render.yaml` exists and the API builds `dist/index.js`, but the operator must link it in Render, provide all required server-only environment variables and apply migrations through `0022`. No API/worker deployment was verified from this environment.
 16. **Event rejection auditing:** rejected events are not inserted into `audit_events`; the API returns safe error codes and does not log payloads/signatures. Revisit in Phase 9 if DB-level security audit of rejects is required.
 17. **Development advisories:** 20 moderate development-only npm advisories remain; `npm audit --omit=dev` is clean.
 18. **Fastify deprecation warning:** `requestIdLogLabel` is deprecated in Fastify 5 and will be removed in Fastify 6. Existing Phase 2 configuration; non-blocking.
 19. **E2E test auth seam:** Playwright uses a static test token and a file-backed DNS resolver through `IW_E2E_*` flags. The API seam is disabled unless `NODE_ENV=test` and the explicit flag are set; the web seam is disabled in production. Real Supabase email OTP delivery and session refresh are not exercised by the automated provider journey. No production credential or production data is used.
+20. **P2 worker lease bookkeeping:** retry/dead/cancel updates are not conditioned on the current lease owner. Deterministic event IDs prevent duplicate evidence, but a stale worker can still disturb job status after lease expiry. Revisit with a lease-owner-conditioned update.
 
 ## Things not to change
 
@@ -640,6 +728,5 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 
 ## Exact next task
 
-**Phase 5 only — MVP functionality completion and E2E verification gate — awaiting explicit
-operator authorization.**
-Do not begin until the Phase 4 checkpoint is accepted and Phase 5 is authorized.
+**Phase 6 — Design references and mockups — awaiting explicit operator authorization.**
+Do not begin until the Phase 5 checkpoint is accepted and Phase 6 is authorized.

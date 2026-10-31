@@ -38,6 +38,11 @@ revocation and archival, evidence-session list/create/detail, renter invitations
 timeline, end/seal/download and the local browser bundle verifier. The UI remains structurally plain
 because the final visual design is not approved. The API is still not deployed to Render.
 
+Phase 5 hardens the MVP gate: platform-probe source certificates can be read by the seal transaction,
+event sequence rollback is rejected, probe observations stop at the effective capture end, stale
+source polling is visibly labelled, and UPS/GPU `unavailable` telemetry is shown in the timeline.
+`render.yaml` now describes the API Render service using Infrastructure as Code.
+
 Phase 3B host/incident domain APIs are accepted and closed. The API supports owner-scoped host CRUD,
 DNS TXT endpoint verification with public-IP/SSRF checks, host enrollment and signed operational
 presence, bounded incident creation/end with a lifecycle sweeper, renter invitations and scoped
@@ -112,8 +117,11 @@ Local Phase 3C verification on 2026-10-31 passed lint, typecheck, build, 20 prot
 20 probe-worker unit tests, one probe-worker database/RLS integration test and one correlator
 regression check for probe-service errors. Phase 3F added 11 CLI verifier tests and two staging demo
 harness tests. Phase 4 adds four API test-seam guard tests and a full-stack Playwright provider flow
-plus local-verifier checks (162 unit tests total; 42 Playwright checks, 41 passed and one mobile
-provider-flow skip). Actual results and remaining blockers are recorded in `AI_HANDOFF.md`.
+plus local-verifier checks. Phase 5 adds platform-probe sealing, sequence-rollback, readiness, worker
+effective-end and telemetry/stale UI coverage. Final results: 162 unit tests, 60 API integration
+tests, 2 probe-worker integration tests, 42 Playwright checks (41 passed, one intentional mobile
+provider-flow skip) and a clean demo harness. Actual results and remaining blockers are recorded in
+`AI_HANDOFF.md`.
 
 ### Renter SDK and probe worker
 
@@ -233,6 +241,26 @@ and the sealed manifest has `simulation_present: true` with a grade capped at `L
 not collect real GPU, UPS or renter workload telemetry. It seeds a disposable staging auth user with
 the migrator role and uses an in-process API instance; it does not use production data or deploy
 anything.
+
+## Render API deployment
+
+The repository root contains `render.yaml` for the `incident-witness-api` web service. It builds the
+protocol, correlator, database and API workspaces, then starts `node apps/api/dist/index.js`.
+The API entrypoint imports the existing Fastify server entrypoint so the Render start command and
+the package's local `node dist/server.js` command remain compatible.
+
+Before the service can become ready:
+
+1. Link `render.yaml` in the Render dashboard.
+2. Set the required server-only environment variables from
+   [`docs/CONFIGURATION.md`](./docs/CONFIGURATION.md), including the staging/production Supabase
+   values, `DATABASE_URL_IW_API`, `IW_TOKEN_PEPPER`, `IW_PLATFORM_SIGNING_PRIVATE_KEY`,
+   `IW_PLATFORM_KEY_ID`, `APP_BASE_URL`, `IW_ALLOWED_WEB_ORIGINS` and `IW_HEALTHCHECK_TOKEN`.
+3. Apply migrations through `0022` with `npm run db:migrate` using `DATABASE_URL_MIGRATOR`.
+4. Set the Vercel `NEXT_PUBLIC_API_BASE_URL` to the deployed API origin and redeploy the web app.
+
+The API readiness endpoint checks the migration ledger and returns 503 until the expected migration
+is applied. Do not put server-only secrets in `NEXT_PUBLIC_*` variables.
 
 ## Deployment lifecycle
 
