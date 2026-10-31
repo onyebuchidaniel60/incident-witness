@@ -376,7 +376,8 @@ describe("ADR-001 staging integration tests", () => {
       await client.query("rollback");
 
       await expect(client.query("create table iw_escalation_test (id integer)")).rejects.toThrow();
-      await expect(client.query("set row_security = off")).resolves.toBeDefined();
+      await client.query("set row_security = off");
+      await expect(client.query("select count(*) from hosts")).rejects.toThrow();
     } finally {
       client.release();
     }
