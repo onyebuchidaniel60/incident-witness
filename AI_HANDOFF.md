@@ -2,11 +2,11 @@
 
 **Last updated:** 2026-10-31
 
-**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**. Phase 6 reference-driven mockups (revision 0.3) are **APPROVED**. Phase 7 final UI implementation is implemented, deployed and **COMPLETE AND CLOSED**; the magic-link session bug and the protected-route API-call race are fixed, verified and accepted. Phase 8 frontend and documentation completeness is in progress.
+**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**. Phase 6 reference-driven mockups (revision 0.3) are **APPROVED**. Phase 7 final UI implementation is implemented, deployed and **COMPLETE AND CLOSED**; the magic-link session bug and the protected-route API-call race are fixed, verified and accepted. Phase 8 frontend and documentation completeness is implemented, test-verified and deployed; operator acceptance is pending.
 
-**Current phase:** Phase 8 — frontend and documentation completeness, authorized by the operator on 2026-10-31.
+**Current phase:** Phase 8 — implemented, tested and deployed. Awaiting operator acceptance; Phase 9 is not authorized.
 
-**Next task:** Complete the Phase 8 checkpoint, obtain operator acceptance, then wait for explicit authorization before Phase 9.
+**Next task:** Operator acceptance of the Phase 8 checkpoint. Phase 9 only after explicit authorization.
 
 **Phase 2 acceptance:** Operator accepted the Phase 2 checkpoint and approved the `public.iw_uid()` security-definer wrapper on 2026-10-31.
 
@@ -90,6 +90,11 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
   - `1393793` — `fix(web): surface stale data and unavailable telemetry`
   - `ebdcd32` — `fix(api): register sequence rollback error code`
   - `77a2c92` — `fix(api): return latest timeline events`
+- **Phase 8 commits:**
+  - `fb95f54` — `feat(web): add site metadata, icons and safe error states`
+  - `8440ce1` — `docs(web): add real documentation and legal status pages`
+  - `d2168de` — `docs: update readme for phase 8 completeness`
+  - Final `docs(handoff)` commit records the Phase 8 checkpoint and deployment evidence.
 - **Phase 3E commits:**
   - `d810d5c` — `feat(db): add phase 3e worker probe access`
   - `0d5a9ea` — `feat(sdk): add renter client`
@@ -765,7 +770,7 @@ The independent hardening gap was that no Supabase client passed explicit cookie
 - The deployed `/login` returned HTTP 200 with the approved UI, and `/auth/callback` without a code returned the expected `307` to `/login?error=invalid_link`. The test-only callback seam is disabled in the production build.
 - A real magic-link inbox click on this Preview remains the operator-side confirmation step.
 
-**Phase 7 visual verification was blocked by this auth bug.** Phase 8 was not started.
+**Phase 7 visual verification was blocked by this auth bug until the fixes below were verified; Phase 8 was subsequently authorized after Phase 7 acceptance.**
 
 ## Protected-route API-call race fix (2026-10-31)
 
@@ -823,7 +828,67 @@ When unauthenticated or after the session disappeared, protected routes could br
 - `/dashboard` and `/hosts` without a session returned `307` to `/login?next=…` at the edge; `/login` returned `200`.
 - No client API request can be made from these redirect responses because the protected route HTML is never served.
 
-**Phase 8 was authorized after Phase 7 acceptance and is in progress.**
+**Phase 8 implementation status (2026-10-31):** Frontend and documentation completeness is implemented, test-verified and deployed to Preview. Operator acceptance is pending. No business logic, API contract, database schema or cryptographic protocol changed.
+
+## Completed in Phase 8 (implemented, tested and deployed 2026-10-31; pending operator acceptance)
+
+### In-app documentation
+
+- Rebuilt `/docs` as a real documentation destination with a section index and substantive sections for:
+  - overview and provider quick start;
+  - host-agent build, enrollment, run and storage behaviour;
+  - renter SDK build, TypeScript integration, invitation and queue rules;
+  - signed event envelope, certificates, manifest, offline browser/CLI verification, exit codes and `iw-rules-v1` assessments;
+  - limitations of signatures, sources, missing observations, bounded capture and staging status;
+  - reference links to the repository documents.
+- Commands and limits match `docs/HOST_AGENT.md`, `docs/RENTER_SDK.md` and `docs/PROTOCOL.md`. No fabricated package names, installers, hosted API URLs or production claims were added.
+- Updated stale document status lines for the host agent, renter SDK, probe worker, user guide, design decisions, configuration, deployment and operations.
+- Replaced the stale `docs/README.md` blueprint note with a maintained documentation index and in-app documentation consistency rules.
+
+### Legal and footer links
+
+- `/privacy` and `/terms` remain real, reachable routes and now carry clearer staging data boundaries. Both state explicitly that legal review is pending and that the pages are not a policy, contract or service-level commitment.
+- The footer links to `/docs`, `/privacy`, `/terms`, `/verify` and the confirmed public GitHub repository. The GitHub link has an accessible “opens in a new tab” label.
+- The 404 page now links to home, documentation and the verifier. The route error page links to home and documentation and remains actionable through “Try again”.
+
+### Metadata and SEO
+
+- Root metadata now includes `metadataBase`, a title template, description, OpenGraph website metadata, Twitter summary card metadata and an application name.
+- Added page-specific titles/descriptions and canonical paths for `/`, `/docs`, `/verify`, `/privacy`, `/terms` and every provider route.
+- Added `app/icon.svg` as the favicon and a generated 1200×630 `opengraph-image` using the approved emerald/charcoal design language.
+- Added `robots.ts` and `sitemap.ts`. The sitemap contains only public routes. `robots.txt` disallows `/dashboard`, `/hosts`, `/incidents`, `/settings`, `/login` and `/auth/`.
+- The authenticated layout and `/login` emit `noindex, nofollow`. The 404 route emits the framework's `noindex` tag only (the conflicting root `index, follow` tag was removed).
+
+### Accessibility and completeness
+
+- The skip link now focuses the `<main id="main-content" tabIndex={-1}>` landmark; this is covered by a keyboard test that checks the visible focus outline.
+- Public pages expose one `h1`; the docs section navigation is labelled; code blocks are keyboard-scrollable with accessible labels.
+- Every visible link, button and form control on public routes has an accessible name; status chips and indicators retain text labels rather than relying on colour.
+- Added a Playwright crawl that checks every internal link on public routes, every same-page anchor target, and the absence of `href="#"`.
+- Verified responsive behaviour at desktop and mobile widths, including removing a mobile horizontal overflow caused by documentation code blocks.
+
+### Phase 8 test evidence
+
+- `npm run lint` — **PASS** across all workspaces.
+- `npm run typecheck` — **PASS** across all workspaces.
+- `npm run build` — **PASS** across the monorepo, including the Next.js 16.4.3 production build.
+- `npm test` — **PASS**: 164 unit tests.
+- `npm run test:integration --workspace @incident-witness/api` — **PASS**: 60/60 against staging.
+- `npm run test:integration --workspace @incident-witness/probe-worker` — **PASS**: 2/2 against staging.
+- `npm run test:e2e` — **PASS**: 76 Playwright checks, 75 passed and one intentional mobile provider-flow skip.
+- `npm run demo` / `npm run test:demo` — **NOT RE-RUN** for this frontend/documentation-only phase; the last recorded result remains the Phase 5 pass.
+
+## Phase 8 deployment checkpoint
+
+- **Vercel Preview URL:** https://incident-witness-5kbj8bthc-uhhh2.vercel.app
+- **Preview deployment ID:** `dpl_C9A6ZiM8nffQGnsahx5B9WjmyKAF`
+- **Preview target/status:** `preview`; `READY`; no Deployment Protection.
+- **Source commit:** `d2168de5c865559aa740b5d795ff9ff86eda19f9` (`docs: update readme for phase 8 completeness`), built from a clean working tree with the Phase 8 commits `fb95f54`, `8440ce1` and `d2168de`.
+- **Route checks on the Preview:** `/`, `/docs`, `/privacy`, `/terms`, `/verify`, `/robots.txt`, `/sitemap.xml`, `/icon.svg` and `/opengraph-image` returned HTTP 200. `/login` returned 200 with `x-robots-tag: noindex`. `/dashboard`, `/hosts`, `/incidents` and `/settings` returned 307 to `/login?next=…` with `x-robots-tag: noindex`.
+- **Content checks on the Preview:** the deployed `/docs` HTML contains the overview, host-agent, renter-SDK, protocol, limitations and reference sections plus the expected commands; the footer contains `/docs`, `/privacy`, `/terms`, `/verify` and the public GitHub repository link.
+- **External link check:** https://github.com/onyebuchidaniel60/incident-witness and https://github.com/onyebuchidaniel60/incident-witness/blob/main/docs/HOST_AGENT.md returned HTTP 200.
+- **Edge caveat:** repeated automated requests to an unmatched path on the Preview returned Vercel's Security Checkpoint (`HTTP 403`, `x-vercel-mitigated: challenge`) rather than the application 404. The 404 title, links and noindex behaviour pass locally in Playwright; this is an edge challenge, not an application failure.
+- **Git-connected Production deployment (auto-created by pushing `main`):** https://incident-witness-8ol9xv0rt-uhhh2.vercel.app, deployment ID `dpl_GikpnKfPoEQBp69qGkENcA5C6hE1`, target `production`, status `READY`, Git metadata commit `d2168de5c865559aa740b5d795ff9ff86eda19f9` on `main`. Stable alias https://incident-witness.vercel.app serves the Phase 8 `/docs` page (HTTP 200). No separate `vercel deploy --prod` command was run; the deployment was auto-created by the Git integration. Production release approval remains a separate Phase 9/operator decision.
 
 ## Design reference and approval status
 
@@ -847,16 +912,14 @@ When unauthenticated or after the session disappeared, protected routes could br
 - `docs/CONFIGURATION.md` updated for renter SDK options and probe-worker variables/provisioning.
 - `docs/API_REFERENCE.md` updated to show both witnesses consume existing contracts; no new public API route.
 - `docs/DEPLOYMENT.md`, `docs/OPERATIONS.md` and `docs/PRIVACY_SECURITY.md` updated for the worker.
-- `README.md` updated with Phase 3F CLI/demo commands, probe-key generation and test counts.
-- `docs/PROTOCOL.md` updated to record the Phase 3F CLI verifier status.
-- `docs/PROBE_WORKER.md` updated for generated-key provisioning.
-- `README.md` updated for Phase 4 web integration, local browser verification, full-stack Playwright tests, `render.yaml`, Phase 5 hardening and magic-link authentication.
-- `docs/DEPLOYMENT.md` updated with the Render `render.yaml` linking and migration prerequisites.
-- `docs/PROTOCOL.md` and `docs/API_REFERENCE.md` updated for the Phase 4 browser verifier and connected workspace.
-- `.env.example` includes conservative probe-worker defaults and key-provisioning guidance.
-- `/docs` route and footer Documentation/GitHub links remain unchanged and reachable from Phase 2.
-- `/privacy` and `/terms` remain clearly labelled placeholders; no legal copy is approved.
-- `docs/DESIGN_DECISIONS.md` records the rejected 0.1 hybrid, the operator-supplied references, the reference analysis/translation, Satoshi/4px revision 0.3 refinements, the explicit approval, Phase 7 implementation deviations and the pending Phase 7 acceptance.
+- `README.md` rewritten for Phase 8 with current setup, magic-link deviation, testing, deployment, protocol, host-agent, renter-SDK and security guidance.
+- `docs/README.md` is now a maintained documentation index with in-app `/docs` consistency rules rather than a blueprint note.
+- `docs/HOST_AGENT.md`, `docs/RENTER_SDK.md`, `docs/PROBE_WORKER.md`, `docs/USER_GUIDE.md`, `docs/CONFIGURATION.md`, `docs/DEPLOYMENT.md`, `docs/OPERATIONS.md` and `docs/DESIGN_DECISIONS.md` have current status lines; no Phase 3 acceptance debt remains.
+- `.env.example` includes `NEXT_PUBLIC_SITE_URL` and conservative probe-worker defaults/key-provisioning guidance.
+- `/docs` is a real, reachable documentation destination with quick start, host-agent, renter-SDK, protocol, verification and limitation sections.
+- Footer Documentation, Privacy, Terms, Verify and GitHub links are present and were checked on the deployed Preview. The GitHub repository and a representative docs file returned HTTP 200.
+- `/privacy` and `/terms` are real routes with explicit legal-review-pending status; no fabricated company, jurisdiction, contact or contractual legal copy is published.
+- `docs/DESIGN_DECISIONS.md` records the rejected 0.1 hybrid, the operator-supplied references, the reference analysis/translation, Satoshi/4px revision 0.3 refinements, the explicit approval, Phase 7 implementation deviations and the completed Phase 7 acceptance.
 - `docs/mockups/README.md` explains how to open and review the reference-driven mockup set; `docs/mockups/index.html` is the local review entry point. Font attribution/license is in `docs/mockups/assets/fonts/FONT_LICENSE.md`.
 
 ## Known risks and operator actions
