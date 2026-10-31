@@ -82,12 +82,14 @@ function isProbeFailure(event: CorrelatorEvent): boolean {
   const responseClass = stringField(payload, "response_class");
   const probeStatus = stringField(payload, "probe_status");
 
+  // A probe infrastructure/policy error is not evidence that the target host is down.
+  if (probeStatus === "error") return false;
+
   return (
     responseClass === "unexpected" ||
     responseClass === "unavailable" ||
     responseClass === "error" ||
-    probeStatus === "failed" ||
-    probeStatus === "error"
+    probeStatus === "failed"
   );
 }
 

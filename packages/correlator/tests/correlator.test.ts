@@ -81,6 +81,24 @@ function probeFailure(seconds: number, simulation = false): CorrelatorEvent {
   });
 }
 
+function probeError(seconds: number): CorrelatorEvent {
+  return makeEvent({
+    event_type: "platform_probe_result",
+    source_type: "platform_probe",
+    observed_at: at(seconds),
+    payload: {
+      target_host_id: "00000000-0000-4000-8000-0000000000a0",
+      probe_status: "error",
+      dns_result: "dns_error",
+      tls_result: "not_attempted",
+      http_result: "not_attempted",
+      latency_ms: 0,
+      response_class: "error",
+      observed_ip_class: "unknown",
+    },
+  });
+}
+
 function renterFailure(seconds: number): CorrelatorEvent {
   return makeEvent({
     event_type: "renter_endpoint_result",
@@ -189,6 +207,11 @@ describe("deterministic correlator", () => {
     expect(full.assessmentCode).toBe("EXTERNAL_REACHABILITY_LOSS");
     expect(full.evidenceGrade).toBe("HIGH");
     expect(full.explanation).toContain("does not identify the precise upstream network cause");
+  });
+
+  it("does not classify a probe infrastructure/policy error as external reachability loss", () => {
+    const result = correlate([hostHeartbeat(20), probeError(10)], RULE_VERSION);
+    expect(result.assessmentCode).toBe("UNKNOWN");
   });
 
   it("does not classify UPS online alone", () => {
