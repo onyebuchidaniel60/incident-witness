@@ -2,11 +2,11 @@
 
 **Last updated:** 2026-10-31
 
-**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**. Phase 6 revision 0.3 reference-driven mockups apply the final typography and sharp-geometry refinements; operator approval is pending.
+**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**. Phase 6 reference-driven mockups (revision 0.3) are **APPROVED**. Phase 7 final UI implementation is in progress.
 
-**Current phase:** Phase 6 revision 0.3 — reference-driven mockups presented; **awaiting final explicit operator approval**. Phase 7 is not authorized.
+**Current phase:** Phase 7 — implementing the approved visual system on top of the existing functional web app. No business logic, API contract or schema change is authorized.
 
-**Next task:** Operator final review of the Phase 6 revision 0.3 mockup set. Revise only from operator feedback, then stop again for explicit approval; do not implement final UI code.
+**Next task:** Complete Phase 7 implementation, run lint/build/E2E, verify the deployed Preview and stop for operator acceptance.
 
 **Phase 2 acceptance:** Operator accepted the Phase 2 checkpoint and approved the `public.iw_uid()` security-definer wrapper on 2026-10-31.
 
@@ -674,27 +674,25 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - **Phase 4 schema:** no migrations, table/column or API contract changes. Only the test-only API runtime seam was added, guarded by `NODE_ENV=test` and `IW_E2E_TEST_AUTH=true`.
 - **Phase 5 schema:** migrations `0020`–`0022` add RLS/grants only; no table or column definitions change. The incident-detail timeline response now includes the owner-visible event `payload` and `simulationMode` fields. API readiness expects `0022`.
 
-## Phase 6 revision 0.3 mockups (created and presented 2026-10-31; final approval pending)
+## Phase 6 revision 0.3 mockups (approved 2026-10-31)
 
-- The operator rejected the 0.1 hybrid mockups and supplied two WebP references in `docs/design-references/`. The reference-driven direction is approved; revision 0.3 applies the requested typography and geometry refinements.
+- The operator rejected the 0.1 hybrid mockups and supplied two WebP references in `docs/design-references/`. The reference-driven direction is approved.
 - Revision 0.3 uses locally bundled **Satoshi** WOFF2 files, with Inter only as a fallback. Font attribution/license is recorded in `docs/mockups/assets/fonts/FONT_LICENSE.md`.
 - Buttons, inputs, chips, session cards, stat tiles, evidence panels and state cards use sharp **4px** corners (chips 3px). The app window keeps a 16px frame radius; the verifier window is 10px and the preview frame 8px.
 - The primary emerald is `#26D18C`; the action gradient ends at `#16845E`. Surfaces retain subtle green/blue-tinted charcoal values rather than pure black.
 - Requested screens are covered in desktop and mobile: public home, authenticated dashboard, incident timeline and local verifier. The mockup index links the full set.
-- Reference analysis, translation, intentional deviations and the five translation questions are recorded in `docs/DESIGN_DECISIONS.md`.
-- No file under `apps/web` was changed. No final CSS, Tailwind tokens or UI implementation was written.
-- Static validation: 9 pages rendered at 1440 px and 430 px in Chromium with no console errors or horizontal overflow; no duplicate IDs, unnamed buttons or unlabelled inputs; one `h1` and no heading-order jumps per page; all local links resolve.
-- Visual inspection completed for all desktop and mobile screens. The mockup set is presented and awaiting final explicit approval.
+- Reference analysis, translation, intentional deviations and the five translation choices are recorded in `docs/DESIGN_DECISIONS.md`.
+- **Operator approval:** explicit **"I approve these mockups."** on 2026-10-31. Phase 7 is authorized for visual implementation only.
 
 ## Design reference and approval status
 
-- **Final visual design:** NOT STARTED.
-- **Approved design direction:** Reference-driven dark emerald command center. The 0.1 hybrid direction was rejected; revision 0.3 applies the approved direction with Satoshi and sharp geometry.
+- **Final visual design:** **APPROVED** (revision 0.3).
+- **Approved design direction:** Reference-driven dark emerald command center with Satoshi, sharp 4px geometry and `#26D18C` emerald.
 - **Design references:** OPERATOR-SUPPLIED — `docs/design-references/incident-reference 1.webp` and `incident-reference 2.webp`. No reference imagery, logos, avatars or copy is embedded in the mockups.
-- **Mockups:** CREATED v0.3 and PRESENTED on 2026-10-31 under `docs/mockups/`; four requested screens with desktop/mobile layouts.
-- **Operator approval:** NOT GRANTED — awaiting the final explicit approval message for the complete mockup direction.
-- **Translation confirmations requested:** mobile top-bar/stacked-card adaptation, dark public landing page, source colour assignments (host green, renter blue, platform cyan), all-dark theme and mono initials instead of avatars.
-- Phase 6 scope, reference analysis, translation, deviations and the approval record are in `docs/DESIGN_DECISIONS.md`; no final styling or UI code has been written.
+- **Mockups:** v0.3 **APPROVED** on 2026-10-31.
+- **Operator approval:** **GRANTED** — "I approve these mockups."
+- **Implementation authorization:** Phase 7 visual implementation only. Business logic, API contracts, database schemas, security and evidence language must not change.
+- Phase 6 scope, reference analysis, translation, deviations and the approval record are in `docs/DESIGN_DECISIONS.md`.
 - Phase 3C, Phase 3D, Phase 3E and Phase 3F did not change frontend styling or visual behaviour.
 - Phase 4/5 connect functional UI and state handling but retain temporary structural styling; final visual design is still not approved or implemented.
 - Phase 4 connects functional UI but keeps temporary structural styling; final visual design is still not approved or implemented.
@@ -756,5 +754,5 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 
 ## Exact next task
 
-**Phase 6 revision 0.3 — Reference-driven mockup final review and explicit approval gate.**
-The new mockups are presented under `docs/mockups/`. Wait for operator feedback, including confirmation or revision of the translation questions in `docs/DESIGN_DECISIONS.md`. Revise only as directed, update the design record, and stop again. Do not implement final CSS, Tailwind styling, component restyling or UI code in `apps/web` until the operator explicitly approves the complete mockup direction.
+**Phase 7 — Implement the approved visual system, verify it, and stop for operator acceptance.**
+Apply the approved Satoshi/4px/emerald design to the existing functional web app without changing business logic, API contracts, database schemas, evidence language or the local-only verifier. Run lint, build and the full E2E suite, verify the deployed Preview, then stop. Do not begin Phase 8.

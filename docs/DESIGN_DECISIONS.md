@@ -1,6 +1,6 @@
 # UI Design Decisions and Operator Approval Record
 
-**Status:** Revision 0.3 reference-driven mockups are presented for final operator approval. The reference-driven direction is approved; revision 0.3 applies the requested typography and sharp-geometry refinements. No final visual implementation is authorized, and no styling or UI code has been applied to `apps/web`.
+**Status:** Revision 0.3 is **APPROVED** by the operator on 2026-10-31. The approved visual direction is authorized for Phase 7 implementation. No business logic, API contract or database schema change is approved by this visual approval.
 
 ## History
 
@@ -8,7 +8,7 @@
 |---|---|---|---|
 | 2026-10-31 | 0.1 | Hybrid: light public pages + dark workspace | **Rejected by operator** |
 | 2026-10-31 | 0.2 | Operator-supplied dark emerald command-center references | Direction approved; typography/geometry refinements requested |
-| 2026-10-31 | 0.3 | Satoshi typeface + sharp 4px control/card geometry | Presented; final approval pending |
+| 2026-10-31 | 0.3 | Satoshi typeface + sharp 4px control/card geometry | **Approved by operator** |
 
 Revision 0.3 supersedes the 0.1 and 0.2 tokens and mockup files. The old hybrid mockups were deleted from `docs/mockups/`.
 
@@ -159,20 +159,20 @@ The mockups are otherwise presented as the translation of the references. Any of
 
 | Screen | Desktop | Mobile | Revision | Status |
 |---|---|---|---|---|
-| Public home `/` | [`mockups/home-desktop.html`](./mockups/home-desktop.html) | [`mockups/home-mobile.html`](./mockups/home-mobile.html) | 0.3 | Presented; final approval pending |
-| Dashboard `/dashboard` | [`mockups/dashboard-desktop.html`](./mockups/dashboard-desktop.html) | [`mockups/dashboard-mobile.html`](./mockups/dashboard-mobile.html) | 0.3 | Presented; final approval pending |
-| Incident timeline `/incidents/[incidentId]` | [`mockups/incident-desktop.html`](./mockups/incident-desktop.html) | [`mockups/incident-mobile.html`](./mockups/incident-mobile.html) | 0.3 | Presented; final approval pending |
-| Local verifier `/verify` | [`mockups/verify-desktop.html`](./mockups/verify-desktop.html) | [`mockups/verify-mobile.html`](./mockups/verify-mobile.html) | 0.3 | Presented; final approval pending |
-| Mockup index | [`mockups/index.html`](./mockups/index.html) | Responsive | 0.3 | Presented; final approval pending |
+| Public home `/` | [`mockups/home-desktop.html`](./mockups/home-desktop.html) | [`mockups/home-mobile.html`](./mockups/home-mobile.html) | 0.3 | **Approved** |
+| Dashboard `/dashboard` | [`mockups/dashboard-desktop.html`](./mockups/dashboard-desktop.html) | [`mockups/dashboard-mobile.html`](./mockups/dashboard-mobile.html) | 0.3 | **Approved** |
+| Incident timeline `/incidents/[incidentId]` | [`mockups/incident-desktop.html`](./mockups/incident-desktop.html) | [`mockups/incident-mobile.html`](./mockups/incident-mobile.html) | 0.3 | **Approved** |
+| Local verifier `/verify` | [`mockups/verify-desktop.html`](./mockups/verify-desktop.html) | [`mockups/verify-mobile.html`](./mockups/verify-mobile.html) | 0.3 | **Approved** |
+| Mockup index | [`mockups/index.html`](./mockups/index.html) | Responsive | 0.3 | **Approved** |
 
 ## Explicit approval record
 
 - **Mockup version presented:** 0.3, 2026-10-31.
 - **Reference assets:** operator-supplied WebP images in `docs/design-references/`.
-- **Design reference approval:** direction approved; revision 0.3 refinements presented for final approval.
-- **Desktop/mobile review:** NOT COMPLETED.
-- **Operator approval message/date:** NOT GRANTED.
-- **Final visual implementation:** NOT AUTHORIZED.
-- **Conditions/comments:** Pending final review of typography and sharp geometry.
+- **Design reference approval:** **APPROVED**. The operator confirmed that Satoshi, the sharp 4px geometry and the refined emerald color match the reference.
+- **Desktop/mobile review:** **COMPLETED**.
+- **Operator approval message/date:** **"I approve these mockups."** — 2026-10-31.
+- **Final visual implementation:** **AUTHORIZED** for Phase 7 only.
+- **Conditions/comments:** The approved direction includes the five documented translation choices (mobile top bar/stacked cards, dark public landing, host green / renter blue / platform cyan, all-dark theme, mono initials). Phase 7 must preserve business logic, API contracts, database schemas, evidence language and the local-only browser verifier.
 
-**Hard stop:** no final UI styling, brand tokens, component restyling or animation implementation until the operator explicitly approves this reference-driven mockup direction. Approval of a mockup is not approval to change business rules, APIs, data models, security or architecture.
+**Approval gate passed.** Phase 7 may implement the approved visual system. Any deviation that changes design intent, product behaviour, data exposure, APIs, security or architecture requires separate operator approval.
