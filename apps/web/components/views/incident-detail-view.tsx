@@ -489,7 +489,7 @@ export function IncidentDetailView({ incidentId }: { incidentId: string }) {
           Timeline
         </h2>
         <p className="text-sm text-slate-600">
-          The API returns the first 50 accepted events in deterministic order. Missing sources are
+          The API returns the latest 50 accepted events in deterministic order. Missing sources are
           shown as gaps, not as normal observations.
         </p>
         {data.timeline.length === 0 ? (

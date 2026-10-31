@@ -585,10 +585,15 @@ export async function registerIncidentRoutes(
         }>(
           `select id, source_key_id, source_type, event_type, sequence, observed_at, received_at,
                   canonical_event, simulation_mode
-             from evidence_events
-            where incident_id = $1
-            order by observed_at asc, source_type asc, source_key_id asc, sequence asc, id asc
-            limit 50`,
+             from (
+               select id, source_key_id, source_type, event_type, sequence, observed_at, received_at,
+                      canonical_event, simulation_mode
+                 from evidence_events
+                where incident_id = $1
+                order by observed_at desc, source_type desc, source_key_id desc, sequence desc, id desc
+                limit 50
+             ) latest
+            order by observed_at asc, source_type asc, source_key_id asc, sequence asc, id asc`,
           [incidentId],
         );
 
