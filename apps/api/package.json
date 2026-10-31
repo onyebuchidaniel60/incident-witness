@@ -10,15 +10,16 @@
     "start": "node dist/server.js",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "pretest": "npm run build --workspace @incident-witness/protocol && npm run build --workspace @incident-witness/db",
+    "pretest": "npm run build --workspace @incident-witness/protocol && npm run build --workspace @incident-witness/correlator && npm run build --workspace @incident-witness/db",
     "test": "vitest run --config vitest.config.ts",
-    "pretest:integration": "npm run build --workspace @incident-witness/protocol && npm run build --workspace @incident-witness/db",
+    "pretest:integration": "npm run build --workspace @incident-witness/protocol && npm run build --workspace @incident-witness/correlator && npm run build --workspace @incident-witness/db",
     "test:integration": "vitest run --config vitest.integration.config.ts"
   },
   "dependencies": {
     "@fastify/cors": "11.3.1",
     "@fastify/helmet": "13.2.0",
     "@fastify/rate-limit": "11.2.1",
+    "@incident-witness/correlator": "0.1.0",
     "@incident-witness/db": "0.1.0",
     "@incident-witness/protocol": "0.1.0",
     "dotenv": "18.0.9",

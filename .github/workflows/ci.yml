@@ -33,6 +33,9 @@ jobs:
       - name: Test protocol golden vectors and cross-runtime verification
         run: npm run test --workspace @incident-witness/protocol
 
+      - name: Test deterministic correlator rules
+        run: npm run test --workspace @incident-witness/correlator
+
       - name: Test API unit and JWT validation
         run: npm run test --workspace @incident-witness/api
 
