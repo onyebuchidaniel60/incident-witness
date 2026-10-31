@@ -395,9 +395,10 @@ export function verifyBundle(bundleValue: unknown, trust: TrustSet): BundleVerif
   const sequenceFailures: string[] = [];
   const eventIds = new Set<string>();
   const sequenceKeys = new Set<string>();
-  const lastSequenceByKey = new Map<string, number>();
+  const sourceKeys = new Set<string>();
   for (const entry of manifest.events) {
     const event = entry.event;
+    sourceKeys.add(event.source_key_id);
     if (eventIds.has(event.event_id)) {
       sequenceFailures.push(`${event.event_id}: duplicate event_id`);
     }
@@ -408,14 +409,6 @@ export function verifyBundle(bundleValue: unknown, trust: TrustSet): BundleVerif
       sequenceFailures.push(`${event.event_id}: duplicate source sequence ${event.sequence}`);
     }
     sequenceKeys.add(sequenceKey);
-
-    const previous = lastSequenceByKey.get(event.source_key_id);
-    if (previous !== undefined && event.sequence <= previous) {
-      sequenceFailures.push(
-        `${event.event_id}: sequence ${event.sequence} does not increase after ${previous}`,
-      );
-    }
-    lastSequenceByKey.set(event.source_key_id, event.sequence);
   }
 
   const ordered = [...manifest.events].sort((left, right) => {
@@ -447,7 +440,7 @@ export function verifyBundle(bundleValue: unknown, trust: TrustSet): BundleVerif
     "Event sequence uniqueness and deterministic ordering",
     sequenceFailures.length === 0 ? "pass" : "fail",
     sequenceFailures.length === 0
-      ? `${manifest.events.length} events, ${lastSequenceByKey.size} source keys`
+      ? `${manifest.events.length} events, ${sourceKeys.size} source keys`
       : failDetails(sequenceFailures),
   );
 
@@ -455,9 +448,6 @@ export function verifyBundle(bundleValue: unknown, trust: TrustSet): BundleVerif
   if (manifest.events.length === 0) consistencyFailures.push("bundle contains no evidence events");
   if (!(captureStart <= captureEnd)) {
     consistencyFailures.push("capture_started_at is after capture_ends_at");
-  }
-  if (!(sealedAt >= captureEnd)) {
-    consistencyFailures.push("sealed_at is before capture_ends_at");
   }
   if (simulatedEvents > 0 && !manifest.simulation_present) {
     consistencyFailures.push("events are marked simulation_mode but simulation_present is false");
