@@ -662,7 +662,15 @@ export async function registerIncidentRoutes(
           );
         }
 
-        const endedAt = new Date();
+        const latestObservation = await client.query<{ latest: Date | null }>(
+          `select max(observed_at) as latest
+             from evidence_events
+            where incident_id = $1`,
+          [incidentId],
+        );
+        const latestObservedAt = latestObservation.rows[0]?.latest?.getTime() ?? 0;
+        const endedAt = new Date(Math.max(Date.now(), latestObservedAt));
+
         await client.query(
           `update incidents set status = 'awaiting_finalize', ended_at = $1 where id = $2`,
           [endedAt, incidentId],

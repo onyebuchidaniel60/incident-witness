@@ -23,17 +23,19 @@ import { ApiError, sendError } from "./errors.js";
 import { startLifecycleSweeper } from "./lifecycle/sweeper.js";
 import { requireAuth } from "./plugins/auth.js";
 import { registerAgentRoutes } from "./routes/agent.js";
+import { registerEvidenceRoutes } from "./routes/evidence.js";
 import { registerHostRoutes } from "./routes/hosts.js";
 import { registerIncidentRoutes } from "./routes/incidents.js";
 import { registerKeyRoutes } from "./routes/keys.js";
 import { registerRenterRoutes } from "./routes/renter.js";
+import { registerSealingRoutes } from "./routes/sealing.js";
 import { NodeDnsResolver, type DnsResolver } from "./services/dns.js";
 import {
   HttpsEndpointChecker,
   type EndpointChecker,
 } from "./services/endpoint.js";
 
-const expectedMigration = "0012_phase3b_enroll_incident_lock";
+const expectedMigration = "0017_phase3c_system_transition_visibility";
 
 export type BuildAppOptions = {
   config?: AppConfig;
@@ -118,6 +120,13 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       done(null, body);
     },
   );
+  app.addContentTypeParser(
+    "application/vnd.incident-witness.event+json",
+    { parseAs: "buffer", bodyLimit: 8 * 1024 },
+    (_request, body, done) => {
+      done(null, body);
+    },
+  );
 
   await app.register(helmet, { contentSecurityPolicy: false });
   await app.register(cors, {
@@ -164,6 +173,26 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
         400,
         "VALIDATION_ERROR",
         "The request did not match the required schema.",
+      );
+    }
+
+    if (error.statusCode === 413) {
+      return sendError(
+        reply,
+        request.id,
+        413,
+        "PAYLOAD_TOO_LARGE",
+        "The request body is too large.",
+      );
+    }
+
+    if (error.statusCode === 415) {
+      return sendError(
+        reply,
+        request.id,
+        415,
+        "VALIDATION_ERROR",
+        "The request content type is not supported.",
       );
     }
 
@@ -301,8 +330,10 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   const routeContext = { config, apiPool, dnsResolver, endpointChecker };
   await registerHostRoutes(app, routeContext);
   await registerAgentRoutes(app, routeContext);
+  await registerEvidenceRoutes(app, routeContext);
   await registerIncidentRoutes(app, routeContext);
   await registerRenterRoutes(app, routeContext);
+  await registerSealingRoutes(app, routeContext);
   await registerKeyRoutes(app, routeContext);
 
   let stopSweeper: (() => void) | undefined;
@@ -312,7 +343,11 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       await assertRuntimeRole(apiPool, "iw_api");
     }
     if (options.enableSweeper !== false) {
-      stopSweeper = startLifecycleSweeper({ pool: apiPool, logger: app.log });
+      stopSweeper = startLifecycleSweeper({
+        pool: apiPool,
+        config,
+        logger: app.log,
+      });
     }
   });
 
