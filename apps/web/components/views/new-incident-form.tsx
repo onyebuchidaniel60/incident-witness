@@ -65,7 +65,7 @@ export function NewIncidentForm() {
           A session requires a host whose agent key is active and whose operational presence was
           received within the last 60 seconds. Enroll or recover a host first.
         </p>
-        <Link href="/hosts" className="mt-3 inline-block font-medium underline">
+        <Link href="/hosts" className="iw-link mt-3 inline-block text-[10px]">
           Manage hosts
         </Link>
       </EmptyState>
@@ -73,12 +73,9 @@ export function NewIncidentForm() {
   }
 
   return (
-    <form
-      onSubmit={submit}
-      className="max-w-xl space-y-5 rounded-lg border border-slate-200 bg-white p-5"
-    >
+    <form onSubmit={submit} className="iw-panel max-w-2xl space-y-5 p-5">
       <div>
-        <label htmlFor="hostId" className="block text-sm font-medium text-slate-800">
+        <label htmlFor="hostId" className="iw-label">
           Host
         </label>
         <select
@@ -88,7 +85,7 @@ export function NewIncidentForm() {
           value={selectedHostId}
           onChange={(event) => setHostId(event.target.value)}
           disabled={busy}
-          className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 disabled:bg-slate-100"
+          className="iw-select mt-1.5"
         >
           <option value="" disabled>
             Select an active host
@@ -99,13 +96,11 @@ export function NewIncidentForm() {
             </option>
           ))}
         </select>
-        <p className="mt-1 text-sm text-slate-600">
-          Agent presence older than 60 seconds will be rejected by the API.
-        </p>
+        <p className="iw-help">Agent presence older than 60 seconds will be rejected by the API.</p>
       </div>
 
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-slate-800">
+        <label htmlFor="title" className="iw-label">
           Session title
         </label>
         <input
@@ -116,15 +111,15 @@ export function NewIncidentForm() {
           value={title}
           onChange={(event) => setTitle(event.target.value)}
           disabled={busy}
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 disabled:bg-slate-100"
+          className="iw-input mt-1.5"
         />
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="iw-help">
           A private label. Do not include customer data, prompts, model content or credentials.
         </p>
       </div>
 
       <div>
-        <label htmlFor="durationMinutes" className="block text-sm font-medium text-slate-800">
+        <label htmlFor="durationMinutes" className="iw-label">
           Capture duration (minutes)
         </label>
         <input
@@ -137,15 +132,15 @@ export function NewIncidentForm() {
           value={durationMinutes}
           onChange={(event) => setDurationMinutes(Number(event.target.value))}
           disabled={busy}
-          className="mt-1 block w-32 rounded-md border border-slate-300 px-3 py-2 disabled:bg-slate-100"
+          className="iw-input mt-1.5 max-w-32"
         />
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="iw-help">
           Allowed range 2–240 minutes. Default 30. Monitoring starts immediately.
         </p>
       </div>
 
       <div>
-        <label htmlFor="workloadRef" className="block text-sm font-medium text-slate-800">
+        <label htmlFor="workloadRef" className="iw-label">
           Workload reference (optional)
         </label>
         <input
@@ -155,19 +150,16 @@ export function NewIncidentForm() {
           value={workloadRef}
           onChange={(event) => setWorkloadRef(event.target.value)}
           disabled={busy}
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 disabled:bg-slate-100"
+          className="iw-input mt-1.5"
         />
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="iw-help">
           An opaque reference only. Never a job payload, secret or model input/output.
         </p>
       </div>
 
       {demoEnabled ? (
-        <div className="rounded-md border border-amber-300 bg-amber-50 p-3">
-          <label
-            htmlFor="demoMode"
-            className="flex items-start gap-2 text-sm font-medium text-amber-950"
-          >
+        <div className="iw-notice iw-notice-warning">
+          <label htmlFor="demoMode" className="flex items-start gap-2 text-[10px] font-medium">
             <input
               id="demoMode"
               name="demoMode"
@@ -175,7 +167,7 @@ export function NewIncidentForm() {
               checked={demoMode}
               onChange={(event) => setDemoMode(event.target.checked)}
               disabled={busy}
-              className="mt-1"
+              className="mt-0.5 accent-[#26d18c]"
             />
             <span>
               Demo/simulation session. Synthetic observations are permanently labelled and the
@@ -186,10 +178,7 @@ export function NewIncidentForm() {
       ) : null}
 
       {error ? (
-        <p
-          role="alert"
-          className="rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-950"
-        >
+        <p role="alert" className="iw-notice iw-notice-danger text-[10px] leading-5">
           {error}
         </p>
       ) : null}
@@ -197,7 +186,7 @@ export function NewIncidentForm() {
       <button
         type="submit"
         disabled={busy || !selectedHostId}
-        className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+        className="iw-btn iw-btn-primary"
       >
         {busy ? "Starting session…" : "Start evidence session"}
       </button>

@@ -33,12 +33,9 @@ export function NewHostForm() {
   }
 
   return (
-    <form
-      onSubmit={submit}
-      className="max-w-xl space-y-5 rounded-lg border border-slate-200 bg-white p-5"
-    >
+    <form onSubmit={submit} className="iw-panel max-w-2xl space-y-5 p-5">
       <div>
-        <label htmlFor="alias" className="block text-sm font-medium text-slate-800">
+        <label htmlFor="alias" className="iw-label">
           Host alias
         </label>
         <input
@@ -49,13 +46,13 @@ export function NewHostForm() {
           value={alias}
           onChange={(event) => setAlias(event.target.value)}
           disabled={busy}
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 disabled:bg-slate-100"
+          className="iw-input mt-1.5"
         />
-        <p className="mt-1 text-sm text-slate-600">A private label, 1–80 characters.</p>
+        <p className="iw-help">A private label, 1–80 characters.</p>
       </div>
 
       <div>
-        <label htmlFor="hostname" className="block text-sm font-medium text-slate-800">
+        <label htmlFor="hostname" className="iw-label">
           Public hostname
         </label>
         <input
@@ -67,11 +64,11 @@ export function NewHostForm() {
           value={hostname}
           onChange={(event) => setHostname(event.target.value)}
           disabled={busy}
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 disabled:bg-slate-100"
+          className="iw-input mt-1.5"
         />
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="iw-help">
           A public DNS name without scheme, port or path. It must serve
-          <code className="mx-1 break-all font-mono text-xs">
+          <code className="mx-1 break-all font-mono text-[9px] text-iw-ink-soft">
             https://&lt;hostname&gt;/.well-known/incident-witness/health
           </code>
           with the exact expected response.
@@ -79,19 +76,12 @@ export function NewHostForm() {
       </div>
 
       {error ? (
-        <p
-          role="alert"
-          className="rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-950"
-        >
+        <p role="alert" className="iw-notice iw-notice-danger text-[10px] leading-5">
           {error}
         </p>
       ) : null}
 
-      <button
-        type="submit"
-        disabled={busy}
-        className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
-      >
+      <button type="submit" disabled={busy} className="iw-btn iw-btn-primary">
         {busy ? "Creating host…" : "Create host"}
       </button>
     </form>

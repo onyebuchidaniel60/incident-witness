@@ -3,11 +3,13 @@
 import Link from "next/link";
 
 import { EmptyState, ErrorState, LoadingState, StatusPill } from "@/components/async-state";
+import { Icon } from "@/components/ui/icon";
 import type { HostSummary, IncidentSummary } from "@/lib/api/types";
 import { useApiResource } from "@/lib/api/use-api-resource";
 import {
   assessmentText,
   formatTimestamp,
+  formatTimestampShort,
   incidentStatusLabel,
   incidentStatusTone,
 } from "@/lib/format";
@@ -18,19 +20,17 @@ export function IncidentsView() {
   const hostNames = new Map(hosts.data?.map((host) => [host.id, host.alias]) ?? []);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap gap-3 text-sm">
-        <Link
-          href="/incidents/new"
-          className="rounded-md bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-700"
-        >
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-2">
+        <Link href="/incidents/new" className="iw-btn iw-btn-primary iw-btn-sm">
+          <Icon name="plus" size="sm" />
           Create evidence session
         </Link>
         <button
           type="button"
           onClick={incidents.reload}
           disabled={incidents.refreshing}
-          className="rounded-md border border-slate-300 bg-white px-4 py-2 font-medium text-slate-900 hover:bg-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+          className="iw-btn iw-btn-secondary iw-btn-sm"
         >
           {incidents.refreshing ? "Refreshing…" : "Refresh"}
         </button>
@@ -50,83 +50,116 @@ export function IncidentsView() {
             Create a bounded session before the operating window you want to observe. Events before
             session creation cannot be reconstructed.
           </p>
-          <Link href="/incidents/new" className="mt-3 inline-block font-medium underline">
+          <Link href="/incidents/new" className="iw-link mt-3 inline-block text-[10px]">
             Create your first session
           </Link>
         </EmptyState>
       ) : null}
 
       {incidents.data && incidents.data.length > 0 ? (
-        <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
-          <table className="min-w-full text-left text-sm">
-            <thead className="bg-slate-100 text-slate-700">
-              <tr>
-                <th scope="col" className="px-4 py-3 font-semibold">
-                  Session
-                </th>
-                <th scope="col" className="px-4 py-3 font-semibold">
-                  Host
-                </th>
-                <th scope="col" className="px-4 py-3 font-semibold">
-                  Status
-                </th>
-                <th scope="col" className="px-4 py-3 font-semibold">
-                  Capture window
-                </th>
-                <th scope="col" className="px-4 py-3 font-semibold">
-                  Evidence
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200">
-              {incidents.data.map((incident) => (
-                <tr key={incident.id} className="align-top">
-                  <td className="px-4 py-3">
-                    <Link href={`/incidents/${incident.id}`} className="font-semibold underline">
+        <>
+          <div className="hidden overflow-hidden rounded-[4px] border border-iw-border md:block">
+            <table className="iw-table">
+              <thead>
+                <tr>
+                  <th scope="col">Session</th>
+                  <th scope="col">Host</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Capture window</th>
+                  <th scope="col">Evidence</th>
+                </tr>
+              </thead>
+              <tbody>
+                {incidents.data.map((incident) => (
+                  <tr key={incident.id}>
+                    <td>
+                      <Link
+                        href={`/incidents/${incident.id}`}
+                        className="font-medium text-iw-ink hover:text-iw-green-bright"
+                      >
+                        {incident.title}
+                      </Link>
+                      {incident.demoMode || incident.simulationPresent ? (
+                        <p className="mt-1">
+                          <span className="iw-chip iw-chip-warning">Labelled demo / simulated evidence</span>
+                        </p>
+                      ) : null}
+                      <p className="mt-1 font-mono text-[8px] text-iw-faint">
+                        Created {formatTimestamp(incident.createdAt)}
+                      </p>
+                    </td>
+                    <td className="font-mono text-[9px]">
+                      {hostNames.get(incident.hostId) ?? incident.hostId}
+                    </td>
+                    <td>
+                      <StatusPill
+                        label={incidentStatusLabel(incident.status)}
+                        tone={incidentStatusTone(incident.status)}
+                      />
+                    </td>
+                    <td className="whitespace-nowrap font-mono text-[9px] text-iw-faint">
+                      {formatTimestampShort(incident.captureStartedAt)}
+                      <br />
+                      <span className="text-[8px]">to {formatTimestampShort(incident.captureEndsAt)}</span>
+                    </td>
+                    <td>
+                      <span className="font-mono text-[9px]">{incident.acceptedEventCount} events</span>
+                      {incident.status === "sealed" ? (
+                        <>
+                          <p className="mt-1 font-mono text-[8px] text-iw-muted">
+                            {incident.assessment?.code ?? "UNKNOWN"} /{" "}
+                            {incident.assessment?.evidenceGrade ?? "INSUFFICIENT"}
+                          </p>
+                          <p className="mt-1 text-[8px] leading-4 text-iw-faint">
+                            {assessmentText(incident.assessment?.code ?? null)}
+                          </p>
+                        </>
+                      ) : null}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="space-y-2 md:hidden">
+            {incidents.data.map((incident) => (
+              <div key={incident.id} className="iw-panel p-3.5">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <Link
+                      href={`/incidents/${incident.id}`}
+                      className="text-[11px] font-medium text-iw-ink hover:text-iw-green-bright"
+                    >
                       {incident.title}
                     </Link>
-                    {incident.demoMode || incident.simulationPresent ? (
-                      <p className="mt-1 text-xs font-semibold text-amber-800">
-                        Labelled demo / simulated evidence
-                      </p>
-                    ) : null}
-                    <p className="mt-1 text-xs text-slate-500">
-                      Created {formatTimestamp(incident.createdAt)}
+                    <p className="mt-1 font-mono text-[8px] text-iw-faint">
+                      {hostNames.get(incident.hostId) ?? incident.hostId}
                     </p>
-                  </td>
-                  <td className="px-4 py-3 text-slate-700">
-                    {hostNames.get(incident.hostId) ?? incident.hostId}
-                  </td>
-                  <td className="px-4 py-3">
-                    <StatusPill
-                      label={incidentStatusLabel(incident.status)}
-                      tone={incidentStatusTone(incident.status)}
-                    />
-                  </td>
-                  <td className="px-4 py-3 text-slate-700">
-                    {formatTimestamp(incident.captureStartedAt)}
-                    <br />
-                    <span className="text-xs">to {formatTimestamp(incident.captureEndsAt)}</span>
-                  </td>
-                  <td className="px-4 py-3 text-slate-700">
-                    {incident.acceptedEventCount} events
-                    {incident.status === "sealed" ? (
-                      <p className="mt-1 text-xs">
-                        {incident.assessment?.code ?? "UNKNOWN"} /{" "}
-                        {incident.assessment?.evidenceGrade ?? "INSUFFICIENT"}
-                      </p>
-                    ) : null}
-                    {incident.status === "sealed" ? (
-                      <p className="mt-1 text-xs">
-                        {assessmentText(incident.assessment?.code ?? null)}
-                      </p>
-                    ) : null}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </div>
+                  <StatusPill
+                    label={incidentStatusLabel(incident.status)}
+                    tone={incidentStatusTone(incident.status)}
+                  />
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                  {incident.demoMode || incident.simulationPresent ? (
+                    <span className="iw-chip iw-chip-warning">Simulated</span>
+                  ) : null}
+                  <span className="font-mono text-[8px] text-iw-faint">
+                    {formatTimestampShort(incident.captureStartedAt)}
+                  </span>
+                </div>
+                <p className="mt-2 font-mono text-[8px] text-iw-muted">
+                  {incident.acceptedEventCount} events
+                  {incident.status === "sealed"
+                    ? ` · ${incident.assessment?.code ?? "UNKNOWN"}`
+                    : ""}
+                </p>
+              </div>
+            ))}
+          </div>
+        </>
       ) : null}
     </div>
   );

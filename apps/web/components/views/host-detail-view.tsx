@@ -12,6 +12,7 @@ import {
   LoadingState,
   StatusPill,
 } from "@/components/async-state";
+import { Icon } from "@/components/ui/icon";
 import { ApiError, apiRequest } from "@/lib/api/client";
 import type { ChallengeResponse, EnrollmentCodeResponse, HostDetail } from "@/lib/api/types";
 import { useApiResource } from "@/lib/api/use-api-resource";
@@ -128,13 +129,13 @@ export function HostDetailView({ hostId }: { hostId: string }) {
   if (host.error) {
     const notFound = host.error instanceof ApiError && host.error.status === 404;
     return (
-      <div className="space-y-4">
+      <div className="space-y-3">
         <ErrorState
           error={host.error}
           onRetry={notFound ? undefined : host.reload}
           title={notFound ? "Host not found." : "The host could not be loaded."}
         />
-        <Link href="/hosts" className="text-sm font-medium underline">
+        <Link href="/hosts" className="iw-link text-[10px]">
           Back to hosts
         </Link>
       </div>
@@ -148,10 +149,21 @@ export function HostDetailView({ hostId }: { hostId: string }) {
   const currentChallenge = challenge ?? null;
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-wrap items-center gap-3">
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-2">
         <StatusPill label={hostStatusLabel(data.status)} tone={hostStatusTone(data.status)} />
-        <span className="text-sm text-slate-600">Host ID: {data.id}</span>
+        <span className="font-mono text-[9px] text-iw-faint">Host ID: {data.id}</span>
+      </div>
+
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="text-2xl leading-tight text-iw-ink">{data.alias}</h2>
+          <p className="mt-1 break-all font-mono text-[9px] text-iw-faint">{data.hostname}</p>
+        </div>
+        <Link href="/hosts" className="iw-btn iw-btn-ghost iw-btn-sm">
+          <Icon name="arrow-left" size="sm" />
+          Back to hosts
+        </Link>
       </div>
 
       {message ? (
@@ -165,215 +177,262 @@ export function HostDetailView({ hostId }: { hostId: string }) {
         </InlineNotice>
       ) : null}
 
-      <section
-        aria-labelledby="host-metadata"
-        className="rounded-lg border border-slate-200 bg-white p-5"
-      >
-        <h2 id="host-metadata" className="text-lg font-semibold text-slate-950">
-          Host metadata
-        </h2>
-        <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+      <section className="iw-panel" aria-labelledby="host-metadata">
+        <div className="iw-panel-header">
           <div>
-            <dt className="font-medium text-slate-600">Alias</dt>
-            <dd className="text-slate-950">{data.alias}</dd>
+            <h2 id="host-metadata" className="text-sm font-semibold text-iw-ink">
+              Host metadata
+            </h2>
+            <p className="mt-1 text-[10px] text-iw-faint">Endpoint and agent identity</p>
           </div>
-          <div>
-            <dt className="font-medium text-slate-600">Hostname</dt>
-            <dd className="break-all text-slate-950">{data.hostname}</dd>
-          </div>
-          <div>
-            <dt className="font-medium text-slate-600">Health path</dt>
-            <dd className="break-all font-mono text-xs text-slate-950">{data.endpoint.path}</dd>
-          </div>
-          <div>
-            <dt className="font-medium text-slate-600">Endpoint verified</dt>
-            <dd className="text-slate-950">{formatTimestamp(data.endpointVerifiedAt)}</dd>
-          </div>
-          <div>
-            <dt className="font-medium text-slate-600">Last agent presence</dt>
-            <dd className="text-slate-950">{formatTimestamp(data.lastAgentSeenAt)}</dd>
-          </div>
-          <div>
-            <dt className="font-medium text-slate-600">Agent version</dt>
-            <dd className="text-slate-950">{data.agentVersion ?? "Not reported"}</dd>
-          </div>
-        </dl>
-      </section>
-
-      <section
-        aria-labelledby="endpoint-proof"
-        className="rounded-lg border border-slate-200 bg-white p-5"
-      >
-        <h2 id="endpoint-proof" className="text-lg font-semibold text-slate-950">
-          DNS ownership and endpoint proof
-        </h2>
-        {endpointVerified ? (
-          <p className="mt-2 text-sm leading-6 text-slate-700">
-            This hostname was verified at {formatTimestamp(data.endpointVerifiedAt)}. The DNS
-            challenge proves configuration control, not hardware identity or sensor truth.
-          </p>
-        ) : (
-          <div className="mt-2 space-y-4 text-sm leading-6 text-slate-700">
-            <p>
-              Create a challenge, add the TXT record at your DNS provider, then verify. The endpoint
-              must serve the fixed health path over HTTPS on port 443 with the exact expected body.
-            </p>
-            {data.endpointChallenge && !challenge ? (
-              <p>
-                A previous challenge exists for{" "}
-                <code className="font-mono">{data.endpointChallenge.dnsRecordName}</code> until{" "}
-                {formatTimestamp(data.endpointChallenge.expiresAt)}. Its secret value is not
-                recoverable; create a new challenge if you no longer have it.
-              </p>
-            ) : null}
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => void createChallenge()}
-                disabled={busy !== null || archived}
-                className="rounded-md bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
-              >
-                {busy === "challenge" ? "Issuing challenge…" : "Create DNS challenge"}
-              </button>
-              <button
-                type="button"
-                onClick={() => void verifyChallenge()}
-                disabled={busy !== null || archived || !currentChallenge}
-                className="rounded-md border border-slate-300 bg-white px-4 py-2 font-medium text-slate-900 hover:bg-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100"
-              >
-                {busy === "verify" ? "Verifying…" : "Verify DNS"}
-              </button>
+          <span className="iw-chip iw-chip-neutral">{data.endpoint.path}</span>
+        </div>
+        <div className="iw-panel-body">
+          <dl className="grid gap-x-6 gap-y-3 text-[10px] sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <dt className="text-iw-faint">Alias</dt>
+              <dd className="mt-0.5 text-iw-ink-soft">{data.alias}</dd>
             </div>
-            {currentChallenge ? (
-              <div className="rounded-md border border-slate-300 bg-slate-50 p-4">
-                <p className="font-semibold text-slate-950">DNS TXT record</p>
-                <dl className="mt-2 space-y-2">
-                  <div>
-                    <dt className="font-medium text-slate-600">Name</dt>
-                    <dd data-testid="dns-record-name" className="break-all font-mono text-xs">
-                      {currentChallenge.dnsRecordName}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-slate-600">Value</dt>
-                    <dd data-testid="dns-record-value" className="break-all font-mono text-xs">
-                      {currentChallenge.dnsRecordValue}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-slate-600">Expires</dt>
-                    <dd>{formatTimestamp(currentChallenge.expiresAt)}</dd>
-                  </div>
-                </dl>
-                <div className="mt-3">
-                  <CopyButton value={currentChallenge.dnsRecordValue} label="Copy TXT value" />
-                </div>
-              </div>
-            ) : null}
-          </div>
-        )}
+            <div>
+              <dt className="text-iw-faint">Hostname</dt>
+              <dd className="mt-0.5 break-all font-mono text-iw-ink-soft">{data.hostname}</dd>
+            </div>
+            <div>
+              <dt className="text-iw-faint">Health path</dt>
+              <dd className="mt-0.5 break-all font-mono text-iw-ink-soft">{data.endpoint.path}</dd>
+            </div>
+            <div>
+              <dt className="text-iw-faint">Endpoint verified</dt>
+              <dd className="mt-0.5 font-mono text-iw-ink-soft">
+                {formatTimestamp(data.endpointVerifiedAt)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-iw-faint">Last agent presence</dt>
+              <dd className="mt-0.5 font-mono text-iw-ink-soft">
+                {formatTimestamp(data.lastAgentSeenAt)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-iw-faint">Agent version</dt>
+              <dd className="mt-0.5 font-mono text-iw-ink-soft">
+                {data.agentVersion ?? "Not reported"}
+              </dd>
+            </div>
+          </dl>
+        </div>
       </section>
 
-      <section
-        aria-labelledby="agent-enrollment"
-        className="rounded-lg border border-slate-200 bg-white p-5"
-      >
-        <h2 id="agent-enrollment" className="text-lg font-semibold text-slate-950">
-          Agent enrollment
-        </h2>
-        {data.sourceKey ? (
-          <div className="mt-2 space-y-3 text-sm leading-6 text-slate-700">
-            <p>
-              Source key <code className="font-mono text-xs">{data.sourceKey.id}</code> is{" "}
-              <strong>{data.sourceKey.status}</strong>. Last key presence:{" "}
-              {formatTimestamp(data.sourceKey.lastSeenAt)}.
+      <section className="iw-panel" aria-labelledby="endpoint-proof">
+        <div className="iw-panel-header">
+          <div>
+            <h2 id="endpoint-proof" className="text-sm font-semibold text-iw-ink">
+              DNS ownership and endpoint proof
+            </h2>
+            <p className="mt-1 text-[10px] text-iw-faint">
+              Prove configuration control before enrollment
             </p>
-            {data.sourceKey.status === "active" && !archived ? (
+          </div>
+          {endpointVerified ? (
+            <span className="iw-chip iw-chip-success">Endpoint verified</span>
+          ) : (
+            <span className="iw-chip iw-chip-warning">Verification required</span>
+          )}
+        </div>
+        <div className="iw-panel-body">
+          {endpointVerified ? (
+            <p className="text-[10px] leading-5 text-iw-muted">
+              This hostname was verified at {formatTimestamp(data.endpointVerifiedAt)}. The DNS
+              challenge proves configuration control, not hardware identity or sensor truth.
+            </p>
+          ) : (
+            <div className="space-y-4 text-[10px] leading-5 text-iw-muted">
+              <p>
+                Create a challenge, add the TXT record at your DNS provider, then verify. The
+                endpoint must serve the fixed health path over HTTPS on port 443 with the exact
+                expected body.
+              </p>
+              {data.endpointChallenge && !challenge ? (
+                <p>
+                  A previous challenge exists for{" "}
+                  <code className="font-mono text-[9px] text-iw-ink-soft">
+                    {data.endpointChallenge.dnsRecordName}
+                  </code>{" "}
+                  until {formatTimestamp(data.endpointChallenge.expiresAt)}. Its secret value is not
+                  recoverable; create a new challenge if you no longer have it.
+                </p>
+              ) : null}
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => void createChallenge()}
+                  disabled={busy !== null || archived}
+                  className="iw-btn iw-btn-primary iw-btn-sm"
+                >
+                  {busy === "challenge" ? "Issuing challenge…" : "Create DNS challenge"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void verifyChallenge()}
+                  disabled={busy !== null || archived || !currentChallenge}
+                  className="iw-btn iw-btn-secondary iw-btn-sm"
+                >
+                  {busy === "verify" ? "Verifying…" : "Verify DNS"}
+                </button>
+              </div>
+              {currentChallenge ? (
+                <div className="rounded-[4px] border border-iw-border bg-white/[0.025] p-3">
+                  <p className="font-semibold text-iw-ink">DNS TXT record</p>
+                  <dl className="mt-2 space-y-2">
+                    <div>
+                      <dt className="text-iw-faint">Name</dt>
+                      <dd
+                        data-testid="dns-record-name"
+                        className="break-all font-mono text-[9px] text-iw-ink-soft"
+                      >
+                        {currentChallenge.dnsRecordName}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-iw-faint">Value</dt>
+                      <dd
+                        data-testid="dns-record-value"
+                        className="break-all font-mono text-[9px] text-iw-ink-soft"
+                      >
+                        {currentChallenge.dnsRecordValue}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-iw-faint">Expires</dt>
+                      <dd className="font-mono text-[9px] text-iw-ink-soft">
+                        {formatTimestamp(currentChallenge.expiresAt)}
+                      </dd>
+                    </div>
+                  </dl>
+                  <div className="mt-3">
+                    <CopyButton value={currentChallenge.dnsRecordValue} label="Copy TXT value" />
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="iw-panel" aria-labelledby="agent-enrollment">
+        <div className="iw-panel-header">
+          <div>
+            <h2 id="agent-enrollment" className="text-sm font-semibold text-iw-ink">
+              Agent enrollment
+            </h2>
+            <p className="mt-1 text-[10px] text-iw-faint">
+              One-time code · single use · 10 minutes
+            </p>
+          </div>
+          {data.sourceKey ? (
+            <span className={`iw-chip ${data.sourceKey.status === "active" ? "iw-chip-success" : "iw-chip-neutral"}`}>
+              {data.sourceKey.status}
+            </span>
+          ) : (
+            <span className="iw-chip iw-chip-warning">Pending enrollment</span>
+          )}
+        </div>
+        <div className="iw-panel-body">
+          {data.sourceKey ? (
+            <div className="space-y-3 text-[10px] leading-5 text-iw-muted">
+              <p>
+                Source key{" "}
+                <code className="font-mono text-[9px] text-iw-ink-soft">{data.sourceKey.id}</code>{" "}
+                is <strong className="text-iw-ink-soft">{data.sourceKey.status}</strong>. Last key
+                presence: {formatTimestamp(data.sourceKey.lastSeenAt)}.
+              </p>
+              {data.sourceKey.status === "active" && !archived ? (
+                <ConfirmAction
+                  label="Revoke host key"
+                  confirmLabel="Revoke key"
+                  description="Revocation prevents future signed events from this key. Historic signatures remain verifiable. A new enrollment will be required."
+                  onConfirm={() => void revokeKey(data.sourceKey!.id)}
+                  busy={busy === "revoke"}
+                  disabled={busy !== null}
+                  destructive
+                />
+              ) : null}
+            </div>
+          ) : data.status === "pending_enrollment" ? (
+            <div className="space-y-4 text-[10px] leading-5 text-iw-muted">
+              <p>
+                Issue a one-time enrollment code, paste it into the host agent on the Linux machine,
+                and keep the resulting credential local. The code expires after 10 minutes.
+              </p>
+              <button
+                type="button"
+                onClick={() => void issueEnrollmentCode()}
+                disabled={busy !== null}
+                className="iw-btn iw-btn-primary iw-btn-sm"
+              >
+                {busy === "enrollment" ? "Issuing code…" : "Issue enrollment code"}
+              </button>
+              {enrollment ? (
+                <div className="iw-notice iw-notice-warning flex-col gap-2">
+                  <p className="font-semibold">One-time enrollment code</p>
+                  <p
+                    data-testid="enrollment-code"
+                    className="break-all font-mono text-[10px]"
+                  >
+                    {enrollment.enrollmentCode}
+                  </p>
+                  <p>Expires: {formatTimestamp(enrollment.expiresAt)}</p>
+                  <p>
+                    This value is not stored and cannot be recovered. If it is lost, revoke/replace
+                    it.
+                  </p>
+                  <CopyButton value={enrollment.enrollmentCode} label="Copy enrollment code" />
+                  <p>{enrollment.installInstructions}</p>
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <p className="text-[10px] leading-5 text-iw-muted">
+              {data.status === "pending_endpoint"
+                ? "Verify the endpoint before issuing an agent enrollment code."
+                : "No agent source key is registered for this host."}
+            </p>
+          )}
+        </div>
+      </section>
+
+      <section className="iw-panel" aria-labelledby="host-archive">
+        <div className="iw-panel-header">
+          <div>
+            <h2 id="host-archive" className="text-sm font-semibold text-iw-ink">
+              Archive host
+            </h2>
+            <p className="mt-1 text-[10px] text-iw-faint">Terminal lifecycle action</p>
+          </div>
+        </div>
+        <div className="iw-panel-body">
+          <p className="max-w-3xl text-[10px] leading-5 text-iw-muted">
+            Archiving is terminal for this host record in v1. It prevents new sessions, revokes
+            active host credentials and unused enrollment tokens, and preserves existing sealed
+            evidence.
+          </p>
+          {archived ? (
+            <p className="mt-3 text-[10px] font-medium text-iw-ink-soft">This host is archived.</p>
+          ) : (
+            <div className="mt-3">
               <ConfirmAction
-                label="Revoke host key"
-                confirmLabel="Revoke key"
-                description="Revocation prevents future signed events from this key. Historic signatures remain verifiable. A new enrollment will be required."
-                onConfirm={() => void revokeKey(data.sourceKey!.id)}
-                busy={busy === "revoke"}
+                label="Archive host"
+                confirmLabel="Archive host"
+                description="Archive this host record? This cannot be undone in v1. End any active session first."
+                onConfirm={() => void archiveHost()}
+                busy={busy === "archive"}
                 disabled={busy !== null}
                 destructive
               />
-            ) : null}
-          </div>
-        ) : data.status === "pending_enrollment" ? (
-          <div className="mt-2 space-y-4 text-sm leading-6 text-slate-700">
-            <p>
-              Issue a one-time enrollment code, paste it into the host agent on the Linux machine,
-              and keep the resulting credential local. The code expires after 10 minutes.
-            </p>
-            <button
-              type="button"
-              onClick={() => void issueEnrollmentCode()}
-              disabled={busy !== null}
-              className="rounded-md bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
-            >
-              {busy === "enrollment" ? "Issuing code…" : "Issue enrollment code"}
-            </button>
-            {enrollment ? (
-              <div className="rounded-md border border-amber-300 bg-amber-50 p-4 text-amber-950">
-                <p className="font-semibold">One-time enrollment code</p>
-                <p data-testid="enrollment-code" className="mt-2 break-all font-mono text-xs">
-                  {enrollment.enrollmentCode}
-                </p>
-                <p className="mt-2">Expires: {formatTimestamp(enrollment.expiresAt)}</p>
-                <p className="mt-2">
-                  This value is not stored and cannot be recovered. If it is lost, revoke/replace
-                  it.
-                </p>
-                <div className="mt-3">
-                  <CopyButton value={enrollment.enrollmentCode} label="Copy enrollment code" />
-                </div>
-                <p className="mt-3 text-sm">{enrollment.installInstructions}</p>
-              </div>
-            ) : null}
-          </div>
-        ) : (
-          <p className="mt-2 text-sm leading-6 text-slate-700">
-            {data.status === "pending_endpoint"
-              ? "Verify the endpoint before issuing an agent enrollment code."
-              : "No agent source key is registered for this host."}
-          </p>
-        )}
+            </div>
+          )}
+        </div>
       </section>
-
-      <section
-        aria-labelledby="host-archive"
-        className="rounded-lg border border-slate-200 bg-white p-5"
-      >
-        <h2 id="host-archive" className="text-lg font-semibold text-slate-950">
-          Archive host
-        </h2>
-        <p className="mt-2 text-sm leading-6 text-slate-700">
-          Archiving is terminal for this host record in v1. It prevents new sessions, revokes active
-          host credentials and unused enrollment tokens, and preserves existing sealed evidence.
-        </p>
-        {archived ? (
-          <p className="mt-3 text-sm font-medium text-slate-800">This host is archived.</p>
-        ) : (
-          <div className="mt-3">
-            <ConfirmAction
-              label="Archive host"
-              confirmLabel="Archive host"
-              description="Archive this host record? This cannot be undone in v1. End any active session first."
-              onConfirm={() => void archiveHost()}
-              busy={busy === "archive"}
-              disabled={busy !== null}
-              destructive
-            />
-          </div>
-        )}
-      </section>
-
-      <p className="text-sm">
-        <Link href="/hosts" className="font-medium underline">
-          Back to hosts
-        </Link>
-      </p>
     </div>
   );
 }

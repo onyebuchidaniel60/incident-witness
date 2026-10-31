@@ -14,6 +14,20 @@ export function formatTimestamp(value: string | null | undefined): string {
   });
 }
 
+export function formatTimestampShort(value: string | null | undefined): string {
+  if (!value) return "Not recorded";
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return "Unrecognised timestamp";
+  return `${new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+    timeZone: "UTC",
+  }).format(date)} UTC`;
+}
+
 export function hostStatusLabel(status: HostStatus): string {
   switch (status) {
     case "pending_endpoint":

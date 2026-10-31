@@ -16,8 +16,8 @@ export default function NewIncidentPage() {
         description="Select an active host and a bounded capture window. Monitoring begins immediately; events before session creation cannot be reconstructed."
       />
       <NewIncidentForm />
-      <p className="text-sm">
-        <Link href="/incidents" className="font-medium underline">
+      <p className="text-[10px]">
+        <Link href="/incidents" className="iw-link">
           Back to evidence sessions
         </Link>
       </p>

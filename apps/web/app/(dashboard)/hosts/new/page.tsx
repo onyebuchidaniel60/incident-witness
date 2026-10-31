@@ -16,8 +16,8 @@ export default function NewHostPage() {
         description="Create the host record first. The next step issues a one-time DNS TXT challenge and verifies the fixed HTTPS health endpoint before an agent enrollment code can be issued."
       />
       <NewHostForm />
-      <p className="text-sm">
-        <Link href="/hosts" className="font-medium underline">
+      <p className="text-[10px]">
+        <Link href="/hosts" className="iw-link">
           Back to hosts
         </Link>
       </p>
