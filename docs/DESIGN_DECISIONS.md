@@ -1,15 +1,24 @@
 # UI Design Decisions and Operator Approval Record
 
-**Status:** Revision 0.2 reference-driven mockups are presented for operator approval. The previous hybrid mockups were rejected. No final visual implementation is authorized, and no styling or UI code has been applied to `apps/web`.
+**Status:** Revision 0.3 reference-driven mockups are presented for final operator approval. The reference-driven direction is approved; revision 0.3 applies the requested typography and sharp-geometry refinements. No final visual implementation is authorized, and no styling or UI code has been applied to `apps/web`.
 
 ## History
 
 | Date | Version | Direction | Result |
 |---|---|---|---|
 | 2026-10-31 | 0.1 | Hybrid: light public pages + dark workspace | **Rejected by operator** |
-| 2026-10-31 | 0.2 | Operator-supplied dark emerald command-center references | Presented; approval pending |
+| 2026-10-31 | 0.2 | Operator-supplied dark emerald command-center references | Direction approved; typography/geometry refinements requested |
+| 2026-10-31 | 0.3 | Satoshi typeface + sharp 4px control/card geometry | Presented; final approval pending |
 
-Revision 0.2 supersedes the 0.1 tokens, layouts and mockup files. The old hybrid mockups were deleted from `docs/mockups/`.
+Revision 0.3 supersedes the 0.1 and 0.2 tokens and mockup files. The old hybrid mockups were deleted from `docs/mockups/`.
+
+## Revision 0.3 — operator feedback applied
+
+1. **Typeface.** The exact reference font is not publicly identified. The reference letterforms are a geometric sans with tight display tracking and single-storey details. **Satoshi** (Indian Type Foundry, via Fontshare) is used as the closest freely available match named by the operator, bundled locally as WOFF2 under `docs/mockups/assets/fonts/`. Inter is retained only as a fallback. See the [font attribution/license note](./mockups/assets/fonts/FONT_LICENSE.md).
+2. **Sharp geometry.** Buttons, inputs, chips, session cards, stat tiles, evidence panels, source cards and state cards now use **4px** corners; chips use 3px. The outer app window keeps a 16px frame radius, the verifier window 10px and the preview frame 8px so the result reads as a technical floating panel rather than a pill-shaped SaaS UI.
+3. **Colour detail.** The primary emerald is tightened to `#26D18C` with an action gradient ending at `#16845E`. The base field keeps subtle green/blue-tinted charcoals rather than pure black.
+4. **Icon spacing.** The icon rail gap is widened to give the reference’s more deliberate vertical rhythm.
+5. **Technical legibility.** Mono metadata was raised slightly in size and contrast while keeping the reference’s compact hierarchy. It remains subordinate to the display heading but readable for evidence inspection.
 
 ## Operator-supplied references
 
@@ -53,7 +62,7 @@ These are approximate values informed by the references, not sampled brand token
 | App surface | `#171A18` / `#1E211F` |
 | Raised card | `#252927` / `#2D322F` |
 | Border | translucent warm white, about 8–15% |
-| Primary emerald | `#2BD58F` / `#67E9B4` |
+| Primary emerald | `#26D18C` / `#67E9B4` |
 | Deep emerald action | `#19966B` / `#16845E` |
 | Live blue | `#6F9BFF` / `#A9C1FF` |
 | Critical red | `#FF6868` |
@@ -76,9 +85,9 @@ These are approximate values informed by the references, not sampled brand token
 
 - Use a dark emerald command-center theme for all public and authenticated screens, matching the references.
 - Keep the green ambient glow on the public landing page and the verifier; use a calmer dark field inside the workspace app window.
-- Use Inter/Inter Display for interface and display text, with a monospace stack for technical data.
+- Use Satoshi (with Inter fallback) for interface and display text, with a monospace stack for technical data.
 - Use emerald for primary actions and active/selected states, blue for live/collecting states, red for critical failures, amber for warnings and gaps, and gray for unknown/unavailable.
-- Preserve the reference’s rounded, layered glass panels and thin luminous borders.
+- Preserve the layered glass panels, thin luminous borders and technical 4px inner geometry from revision 0.3.
 
 ### Public home
 
@@ -150,20 +159,20 @@ The mockups are otherwise presented as the translation of the references. Any of
 
 | Screen | Desktop | Mobile | Revision | Status |
 |---|---|---|---|---|
-| Public home `/` | [`mockups/home-desktop.html`](./mockups/home-desktop.html) | [`mockups/home-mobile.html`](./mockups/home-mobile.html) | 0.2 | Presented; approval pending |
-| Dashboard `/dashboard` | [`mockups/dashboard-desktop.html`](./mockups/dashboard-desktop.html) | [`mockups/dashboard-mobile.html`](./mockups/dashboard-mobile.html) | 0.2 | Presented; approval pending |
-| Incident timeline `/incidents/[incidentId]` | [`mockups/incident-desktop.html`](./mockups/incident-desktop.html) | [`mockups/incident-mobile.html`](./mockups/incident-mobile.html) | 0.2 | Presented; approval pending |
-| Local verifier `/verify` | [`mockups/verify-desktop.html`](./mockups/verify-desktop.html) | [`mockups/verify-mobile.html`](./mockups/verify-mobile.html) | 0.2 | Presented; approval pending |
-| Mockup index | [`mockups/index.html`](./mockups/index.html) | Responsive | 0.2 | Presented; approval pending |
+| Public home `/` | [`mockups/home-desktop.html`](./mockups/home-desktop.html) | [`mockups/home-mobile.html`](./mockups/home-mobile.html) | 0.3 | Presented; final approval pending |
+| Dashboard `/dashboard` | [`mockups/dashboard-desktop.html`](./mockups/dashboard-desktop.html) | [`mockups/dashboard-mobile.html`](./mockups/dashboard-mobile.html) | 0.3 | Presented; final approval pending |
+| Incident timeline `/incidents/[incidentId]` | [`mockups/incident-desktop.html`](./mockups/incident-desktop.html) | [`mockups/incident-mobile.html`](./mockups/incident-mobile.html) | 0.3 | Presented; final approval pending |
+| Local verifier `/verify` | [`mockups/verify-desktop.html`](./mockups/verify-desktop.html) | [`mockups/verify-mobile.html`](./mockups/verify-mobile.html) | 0.3 | Presented; final approval pending |
+| Mockup index | [`mockups/index.html`](./mockups/index.html) | Responsive | 0.3 | Presented; final approval pending |
 
 ## Explicit approval record
 
-- **Mockup version presented:** 0.2, 2026-10-31.
+- **Mockup version presented:** 0.3, 2026-10-31.
 - **Reference assets:** operator-supplied WebP images in `docs/design-references/`.
-- **Design reference approval:** accepted as the visual direction; the translation above is pending confirmation where noted.
+- **Design reference approval:** direction approved; revision 0.3 refinements presented for final approval.
 - **Desktop/mobile review:** NOT COMPLETED.
 - **Operator approval message/date:** NOT GRANTED.
 - **Final visual implementation:** NOT AUTHORIZED.
-- **Conditions/comments:** Pending operator review.
+- **Conditions/comments:** Pending final review of typography and sharp geometry.
 
 **Hard stop:** no final UI styling, brand tokens, component restyling or animation implementation until the operator explicitly approves this reference-driven mockup direction. Approval of a mockup is not approval to change business rules, APIs, data models, security or architecture.

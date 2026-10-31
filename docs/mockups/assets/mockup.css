@@ -5,10 +5,42 @@
    Static prototype only. Not imported by apps/web.
    -------------------------------------------------------------------------- */
 
+@font-face {
+  font-family: "Satoshi";
+  src: url("fonts/Satoshi-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("fonts/Satoshi-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("fonts/Satoshi-Medium.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("fonts/Satoshi-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --font-sans: "Inter", "Inter Display", -apple-system, BlinkMacSystemFont,
+  --font-sans: "Satoshi", "Inter", -apple-system, BlinkMacSystemFont,
     "Segoe UI", sans-serif;
-  --font-display: "Inter Display", "Inter", -apple-system, BlinkMacSystemFont,
+  --font-display: "Satoshi", "Inter", -apple-system, BlinkMacSystemFont,
     "Segoe UI", sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Code", "Roboto Mono",
     Menlo, Consolas, "DejaVu Sans Mono", monospace;
@@ -23,19 +55,19 @@
 
   --ink: #f1f7f3;
   --ink-soft: #d6ded9;
-  --muted: #9ba69f;
-  --faint: #727d77;
+  --muted: #a2aca5;
+  --faint: #7f8a83;
 
   --border: rgba(235, 255, 246, 0.08);
   --border-strong: rgba(235, 255, 246, 0.15);
   --border-bright: rgba(235, 255, 246, 0.22);
 
-  --green: #2bd58f;
+  --green: #26d18c;
   --green-bright: #67e9b4;
   --green-deep: #16845e;
-  --green-soft: rgba(43, 213, 143, 0.1);
-  --green-border: rgba(43, 213, 143, 0.4);
-  --green-glow: rgba(43, 213, 143, 0.22);
+  --green-soft: rgba(38, 209, 140, 0.1);
+  --green-border: rgba(38, 209, 140, 0.4);
+  --green-glow: rgba(38, 209, 140, 0.22);
 
   --blue: #6f9bff;
   --blue-bright: #a9c1ff;
@@ -50,17 +82,17 @@
   --yellow-soft: rgba(230, 185, 85, 0.1);
   --yellow-border: rgba(230, 185, 85, 0.28);
 
-  --radius-window: 24px;
-  --radius-panel: 16px;
-  --radius-card: 13px;
-  --radius-control: 10px;
-  --radius-chip: 8px;
+  --radius-window: 16px;
+  --radius-panel: 4px;
+  --radius-card: 4px;
+  --radius-control: 4px;
+  --radius-chip: 3px;
 
   --shadow-window: 0 50px 120px rgba(0, 0, 0, 0.72),
     inset 0 1px 0 rgba(255, 255, 255, 0.055);
   --shadow-card: 0 18px 40px rgba(0, 0, 0, 0.22);
-  --shadow-glow: 0 0 0 1px rgba(43, 213, 143, 0.1),
-    0 16px 44px rgba(0, 0, 0, 0.28), 0 0 34px rgba(43, 213, 143, 0.08);
+  --shadow-glow: 0 0 0 1px rgba(38, 209, 140, 0.1),
+    0 16px 44px rgba(0, 0, 0, 0.28), 0 0 34px rgba(38, 209, 140, 0.08);
 
   --maxw: 1240px;
 }
@@ -86,6 +118,7 @@ body {
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  font-synthesis: none;
 }
 
 body::before {
@@ -95,7 +128,7 @@ body::before {
   z-index: -2;
   background:
     radial-gradient(900px 620px at 4% -8%, rgba(45, 216, 146, 0.3), transparent 62%),
-    radial-gradient(680px 480px at 100% 0%, rgba(43, 213, 143, 0.07), transparent 60%),
+    radial-gradient(680px 480px at 100% 0%, rgba(38, 209, 140, 0.07), transparent 60%),
     radial-gradient(900px 700px at 50% 110%, rgba(19, 74, 53, 0.18), transparent 65%),
     var(--bg-deep);
   pointer-events: none;
@@ -166,7 +199,7 @@ svg {
 }
 
 ::selection {
-  background: rgba(43, 213, 143, 0.24);
+  background: rgba(38, 209, 140, 0.24);
   color: #ffffff;
 }
 
@@ -291,7 +324,7 @@ svg {
   border-bottom: 1px solid var(--border);
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 8.5px;
+  font-size: 9.5px;
   letter-spacing: 0.12em;
   text-align: center;
   text-transform: uppercase;
@@ -424,16 +457,16 @@ svg {
 }
 
 .btn--primary {
-  border-color: rgba(43, 213, 143, 0.55);
-  background: linear-gradient(180deg, #28ca8f 0%, #19966b 100%);
+  border-color: rgba(38, 209, 140, 0.55);
+  background: linear-gradient(180deg, #26d18c 0%, #16845e 100%);
   color: #f3fff8;
-  box-shadow: 0 10px 28px rgba(43, 213, 143, 0.24),
+  box-shadow: 0 10px 28px rgba(38, 209, 140, 0.24),
     inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .btn--primary:hover {
-  background: linear-gradient(180deg, #33d99c 0%, #1da476 100%);
-  box-shadow: 0 12px 34px rgba(43, 213, 143, 0.32),
+  background: linear-gradient(180deg, #31dc98 0%, #1a996b 100%);
+  box-shadow: 0 12px 34px rgba(38, 209, 140, 0.32),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
@@ -555,7 +588,7 @@ svg {
 
 .dot--green {
   color: var(--green);
-  box-shadow: 0 0 10px rgba(43, 213, 143, 0.7);
+  box-shadow: 0 0 10px rgba(38, 209, 140, 0.7);
 }
 
 .dot--blue {
@@ -779,11 +812,11 @@ svg {
   border-radius: 12px;
   background: linear-gradient(
     145deg,
-    rgba(43, 213, 143, 0.18),
+    rgba(38, 209, 140, 0.18),
     rgba(22, 132, 94, 0.12)
   );
   color: var(--green-bright);
-  box-shadow: 0 0 26px rgba(43, 213, 143, 0.16),
+  box-shadow: 0 0 26px rgba(38, 209, 140, 0.16),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
@@ -795,7 +828,7 @@ svg {
 .rail-nav {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 10px;
   width: 100%;
   align-items: center;
 }
@@ -824,12 +857,12 @@ svg {
 .rail-link[aria-current="page"] {
   background: linear-gradient(
     145deg,
-    rgba(43, 213, 143, 0.2),
+    rgba(38, 209, 140, 0.2),
     rgba(22, 132, 94, 0.12)
   );
   color: var(--green-bright);
-  box-shadow: inset 0 0 0 1px rgba(43, 213, 143, 0.28),
-    0 0 22px rgba(43, 213, 143, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(38, 209, 140, 0.28),
+    0 0 22px rgba(38, 209, 140, 0.12);
 }
 
 .rail-bottom {
@@ -964,7 +997,7 @@ svg {
   border-color: var(--green-border);
   background: linear-gradient(
     180deg,
-    rgba(43, 213, 143, 0.075) 0%,
+    rgba(38, 209, 140, 0.075) 0%,
     rgba(34, 39, 36, 0.88) 100%
   );
   box-shadow: var(--shadow-glow);
@@ -1300,7 +1333,7 @@ svg {
   margin-top: 4px;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 9px;
 }
 
 .data-table {
@@ -1347,7 +1380,7 @@ svg {
   margin-top: 2px;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 8.5px;
 }
 
 .record-list {
@@ -1403,7 +1436,7 @@ svg {
 
 .record__result .mono {
   color: var(--muted);
-  font-size: 8px;
+  font-size: 8.5px;
 }
 
 /* --------------------------------------------------------------------------
@@ -1444,14 +1477,14 @@ svg {
   margin-top: 5px;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 9px;
   line-height: 1.55;
 }
 
 .source-card__note {
   margin-top: 4px;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 9.5px;
   line-height: 1.5;
 }
 
@@ -1523,13 +1556,13 @@ svg {
 .event__type {
   color: var(--ink-soft);
   font-family: var(--font-mono);
-  font-size: 9.5px;
+  font-size: 10.5px;
 }
 
 .event__summary {
   margin-top: 3px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.55;
 }
 
@@ -1542,14 +1575,14 @@ svg {
   margin-top: 3px;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 9px;
 }
 
 .event__seq {
   padding-top: 2px;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 8.5px;
   white-space: nowrap;
 }
 
@@ -1570,7 +1603,7 @@ svg {
 
 .event-payload dt {
   color: var(--faint);
-  font-size: 7.5px;
+  font-size: 8px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -1580,7 +1613,7 @@ svg {
   overflow-wrap: anywhere;
   color: var(--green-bright);
   font-family: var(--font-mono);
-  font-size: 8.5px;
+  font-size: 9.5px;
 }
 
 .event--gap {
@@ -1622,7 +1655,7 @@ svg {
   padding: 11px 18px;
   border-top: 1px solid var(--border);
   color: var(--faint);
-  font-size: 8.5px;
+  font-size: 9px;
 }
 
 .timeline-foot .mono {
@@ -1727,7 +1760,7 @@ svg {
   margin-top: 5px;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 8.5px;
 }
 
 /* --------------------------------------------------------------------------
@@ -1939,7 +1972,7 @@ svg {
 .preview-rail__icon.is-active {
   background: var(--green-soft);
   color: var(--green-bright);
-  box-shadow: inset 0 0 0 1px rgba(43, 213, 143, 0.24);
+  box-shadow: inset 0 0 0 1px rgba(38, 209, 140, 0.24);
 }
 
 .preview-rail__icon .icon {
@@ -1971,7 +2004,7 @@ svg {
 .preview-list__item.is-selected {
   border-color: var(--green-border);
   background: var(--green-soft);
-  box-shadow: 0 0 18px rgba(43, 213, 143, 0.08);
+  box-shadow: 0 0 18px rgba(38, 209, 140, 0.08);
 }
 
 .preview-list__time {
@@ -3193,13 +3226,13 @@ svg {
 .m-event__type {
   color: var(--ink-soft);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 9.5px;
 }
 
 .m-event__summary {
   margin-top: 3px;
   color: var(--muted);
-  font-size: 9.5px;
+  font-size: 10px;
   line-height: 1.5;
 }
 
@@ -3207,7 +3240,7 @@ svg {
   margin-top: 3px;
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 7.5px;
+  font-size: 8.5px;
 }
 
 .m-event--gap {
@@ -3427,6 +3460,82 @@ svg {
   flex-wrap: wrap;
   gap: 5px;
   margin-top: 10px;
+}
+
+/* --------------------------------------------------------------------------
+   Revision 0.3 — reference geometry refinement
+   The reference uses tight, nearly rectangular controls and cards. Larger
+   application frames retain a modest radius, while buttons, inputs, chips,
+   cards and technical panels use 3–4 px corners.
+   -------------------------------------------------------------------------- */
+
+.app-frame {
+  border-radius: 16px;
+}
+
+.verify-window {
+  border-radius: 10px;
+}
+
+.preview-frame {
+  border-radius: 8px;
+}
+
+.mobile-frame {
+  border-radius: 18px;
+}
+
+.topbar {
+  border-radius: 6px;
+}
+
+.brand-mark {
+  border-radius: 4px;
+}
+
+.btn,
+.search-box input,
+.list-card,
+.stat,
+.source-tile,
+.source-card,
+.event-payload,
+.assessment,
+.invite-box,
+.file-row,
+.privacy-note,
+.dropzone,
+.verify-meta div,
+.state-card,
+.limitation-strip,
+.index-card,
+.source-feature,
+.limits-panel,
+.rail-link,
+.m-card,
+.m-source,
+.m-result,
+.m-stat,
+.m-menu summary,
+.m-dropzone,
+.m-preview,
+.preview-list__item,
+.preview-source-row div,
+.preview-rail__icon,
+.file-glyph,
+.dropzone__glyph,
+.m-dropzone__glyph,
+.result-banner {
+  border-radius: 4px;
+}
+
+.chip,
+.preview-detail__meta .chip {
+  border-radius: 3px;
+}
+
+.m-menu__panel {
+  border-radius: 6px;
 }
 
 /* --------------------------------------------------------------------------

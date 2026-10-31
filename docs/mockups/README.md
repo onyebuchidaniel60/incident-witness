@@ -1,6 +1,6 @@
 # Phase 6 reference-driven mockups
 
-**Status:** Revision 0.2 presented for operator approval on 2026-10-31. The previous hybrid mockups were rejected. No code or styling has been applied to `apps/web`.
+**Status:** Revision 0.3 presented for final operator approval on 2026-10-31. The previous hybrid mockups were rejected; the reference-driven direction is approved, with typography and sharp-geometry refinements applied. No code or styling has been applied to `apps/web`.
 
 This set translates the operator-supplied references in `docs/design-references/` into Incident Witness screens:
 
@@ -16,8 +16,18 @@ The references supply the visual language only. No reference imagery, logos, ava
 - Narrow icon rail, list pane and wide detail pane.
 - Emerald primary actions and selected-record glow.
 - Blue live-state chips, red critical states and amber warning/gap states.
-- Large display headings, compact uppercase labels and monospace technical metadata.
-- Rounded cards, layered translucent surfaces and restrained depth.
+- Satoshi geometric sans for display and interface text, with monospace technical metadata.
+- Sharp 4px controls, chips and cards; larger application frames keep a modest radius.
+- Layered translucent surfaces, subtle borders and restrained depth.
+
+## Typography and geometry (revision 0.3)
+
+- **Typeface:** Satoshi, bundled locally as WOFF2 under `assets/fonts/` and loaded with `@font-face`. See [`assets/fonts/FONT_LICENSE.md`](./assets/fonts/FONT_LICENSE.md).
+- **Why Satoshi:** the reference lettering is a geometric sans with tight display tracking and single-storey details; Satoshi is the closest freely available match named by the operator.
+- **Technical text:** monospace stack retained for IDs, timestamps, signatures, hashes, event types and sequence numbers.
+- **Controls and cards:** 4px radius on buttons, inputs, chips, session cards, stat tiles, evidence panels and state cards; 3px on chips.
+- **Frames:** the app window keeps a 16px frame radius, the verifier window 10px and the preview frame 8px so the inner geometry stays sharp without losing the floating-window silhouette.
+- **Green:** primary emerald adjusted to `#26D18C`, with the darker action gradient ending at `#16845E`.
 
 ## How to view
 
@@ -48,7 +58,8 @@ All hostnames, IDs, event counts, timestamps, fingerprints, codes and telemetry 
 |---|---|
 | Three-pane app window | Icon rail + session list + incident/dashboard detail |
 | Emerald active navigation and selected cards | Selected session uses a green border and soft glow |
-| Large display headings | Incident title and workspace title use Inter Display with tight tracking |
+| Large display headings | Incident title and workspace title use Satoshi with tight tracking |
+| Tight button geometry | Primary and secondary controls use 4px corners and subtle border/shading |
 | Uppercase metadata rows | Report ID, host ID, platform key, timestamps and sequence labels |
 | Blue “In progress” chip | `Collecting` / `Live` source states |
 | Red severity bars | Critical evidence and unreachable states |

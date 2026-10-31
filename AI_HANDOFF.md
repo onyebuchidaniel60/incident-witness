@@ -2,11 +2,11 @@
 
 **Last updated:** 2026-10-31
 
-**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**. Phase 6 revision 0.2 reference-driven mockups are created and presented; operator approval is pending.
+**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**. Phase 6 revision 0.3 reference-driven mockups apply the final typography and sharp-geometry refinements; operator approval is pending.
 
-**Current phase:** Phase 6 revision 0.2 — reference-driven mockups presented; **awaiting explicit operator approval**. Phase 7 is not authorized.
+**Current phase:** Phase 6 revision 0.3 — reference-driven mockups presented; **awaiting final explicit operator approval**. Phase 7 is not authorized.
 
-**Next task:** Operator review of the Phase 6 revision 0.2 mockup set. Revise only from operator feedback, then stop again for explicit approval; do not implement final UI code.
+**Next task:** Operator final review of the Phase 6 revision 0.3 mockup set. Revise only from operator feedback, then stop again for explicit approval; do not implement final UI code.
 
 **Phase 2 acceptance:** Operator accepted the Phase 2 checkpoint and approved the `public.iw_uid()` security-definer wrapper on 2026-10-31.
 
@@ -674,24 +674,25 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - **Phase 4 schema:** no migrations, table/column or API contract changes. Only the test-only API runtime seam was added, guarded by `NODE_ENV=test` and `IW_E2E_TEST_AUTH=true`.
 - **Phase 5 schema:** migrations `0020`–`0022` add RLS/grants only; no table or column definitions change. The incident-detail timeline response now includes the owner-visible event `payload` and `simulationMode` fields. API readiness expects `0022`.
 
-## Phase 6 revision 0.2 mockups (created and presented 2026-10-31; approval pending)
+## Phase 6 revision 0.3 mockups (created and presented 2026-10-31; final approval pending)
 
-- The operator rejected the 0.1 hybrid mockups and supplied two WebP references in `docs/design-references/`.
-- Revision 0.2 replaces the old mockup set with a dark emerald command-center language: floating glass app window, icon rail, list pane, wide detail pane, emerald actions/selected states, blue live chips and amber/red/gray evidence states.
+- The operator rejected the 0.1 hybrid mockups and supplied two WebP references in `docs/design-references/`. The reference-driven direction is approved; revision 0.3 applies the requested typography and geometry refinements.
+- Revision 0.3 uses locally bundled **Satoshi** WOFF2 files, with Inter only as a fallback. Font attribution/license is recorded in `docs/mockups/assets/fonts/FONT_LICENSE.md`.
+- Buttons, inputs, chips, session cards, stat tiles, evidence panels and state cards use sharp **4px** corners (chips 3px). The app window keeps a 16px frame radius; the verifier window is 10px and the preview frame 8px.
+- The primary emerald is `#26D18C`; the action gradient ends at `#16845E`. Surfaces retain subtle green/blue-tinted charcoal values rather than pure black.
 - Requested screens are covered in desktop and mobile: public home, authenticated dashboard, incident timeline and local verifier. The mockup index links the full set.
 - Reference analysis, translation, intentional deviations and the five translation questions are recorded in `docs/DESIGN_DECISIONS.md`.
-- Old host-setup, sealed-state and state-gallery mockup files were removed as part of the delete/overwrite instruction. The current incident and verifier screens retain their relevant states inline.
 - No file under `apps/web` was changed. No final CSS, Tailwind tokens or UI implementation was written.
 - Static validation: 9 pages rendered at 1440 px and 430 px in Chromium with no console errors or horizontal overflow; no duplicate IDs, unnamed buttons or unlabelled inputs; one `h1` and no heading-order jumps per page; all local links resolve.
-- Visual inspection completed for all desktop and mobile screens. The mockup set is presented and awaiting explicit approval.
+- Visual inspection completed for all desktop and mobile screens. The mockup set is presented and awaiting final explicit approval.
 
 ## Design reference and approval status
 
 - **Final visual design:** NOT STARTED.
-- **Approved design direction:** NONE. The 0.1 hybrid direction was rejected. Revision 0.2 applies the operator-supplied dark emerald references and is pending approval.
+- **Approved design direction:** Reference-driven dark emerald command center. The 0.1 hybrid direction was rejected; revision 0.3 applies the approved direction with Satoshi and sharp geometry.
 - **Design references:** OPERATOR-SUPPLIED — `docs/design-references/incident-reference 1.webp` and `incident-reference 2.webp`. No reference imagery, logos, avatars or copy is embedded in the mockups.
-- **Mockups:** CREATED v0.2 and PRESENTED on 2026-10-31 under `docs/mockups/`; four requested screens with desktop/mobile layouts.
-- **Operator approval:** NOT GRANTED — awaiting an explicit approval message for the complete mockup direction.
+- **Mockups:** CREATED v0.3 and PRESENTED on 2026-10-31 under `docs/mockups/`; four requested screens with desktop/mobile layouts.
+- **Operator approval:** NOT GRANTED — awaiting the final explicit approval message for the complete mockup direction.
 - **Translation confirmations requested:** mobile top-bar/stacked-card adaptation, dark public landing page, source colour assignments (host green, renter blue, platform cyan), all-dark theme and mono initials instead of avatars.
 - Phase 6 scope, reference analysis, translation, deviations and the approval record are in `docs/DESIGN_DECISIONS.md`; no final styling or UI code has been written.
 - Phase 3C, Phase 3D, Phase 3E and Phase 3F did not change frontend styling or visual behaviour.
@@ -715,8 +716,8 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - `.env.example` includes conservative probe-worker defaults and key-provisioning guidance.
 - `/docs` route and footer Documentation/GitHub links remain unchanged and reachable from Phase 2.
 - `/privacy` and `/terms` remain clearly labelled placeholders; no legal copy is approved.
-- `docs/DESIGN_DECISIONS.md` records the rejected 0.1 hybrid, the operator-supplied references, the reference analysis/translation, intentional deviations, confirmation questions and pending v0.2 approval.
-- `docs/mockups/README.md` explains how to open and review the reference-driven mockup set; `docs/mockups/index.html` is the local review entry point.
+- `docs/DESIGN_DECISIONS.md` records the rejected 0.1 hybrid, the operator-supplied references, the reference analysis/translation, Satoshi/4px revision 0.3 refinements, intentional deviations and pending final approval.
+- `docs/mockups/README.md` explains how to open and review the reference-driven mockup set; `docs/mockups/index.html` is the local review entry point. Font attribution/license is in `docs/mockups/assets/fonts/FONT_LICENSE.md`.
 
 ## Known risks and operator actions
 
@@ -755,5 +756,5 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 
 ## Exact next task
 
-**Phase 6 revision 0.2 — Reference-driven mockup review and explicit approval gate.**
+**Phase 6 revision 0.3 — Reference-driven mockup final review and explicit approval gate.**
 The new mockups are presented under `docs/mockups/`. Wait for operator feedback, including confirmation or revision of the translation questions in `docs/DESIGN_DECISIONS.md`. Revise only as directed, update the design record, and stop again. Do not implement final CSS, Tailwind styling, component restyling or UI code in `apps/web` until the operator explicitly approves the complete mockup direction.
