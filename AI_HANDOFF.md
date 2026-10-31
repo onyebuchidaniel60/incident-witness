@@ -61,6 +61,7 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
   - `b8ed540` — `feat(demo): add end-to-end integration harness`
   - `10cac9d` — `feat(worker): support generated probe key provisioning`
   - `8b3adf9` — `style(phase3f): format verifier and harness sources`
+  - `929c20e` — `fix(cli): accept out-of-order observed timelines`
 - **Phase 3E commits:**
   - `d810d5c` — `feat(db): add phase 3e worker probe access`
   - `0d5a9ea` — `feat(sdk): add renter client`
