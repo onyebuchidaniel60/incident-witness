@@ -63,6 +63,7 @@ export async function registerRenterRoutes(
       const { incidentId } = incidentParamsSchema.parse(request.params);
 
       const result = await withProviderTransaction(apiPool, userId, async ({ client }) => {
+        await client.query(`select pg_advisory_xact_lock(hashtextextended($1, 0))`, [incidentId]);
         const incidentResult = await client.query<{
           id: string;
           status: string;
@@ -220,6 +221,32 @@ export async function registerRenterRoutes(
             initialInvitation.incident_id,
           ]);
 
+          const incidentResult = await client.query<{
+            id: string;
+            owner_user_id: string;
+            status: string;
+            capture_ends_at: Date;
+            ingestion_deadline: Date;
+          }>(
+            `select id, owner_user_id, status, capture_ends_at, ingestion_deadline
+               from incidents
+              where id = $1
+              for share`,
+            [initialInvitation.incident_id],
+          );
+          const incident = incidentResult.rows[0];
+          if (
+            !incident ||
+            !["collecting", "awaiting_finalize"].includes(incident.status) ||
+            incident.ingestion_deadline.getTime() <= Date.now()
+          ) {
+            throw new ApiError(
+              409,
+              "INVITATION_INVALID",
+              "The evidence session is no longer accepting renter enrollment.",
+            );
+          }
+
           const invitationResult = await client.query<{
             id: string;
             incident_id: string;
@@ -250,32 +277,6 @@ export async function registerRenterRoutes(
           }
 
           await setTransactionGuc(client, "iw.owner_user_id", invitation.owner_user_id);
-
-          const incidentResult = await client.query<{
-            id: string;
-            owner_user_id: string;
-            status: string;
-            capture_ends_at: Date;
-            ingestion_deadline: Date;
-          }>(
-            `select id, owner_user_id, status, capture_ends_at, ingestion_deadline
-               from incidents
-              where id = $1
-              for share`,
-            [invitation.incident_id],
-          );
-          const incident = incidentResult.rows[0];
-          if (
-            !incident ||
-            !["collecting", "awaiting_finalize"].includes(incident.status) ||
-            incident.ingestion_deadline.getTime() <= Date.now()
-          ) {
-            throw new ApiError(
-              409,
-              "INVITATION_INVALID",
-              "The evidence session is no longer accepting renter enrollment.",
-            );
-          }
 
           const existingKey = await client.query<{ id: string }>(
             `select id

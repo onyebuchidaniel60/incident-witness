@@ -857,6 +857,7 @@ export async function registerHostRoutes(
       const { hostId } = hostIdParamsSchema.parse(request.params);
 
       const result = await withProviderTransaction(apiPool, userId, async ({ client }) => {
+        await client.query(`select pg_advisory_xact_lock(hashtextextended($1, 0))`, [hostId]);
         const host = await loadOwnedHost(client, hostId, true);
         if (host.status === "archived") {
           throw new ApiError(409, "RESOURCE_CONFLICT", "Archived hosts cannot be enrolled.");

@@ -104,6 +104,71 @@ export async function registerAgentRoutes(
           gucs: { "iw.enrollment_token_hash_hex": codeHashHex },
         },
         async ({ client }) => {
+          const initial = await client.query<{
+            id: string;
+            host_id: string;
+            owner_user_id: string;
+            expires_at: Date;
+            redeemed_at: Date | null;
+            revoked_at: Date | null;
+          }>(
+            `select id, host_id, owner_user_id, expires_at, redeemed_at, revoked_at
+               from enrollment_tokens
+              where token_hash = decode($1, 'hex')`,
+            [codeHashHex],
+          );
+          const initialToken = initial.rows[0];
+          if (!initialToken || initialToken.revoked_at) {
+            throw new ApiError(401, "ENROLLMENT_INVALID", "The enrollment code is invalid.");
+          }
+          if (initialToken.redeemed_at) {
+            throw new ApiError(
+              409,
+              "ENROLLMENT_ALREADY_REDEEMED",
+              "This enrollment code has already been used.",
+            );
+          }
+          if (initialToken.expires_at.getTime() <= Date.now()) {
+            throw new ApiError(409, "ENROLLMENT_INVALID", "This enrollment code has expired.");
+          }
+
+          await setTransactionGuc(client, "iw.host_id", initialToken.host_id);
+          await setTransactionGuc(client, "iw.owner_user_id", initialToken.owner_user_id);
+          await setTransactionGuc(client, "iw.source_key_id", sourceKeyId);
+          await client.query(`select pg_advisory_xact_lock(hashtextextended($1, 0))`, [
+            initialToken.host_id,
+          ]);
+
+          const hostResult = await client.query<{
+            id: string;
+            owner_user_id: string;
+            status: string;
+          }>(
+            `select id, owner_user_id, status from hosts where id = $1 for update`,
+            [initialToken.host_id],
+          );
+          const host = hostResult.rows[0];
+          if (!host) {
+            throw new ApiError(401, "ENROLLMENT_INVALID", "The enrollment code is invalid.");
+          }
+          if (host.status === "archived") {
+            throw new ApiError(409, "RESOURCE_CONFLICT", "This host is archived.");
+          }
+          if (host.status === "active") {
+            throw new ApiError(
+              409,
+              "HOST_ALREADY_ENROLLED",
+              "This host already has an active agent key.",
+            );
+          }
+          if (host.status !== "pending_enrollment") {
+            throw new ApiError(
+              409,
+              "HOST_NOT_READY",
+              "Verify the host endpoint before enrolling an agent.",
+            );
+          }
+
           const tokenResult = await client.query<{
             id: string;
             host_id: string;
@@ -131,40 +196,6 @@ export async function registerAgentRoutes(
           }
           if (token.expires_at.getTime() <= Date.now()) {
             throw new ApiError(409, "ENROLLMENT_INVALID", "This enrollment code has expired.");
-          }
-
-          await setTransactionGuc(client, "iw.host_id", token.host_id);
-          await setTransactionGuc(client, "iw.owner_user_id", token.owner_user_id);
-          await setTransactionGuc(client, "iw.source_key_id", sourceKeyId);
-
-          const hostResult = await client.query<{
-            id: string;
-            owner_user_id: string;
-            status: string;
-          }>(
-            `select id, owner_user_id, status from hosts where id = $1 for update`,
-            [token.host_id],
-          );
-          const host = hostResult.rows[0];
-          if (!host) {
-            throw new ApiError(401, "ENROLLMENT_INVALID", "The enrollment code is invalid.");
-          }
-          if (host.status === "archived") {
-            throw new ApiError(409, "RESOURCE_CONFLICT", "This host is archived.");
-          }
-          if (host.status === "active") {
-            throw new ApiError(
-              409,
-              "HOST_ALREADY_ENROLLED",
-              "This host already has an active agent key.",
-            );
-          }
-          if (host.status !== "pending_enrollment") {
-            throw new ApiError(
-              409,
-              "HOST_NOT_READY",
-              "Verify the host endpoint before enrolling an agent.",
-            );
           }
 
           const signedCertificate = createHostCertificate({
