@@ -35,7 +35,7 @@ import {
   type EndpointChecker,
 } from "./services/endpoint.js";
 
-const expectedMigration = "0017_phase3c_system_transition_visibility";
+const expectedMigration = "0019_phase3e_worker_counter_select";
 
 export type BuildAppOptions = {
   config?: AppConfig;
