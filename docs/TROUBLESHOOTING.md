@@ -15,7 +15,7 @@ This guide describes current user-facing error categories. Host-agent commands a
 | Presence sequence rejected | Local spool restored from an older copy, duplicated agent process or clock issue | Stop duplicate agents; do not reset the spool counter; revoke/re-enroll only if the key is compromised |
 | GPU telemetry unavailable | `nvidia-smi` absent, device/driver not available or command timeout | Dashboard should show unavailable; this is not proof of a GPU fault |
 | UPS telemetry unavailable | NUT not installed/configured or UPS unreachable | Dashboard should show unavailable; do not interpret as stable power |
-| Agent spool is full | API unavailable for an extended period or local disk quota reached | Restore connectivity/check disk; the agent drops oldest non-critical observations first and reports a gap; do not delete the spool manually unless the user accepts evidence loss |
+| Agent spool is full | API unavailable for an extended period or local disk quota reached | Restore connectivity/check disk; the agent drops oldest non-critical observations first and reports degraded/spool-full state. Evidence from the dropped period is missing; do not delete the spool manually unless the user accepts evidence loss |
 | Renter invitation expired | 15-minute TTL passed or invitation already redeemed | Provider issues a new invitation |
 | Renter observations absent | SDK not joined, runtime stopped or API unavailable | Check renter SDK status and invitation; absence is a gap, not evidence of normal workload |
 | Probe is missing | Worker unavailable, DNS/TLS failure, lease backlog or target not reachable | Check platform worker health; service failure is not classified as host outage |
