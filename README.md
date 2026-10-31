@@ -8,7 +8,16 @@ Incident Witness is a portable incident-evidence protocol for decentralized comp
 
 ## Project status
 
-Blueprint complete. Application implementation has not started. The product requirements, architecture, security rules and phase plan are in the root documentation.
+Phase 1 is implemented and pending operator acceptance: a route-complete, navigable
+Next.js structural frontend in explicit no-auth placeholder mode. There is no API, database,
+authentication, host agent, renter SDK, platform probe or working evidence verifier yet. The
+product requirements, architecture, security rules and phase plan remain in the root
+documentation.
+
+Phase 1 routes are `/`, `/login`, `/verify`, `/docs`, `/privacy`, `/terms`, `/dashboard`,
+`/hosts`, `/hosts/new`, `/hosts/[hostId]`, `/incidents`, `/incidents/new`,
+`/incidents/[incidentId]`, `/settings`, and the not-found route. All protected-area routes are
+clearly labelled placeholders and do not expose provider data.
 
 ## Source-of-truth documentation
 
@@ -28,22 +37,27 @@ A provider should be able to register a Linux host, prove control of a public HT
 
 Node.js 26.13.0 LTS (released 2026-10-28), TypeScript, npm workspaces, Next.js 16.4.x App Router (16.4.3 current stable checked 2026-10-30), Tailwind CSS 4.x, Fastify 5, Supabase Postgres/Auth, `@supabase/ssr` (beta; pinned behind an adapter), Drizzle, `pg`, `jose`, RFC 8785 canonical JSON, Ed25519, a SQLite host-agent spool, a renter TypeScript SDK, a Render probe worker, Vercel frontend deployment, Vitest, Playwright and pgTAP. See `ARCHITECTURE.md` for responsibilities and security constraints.
 
-## Development status and commands
+## Development commands
 
-The repository implementation has not yet been initialized. Do not run the example commands below until Phase 0 has inspected the actual repository and Phase 1 has established the agreed package scripts.
-
-Planned command interface:
+Phase 1 uses Node.js 26.13.0 and npm workspaces. The following commands are the verified local
+interface:
 
 ```bash
 npm ci
 npm run dev
 npm run lint
 npm run typecheck
-npm test
 npm run build
+npm run test:e2e
 ```
 
-Use `npm.cmd` from Windows PowerShell where required. The exact workspace scripts must be created and documented during Phase 1; the coding agent must not claim these commands work before verifying them.
+`npm test` is the same Playwright smoke suite as `npm run test:e2e`. The suite loads every route
+at desktop and mobile viewport sizes, checks the not-found response, tests primary navigation,
+and confirms the documentation and GitHub footer links. Phase 1 does not include unit,
+integration or API tests yet.
+
+Local Phase 1 verification on 2026-10-31 passed `npm ci`, lint, typecheck, build and 36 Playwright
+checks. Use `npm.cmd` from Windows PowerShell where required.
 
 ## Configuration
 

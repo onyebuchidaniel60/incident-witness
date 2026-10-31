@@ -1,0 +1,20 @@
+# Documentation and handoff material are intentionally left untouched.
+docs/
+*.md
+
+# Dependencies and generated output
+node_modules/
+.next/
+out/
+dist/
+build/
+coverage/
+test-results/
+playwright-report/
+blob-report/
+.vercel/
+package-lock.json
+
+# Local environment files
+.env
+.env.*

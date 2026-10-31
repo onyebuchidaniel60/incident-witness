@@ -1,0 +1,29 @@
+{
+  "name": "incident-witness",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Incident Witness monorepo",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=26.13.0 <27",
+    "npm": ">=11.20.0"
+  },
+  "packageManager": "npm@11.20.0",
+  "scripts": {
+    "dev": "npm run dev --workspace @incident-witness/web",
+    "build": "npm run build --workspace @incident-witness/web",
+    "start": "npm run start --workspace @incident-witness/web",
+    "lint": "npm run lint --workspace @incident-witness/web",
+    "typecheck": "npm run typecheck --workspace @incident-witness/web",
+    "test": "npm run test --workspace @incident-witness/web",
+    "test:e2e": "npm run test:e2e --workspace @incident-witness/web",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "3.9.10"
+  }
+}
