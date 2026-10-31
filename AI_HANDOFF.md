@@ -2,11 +2,11 @@
 
 **Last updated:** 2026-10-31
 
-**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**. Phase 6 reference-driven mockups (revision 0.3) are **APPROVED**. Phase 7 final UI implementation is implemented and deployed; the magic-link session bug and the protected-route API-call race are fixed and verified. Operator acceptance is pending.
+**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**. Phase 6 reference-driven mockups (revision 0.3) are **APPROVED**. Phase 7 final UI implementation is implemented, deployed and **COMPLETE AND CLOSED**; the magic-link session bug and the protected-route API-call race are fixed, verified and accepted. Phase 8 frontend and documentation completeness is in progress.
 
-**Current phase:** Phase 7 — implemented, tested and deployed; critical auth bugs fixed. Awaiting operator acceptance; Phase 8 is not authorized.
+**Current phase:** Phase 8 — frontend and documentation completeness, authorized by the operator on 2026-10-31.
 
-**Next task:** Operator acceptance of the Phase 7 checkpoint. Phase 8 only after explicit authorization.
+**Next task:** Complete the Phase 8 checkpoint, obtain operator acceptance, then wait for explicit authorization before Phase 9.
 
 **Phase 2 acceptance:** Operator accepted the Phase 2 checkpoint and approved the `public.iw_uid()` security-definer wrapper on 2026-10-31.
 
@@ -21,6 +21,10 @@
 **Phase 3F acceptance:** Operator reviewed the Phase 3F checkpoint report and accepted it on 2026-10-31. The offline CLI verifier and the staging E2E demo-harness proof are accepted. Phase 3F is **COMPLETE AND CLOSED**, and Phase 3 is entirely **COMPLETE**.
 
 **Phase 5 acceptance:** Operator reviewed the Phase 5 checkpoint report and the Magic Link authentication pivot on 2026-10-31. The operator confirmed that the Magic Link successfully logged them in; the current failure is a Supabase free-tier rate limit, not a code issue. The Hard Functionality Gate is officially **PASSED**. Phase 5 is **COMPLETE AND CLOSED**.
+
+**Phase 7 acceptance:** Operator reviewed the Phase 7 visual implementation, the magic-link session fix and the protected-route API-call race fix on 2026-10-31. The operator confirmed that protected routes now redirect to `/login` without flashing API errors and that the approved design implementation looks correct. The diagnosis, fixes and visual design are **APPROVED**. Phase 7 is **COMPLETE AND CLOSED**.
+
+**Phase 8 authorization:** Following Phase 7 acceptance, the operator authorized Phase 8 frontend and documentation completeness on 2026-10-31.
 
 **Authentication deviation (operator-approved 2026-10-31):** The provider login was changed from a six-digit Supabase email OTP to Supabase's default magic-link flow. This bypasses the Supabase free-tier requirement for custom SMTP and an editable email template. The form calls `signInWithOtp` with `emailRedirectTo=/auth/callback`; the callback exchanges the code for a session and redirects to `/dashboard`, or redirects to `/login?error=invalid_link` on failure. The Supabase Auth redirect allow-list must include the deployment origin and `/auth/callback`. No external email service or backend/database change was introduced.
 
@@ -684,7 +688,7 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - Reference analysis, translation, intentional deviations and the five translation choices are recorded in `docs/DESIGN_DECISIONS.md`.
 - **Operator approval:** explicit **"I approve these mockups."** on 2026-10-31. Phase 7 is authorized for visual implementation only.
 
-## Completed in Phase 7 (implemented and verified 2026-10-31; pending operator acceptance)
+## Completed in Phase 7 (COMPLETE AND CLOSED 2026-10-31)
 
 - Copied the approved Satoshi WOFF2 files to `apps/web/public/fonts/` with attribution/license, and loaded them globally through `@font-face` in `apps/web/app/globals.css`.
 - Added Tailwind v4 theme tokens for the emerald palette (`#26D18C`), tinted charcoal surfaces, typography, 4px card/control radii and 3px chips.
@@ -819,11 +823,11 @@ When unauthenticated or after the session disappeared, protected routes could br
 - `/dashboard` and `/hosts` without a session returned `307` to `/login?next=…` at the edge; `/login` returned `200`.
 - No client API request can be made from these redirect responses because the protected route HTML is never served.
 
-**Phase 8 was not started.** The Phase 7 checkpoint remains pending operator acceptance.
+**Phase 8 was authorized after Phase 7 acceptance and is in progress.**
 
 ## Design reference and approval status
 
-- **Final visual design:** **APPROVED and IMPLEMENTED** (revision 0.3; Phase 7 acceptance pending).
+- **Final visual design:** **APPROVED and IMPLEMENTED** (revision 0.3; Phase 7 **COMPLETE AND CLOSED**).
 - **Approved design direction:** Reference-driven dark emerald command center with Satoshi, sharp 4px geometry and `#26D18C` emerald.
 - **Design references:** OPERATOR-SUPPLIED — `docs/design-references/incident-reference 1.webp` and `incident-reference 2.webp`. No reference imagery, logos, avatars or copy is embedded in the mockups.
 - **Mockups:** v0.3 **APPROVED** on 2026-10-31.
@@ -832,7 +836,8 @@ When unauthenticated or after the session disappeared, protected routes could br
 - Phase 6 scope, reference analysis, translation, deviations and the approval record are in `docs/DESIGN_DECISIONS.md`.
 - Phase 3C, Phase 3D, Phase 3E and Phase 3F did not change frontend styling or visual behaviour.
 - Phase 4/5 connect functional UI and state handling; Phase 7 applies the approved final visual design. Business logic, API contracts and schemas remain unchanged.
-- Phase 4 connects functional UI and state handling; the final visual design is now implemented and awaiting operator acceptance.
+- Phase 4 connects functional UI and state handling; the final visual design is implemented, accepted and closed.
+- Operator acceptance of the Phase 7 design and auth fixes was recorded on 2026-10-31.
 
 ## Documentation/footer status
 
