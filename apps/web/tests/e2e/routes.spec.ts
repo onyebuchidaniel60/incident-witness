@@ -59,6 +59,7 @@ test("login form requests a magic link without a code field", async ({ page }) =
   await expect(page.getByLabel("Provider email address")).toBeVisible();
   await expect(page.getByRole("button", { name: "Send login link" })).toBeVisible();
   await expect(page.getByLabel("One-time code")).toHaveCount(0);
+  await expect(page.getByText(/Supabase sends the default email login link/i)).toHaveCount(0);
 });
 
 test("invalid auth callback redirects to login with a safe error", async ({ page }) => {

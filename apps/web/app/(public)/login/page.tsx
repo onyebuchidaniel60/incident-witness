@@ -4,7 +4,6 @@ import Link from "next/link";
 import { E2eSignInButton } from "@/components/e2e-sign-in-button";
 import { LoginForm } from "@/components/login-form";
 import { PageIntro } from "@/components/page-intro";
-import { Icon } from "@/components/ui/icon";
 
 export const metadata: Metadata = {
   title: "Provider Sign-In",
@@ -40,19 +39,6 @@ export default async function LoginPage({
         </div>
 
         <div className="space-y-4">
-          <div className="iw-notice iw-notice-info flex-col gap-1.5">
-            <p className="flex items-center gap-2 font-semibold">
-              <Icon name="shield" size="sm" />
-              Magic-link sign-in
-            </p>
-            <p className="text-[11px] leading-5">
-              Supabase sends the default email login link, so no custom SMTP template is required.
-              The deployment origin and{" "}
-              <code className="font-mono text-[10px]">/auth/callback</code> path must be
-              allow-listed in the Supabase Auth redirect settings. If email delivery is unavailable,
-              the sign-in link cannot be issued.
-            </p>
-          </div>
           <E2eSignInButton />
           <div className="flex flex-wrap gap-4 text-[10px] font-medium">
             <Link href="/" className="iw-link">

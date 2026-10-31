@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { JudgeDemoButton } from "@/components/judge-demo-button";
 import { Icon, type IconName } from "@/components/ui/icon";
-import { demoLoginConfigured } from "@/lib/demo-login";
 
 export const metadata: Metadata = {
   title: { absolute: "Incident Witness — Portable incident evidence" },
@@ -43,8 +41,6 @@ const sources: {
 ];
 
 export default function HomePage() {
-  const demoLoginAvailable = demoLoginConfigured();
-
   return (
     <div className="space-y-16 sm:space-y-20">
       <section className="grid items-center gap-10 pb-2 pt-4 lg:grid-cols-[1.02fr_0.98fr] lg:gap-14 lg:pt-10">
@@ -63,7 +59,6 @@ export default function HomePage() {
             physical root cause.
           </p>
           <div className="mt-7 flex flex-wrap gap-2.5">
-            {demoLoginAvailable ? <JudgeDemoButton /> : null}
             <Link href="/docs" className="iw-btn iw-btn-primary iw-btn-lg">
               Read the documentation
               <Icon name="arrow-up-right" size="sm" />

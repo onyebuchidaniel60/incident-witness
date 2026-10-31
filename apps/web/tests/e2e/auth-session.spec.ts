@@ -126,3 +126,32 @@ test("API 401 redirects to login without rendering a raw auth error", async ({ p
   await expect(page).toHaveURL(/\/login\?next=%2Fdashboard$/, { timeout: 10_000 });
   await expect(page.getByText(/authentication token is invalid/i)).toHaveCount(0);
 });
+
+test("clicking Workspace unauthenticated redirects before dashboard content loads", async ({
+  page,
+}) => {
+  const apiRequests: string[] = [];
+  page.on("request", (request) => {
+    if (request.url().startsWith(API_URL)) apiRequests.push(request.url());
+  });
+
+  await page.goto("/");
+
+  const menuButton = page.getByRole("button", { name: "Open menu" });
+  if (await menuButton.isVisible()) {
+    await menuButton.click();
+  }
+
+  const primaryNavigation = page.getByRole("navigation", { name: "Primary" });
+  await primaryNavigation.getByRole("link", { name: "Workspace" }).click();
+
+  await expect(page).toHaveURL(/\/login\?next=%2Fdashboard$/, { timeout: 10_000 });
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Provider sign-in" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Provider dashboard" }),
+  ).toHaveCount(0);
+  await expect(page.getByText(/authentication token is invalid/i)).toHaveCount(0);
+  expect(apiRequests).toEqual([]);
+});

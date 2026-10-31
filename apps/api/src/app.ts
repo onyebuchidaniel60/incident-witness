@@ -21,6 +21,7 @@ import { createRemoteJwtVerifier, type JwtVerifier } from "./auth/jwt.js";
 import { config as defaultConfig, type AppConfig } from "./config.js";
 import { ApiError, sendError } from "./errors.js";
 import { startLifecycleSweeper } from "./lifecycle/sweeper.js";
+import { loggerRedaction } from "./logging.js";
 import { requireAuth } from "./plugins/auth.js";
 import { registerAgentRoutes } from "./routes/agent.js";
 import { registerEvidenceRoutes } from "./routes/evidence.js";
@@ -88,23 +89,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
         ? false
         : {
             level: config.logLevel,
-            redact: {
-              paths: [
-                "req.headers.authorization",
-                "req.headers.cookie",
-                "res.headers.set-cookie",
-                "*.authorization",
-                "*.cookie",
-                "*.token",
-                "*.password",
-                "*.secret",
-                "*.credential",
-                "*.databaseUrl",
-                "*.connectionString",
-                "*.privateKey",
-              ],
-              censor: "[REDACTED]",
-            },
+            redact: loggerRedaction,
           },
     genReqId: () => randomUUID(),
     requestIdLogLabel: "request_id",

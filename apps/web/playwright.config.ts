@@ -29,10 +29,6 @@ const webEnvironment = {
   NEXT_PUBLIC_IW_ENABLE_DEMO_SESSIONS: "true",
   IW_E2E_TEST_AUTH: "true",
   IW_E2E_TOKEN: "e2e-provider-token",
-  // Keep the judge-demo route deterministic in E2E even if the developer has a
-  // real server-only key in .env. The route must fail closed without it.
-  IW_ENABLE_DEMO_LOGIN: "false",
-  SUPABASE_SERVICE_ROLE_KEY: "",
 };
 
 export default defineConfig({
