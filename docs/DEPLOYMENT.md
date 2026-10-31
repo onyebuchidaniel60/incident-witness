@@ -50,7 +50,9 @@ If no deployment provider access is available, report the exact missing permissi
 
 ## Database connection
 
-Use a direct connection or session pooler where transaction-scoped identity/RLS requires it; verify connection behaviour with integration tests. Do not assume a transaction pooler preserves session state. The selected mechanism must safely execute `SET LOCAL ROLE` and transaction-local JWT claim values for each request.
+Use a direct connection or session pooler where transaction-scoped identity/RLS requires it; verify connection behaviour with integration tests. Do not assume a transaction pooler preserves session state.
+
+The API connects with the restricted `iw_api` login role, directly or through a verified session pooler. JWT subject and request mode are set transaction-locally using parameterized `set_config` or equivalent `SET LOCAL` calls. **`SET ROLE authenticated` is prohibited.** Transaction pooling and service-role bypass are prohibited.
 
 ## Production release gate
 

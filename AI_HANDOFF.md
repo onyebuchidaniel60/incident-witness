@@ -2,11 +2,11 @@
 
 **Last updated:** 2026-10-31
 
-**Project status:** Phase 1 skeletal frontend complete and closed; Phase 2 not started.
+**Project status:** Phase 1 skeletal frontend complete and closed; ADR-001 accepted; Phase 2 not started.
 
-**Current phase:** Phase 1 — COMPLETE, CLOSED.
+**Current phase:** Phase 1 — COMPLETE, CLOSED. ADR-001 Accepted.
 
-**Next task:** ADR-001 draft only, awaiting operator authorization.
+**Next task:** Phase 2 — backend/data/auth foundation, awaiting explicit operator authorization.
 
 ## Project
 
@@ -29,6 +29,7 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 - Next.js 16.4.3 App Router + Tailwind CSS 4.x frontend; Next 16 `proxy.ts` placeholder is present.
 - Fastify 5 API — **not implemented**.
 - Supabase Postgres/Auth; Drizzle + `pg`; RLS and restricted DB roles — **not implemented**.
+- Database identity: **ADR-001 accepted** — Option B: Fastify connects as the restricted `iw_api` role, sets transaction-local JWT/mode GUCs, keeps RLS targeted to `iw_api`, and forbids `SET ROLE authenticated`. `docs/DEPLOYMENT.md` has been corrected accordingly.
 - `jose` JWT verification — **not implemented**.
 - RFC 8785 JCS via pinned `canonicalize@5.1.0` + SHA-256 + Ed25519 protocol — **not implemented**.
 - Linux x86_64 host agent with SQLite spool — **not implemented**.
@@ -45,8 +46,7 @@ No AI, payment, blockchain, Arweave, marketplace, public bundle directory, Redis
 - **Working directory/repo root:** `/root/incident-witness`
 - **Branch:** `main`
 - **Latest implementation commit:** `27651555794a867c1d98c28b93fb0d2837c58280` — `feat(web): add route-complete Phase 1 skeletal shell`
-- **Current Git HEAD / origin/main:** `c0eb9e30c53129a200f1a350ec927792684696ca` — `chore: trigger normal vercel deploy`
-- **Git sync:** `main` and `origin/main` were verified in sync at `c0eb9e30c53129a200f1a350ec927792684696ca` before this closeout commit. This docs-only closeout commit is intentionally not pushed.
+- **Verified Git sync before ADR-001 acceptance:** `431339cf009f0eafa57c9b95630361824d475fa3` — `docs: close Phase 1 checkpoint (operator approved production deployment)`; `main` and `origin/main` were synchronized at that SHA. The ADR-001 acceptance documentation commit is pushed on completion.
 - **Existing application code:** `apps/web` Phase 1 structural frontend only.
 - **Existing deployment project:** Vercel project `incident-witness`, ID `prj_YOmSDUci8FSEsqW16mw0X1MldfJ7`, team `uhhh2`.
 - **Node runtime:** confirmed `v26.13.0`; npm `11.20.0`; `.node-version` pins `26.13.0`.
@@ -135,11 +135,10 @@ No tests are claimed beyond those run above. Vitest, pgTAP and API/security inte
 
 ## Known risks and operator actions
 
-1. **ADR-001 prerequisite for Phase 2:** resolve `docs/DEPLOYMENT.md` wording about `SET LOCAL ROLE` versus `ARCHITECTURE.md` §5.2, which specifies `iw_api` transactions and explicitly forbids `SET ROLE authenticated`. Do not implement Phase 2 DB identity until the role/GUC approach is decided and tested.
+1. **Phase 2 implementation gate:** ADR-001 is accepted; Phase 2 must implement Option B and complete the ADR-001-T01–T14 integration tests against a real staging Supabase database with the real `iw_api`/`iw_worker` login roles before any RLS-dependent feature is accepted.
 2. **Vercel Authentication is disabled:** `ssoProtection` is `null`. The static shell has no data or secrets, but it is publicly reachable; enable Vercel Authentication if public access is not intended.
 3. **Development dependency advisories:** 16 moderate `minimatch` advisories in the ESLint toolchain; production dependency audit is clean. Revisit when upstream packages publish compatible fixes; do not use a forced breaking downgrade.
 4. **No Phase 2+ functionality:** no API, database, auth, agent, SDK, probe worker, protocol package or working verifier exists. Do not describe those as implemented.
-5. **Closeout commit is unpushed:** the docs-only Phase 1 closeout commit follows the verified `c0eb9e3` sync point and was intentionally not pushed.
 
 ## Things not to change
 
@@ -154,4 +153,4 @@ No tests are claimed beyond those run above. Vitest, pgTAP and API/security inte
 
 ## Exact next task
 
-**ADR-001 draft only, awaiting operator authorization.** Do not draft it yet, and do not start Phase 2.
+**Phase 2 — backend/data/auth foundation, awaiting explicit operator authorization.** Do not start Phase 2.
