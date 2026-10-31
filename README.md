@@ -55,7 +55,7 @@ Node.js 26.13.0 LTS (released 2026-10-28), TypeScript, npm workspaces, Next.js 1
 
 ## Development commands
 
-Phase 2 uses Node.js 26.13.0 and npm workspaces. The local interface is:
+The repository uses Node.js 26.13.0 and npm workspaces. The local interface is:
 
 ```bash
 npm ci
@@ -73,8 +73,8 @@ npm run test:integration --workspace @incident-witness/api
 npm run test:e2e
 ```
 
-`npm test` runs the staging database integration tests (including ADR-001 T01–T14) followed by the
-API Vitest suite. The Phase 3B API integration suite is run explicitly with
+`npm test` runs the protocol, correlator, ADR-001 database, host-agent and API unit suites. The
+Phase 3B API integration suite is run explicitly with
 `npm run test:integration --workspace @incident-witness/api` because it requires staging
 credentials and must never be run against production. `npm run test:e2e` runs the Playwright
 public-route, auth-redirect, navigation and footer checks at desktop and mobile viewport sizes.
