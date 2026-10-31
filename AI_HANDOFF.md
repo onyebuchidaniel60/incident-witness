@@ -2,11 +2,11 @@
 
 **Last updated:** 2026-10-31
 
-**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**. Phase 6 reference-driven mockups (revision 0.3) are **APPROVED**. Phase 7 final UI implementation is implemented, deployed and **COMPLETE AND CLOSED**; the magic-link session bug and the protected-route API-call race are fixed, verified and accepted. Phase 8 frontend and documentation completeness is implemented, test-verified and deployed; operator acceptance is pending.
+**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**. Phase 6 reference-driven mockups (revision 0.3) are **APPROVED**. Phase 7 final UI implementation is implemented, deployed and **COMPLETE AND CLOSED**; the magic-link session bug and the protected-route API-call race are fixed, verified and accepted. Phase 8 frontend and documentation completeness is implemented, test-verified, deployed and **COMPLETE AND CLOSED**.
 
-**Current phase:** Phase 8 — implemented, tested and deployed. Awaiting operator acceptance; Phase 9 is not authorized.
+**Current phase:** Post-Phase 8 secure hackathon judge-demo login enhancement. Phase 9 is not authorized.
 
-**Next task:** Operator acceptance of the Phase 8 checkpoint. Phase 9 only after explicit authorization.
+**Next task:** Complete and verify the judge-demo login bypass, then wait for explicit Phase 9 authorization.
 
 **Phase 2 acceptance:** Operator accepted the Phase 2 checkpoint and approved the `public.iw_uid()` security-definer wrapper on 2026-10-31.
 
@@ -25,6 +25,10 @@
 **Phase 7 acceptance:** Operator reviewed the Phase 7 visual implementation, the magic-link session fix and the protected-route API-call race fix on 2026-10-31. The operator confirmed that protected routes now redirect to `/login` without flashing API errors and that the approved design implementation looks correct. The diagnosis, fixes and visual design are **APPROVED**. Phase 7 is **COMPLETE AND CLOSED**.
 
 **Phase 8 authorization:** Following Phase 7 acceptance, the operator authorized Phase 8 frontend and documentation completeness on 2026-10-31.
+
+**Phase 8 acceptance:** Operator reviewed the Phase 8 report on 2026-10-31 and **APPROVED** the checkpoint. Documentation, SEO metadata, link audits and accessibility fixes are accepted. The Vercel edge `403` responses were confirmed as bot protection rather than an application failure. Phase 8 is **COMPLETE AND CLOSED**.
+
+**Judge-demo authorization:** After Phase 8 acceptance, the operator authorized a secure one-click judge demo login bypass for the hackathon. This is an additive demo-only path; the existing magic-link flow remains the real-user authentication path.
 
 **Authentication deviation (operator-approved 2026-10-31):** The provider login was changed from a six-digit Supabase email OTP to Supabase's default magic-link flow. This bypasses the Supabase free-tier requirement for custom SMTP and an editable email template. The form calls `signInWithOtp` with `emailRedirectTo=/auth/callback`; the callback exchanges the code for a session and redirects to `/dashboard`, or redirects to `/login?error=invalid_link` on failure. The Supabase Auth redirect allow-list must include the deployment origin and `/auth/callback`. No external email service or backend/database change was introduced.
 
@@ -829,9 +833,9 @@ When unauthenticated or after the session disappeared, protected routes could br
 - `/dashboard` and `/hosts` without a session returned `307` to `/login?next=…` at the edge; `/login` returned `200`.
 - No client API request can be made from these redirect responses because the protected route HTML is never served.
 
-**Phase 8 implementation status (2026-10-31):** Frontend and documentation completeness is implemented, test-verified and deployed to Preview. Operator acceptance is pending. No business logic, API contract, database schema or cryptographic protocol changed.
+**Phase 8 implementation status (2026-10-31):** Frontend and documentation completeness is implemented, test-verified, deployed and accepted. Phase 8 is **COMPLETE AND CLOSED**. No business logic, API contract, database schema or cryptographic protocol changed.
 
-## Completed in Phase 8 (implemented, tested and deployed 2026-10-31; pending operator acceptance)
+## Completed in Phase 8 (COMPLETE AND CLOSED 2026-10-31)
 
 ### In-app documentation
 
