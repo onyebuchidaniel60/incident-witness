@@ -1,9 +1,12 @@
 # AI_HANDOFF.md — Incident Witness
 
-**Last updated:** 2026-10-30  
-**Project status:** Blueprint complete; implementation not started.  
-**Current phase:** Phase 0 — read-only repository/platform inventory.  
-**Next task:** Inspect the actual repository/workspace and report a read-only audit in the agent response; no files are to be modified.  
+**Last updated:** 2026-10-31
+
+**Project status:** Phase 1 skeletal frontend implemented; Phase 2 not started.
+
+**Current phase:** Phase 1 — COMPLETE (pending operator acceptance).
+
+**Next task:** Phase 2 only, awaiting explicit operator authorization.
 
 ## Project
 
@@ -23,68 +26,92 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 ## Current architecture
 
 - Node.js 26.13.0 LTS baseline; use later supported 26.x security patches when available, TypeScript strict, npm workspaces.
-- Next.js 16.4.x App Router + Tailwind CSS 4.x frontend; Next 16 `proxy.ts` auth refresh convention.
-- Fastify 5 API.
-- Supabase Postgres/Auth; Drizzle + `pg`; RLS and restricted DB roles.
-- `jose` JWT verification.
-- RFC 8785 JCS via pinned `canonicalize@5.1.0` + SHA-256 + Ed25519 protocol; Node signing with `node:crypto`, browser-only public-key verification with `@noble/ed25519` 3.2.x and shared cross-runtime vectors.
-- Linux x86_64 host agent with SQLite spool.
-- Incident-scoped TypeScript renter SDK.
-- Render background probe worker; fixed HTTPS health endpoint; Postgres leases.
-- Vercel Preview/Production for frontend; Render API/worker.
-- Vitest, Playwright and pgTAP.
+- Next.js 16.4.3 App Router + Tailwind CSS 4.x frontend; Next 16 `proxy.ts` placeholder is present.
+- Fastify 5 API — **not implemented**.
+- Supabase Postgres/Auth; Drizzle + `pg`; RLS and restricted DB roles — **not implemented**.
+- `jose` JWT verification — **not implemented**.
+- RFC 8785 JCS via pinned `canonicalize@5.1.0` + SHA-256 + Ed25519 protocol — **not implemented**.
+- Linux x86_64 host agent with SQLite spool — **not implemented**.
+- Incident-scoped TypeScript renter SDK — **not implemented**.
+- Render background probe worker — **not implemented**.
+- Vercel Preview/Production for frontend; Render API/worker — Vercel project exists; Render not configured.
+- Vitest, Playwright and pgTAP — Playwright smoke tests exist; Vitest/pgTAP tests not created.
 
 No AI, payment, blockchain, Arweave, marketplace, public bundle directory, Redis, Kubernetes or object-storage requirement in MVP.
 
 ## Repository state
 
-- **Repository URL:** not supplied/verified.
-- **Working directory/repo root:** not yet inspected.
-- **Branch:** not yet inspected.
-- **Latest commit:** not yet inspected.
-- **Existing code/database/CI:** not yet inspected.
-- **Existing deploy projects:** not yet inspected.
-- **Do not infer or create a replacement repository.** Phase 0 is read-only; report existing state before making changes.
+- **Repository URL:** confirmed public — https://github.com/onyebuchidaniel60/incident-witness
+- **Working directory/repo root:** `/root/incident-witness`
+- **Branch:** `main`
+- **Latest implementation commit:** `27651555794a867c1d98c28b93fb0d2837c58280` — `feat(web): add route-complete Phase 1 skeletal shell`
+- **Checkpoint commit:** a docs-only follow-up commit containing this handoff update follows the implementation commit.
+- **Existing application code:** `apps/web` Phase 1 structural frontend only.
+- **Existing deployment project:** Vercel project `incident-witness`, ID `prj_YOmSDUci8FSEsqW16mw0X1MldfJ7`, team `uhhh2`.
+- **Node runtime:** confirmed `v26.13.0`; npm `11.20.0`; `.node-version` pins `26.13.0`.
 
 ## Preview / deployment checkpoint
 
-- **Preview URL:** NOT DEPLOYED.
-- **Preview provider/project:** not yet confirmed.
-- **Latest deployed commit:** NONE.
-- **Production URL:** NOT DEPLOYED.
-- **Safe staging config:** NOT CONFIGURED/VERIFIED.
-- **Visible frontend:** none verified in this project context.
-- **Blocker:** repository, Vercel project and staging Supabase/Render resources have not been inspected or authorized.
+- **Preview URL:** https://incident-witness-yru7b9b75-uhhh2.vercel.app
+- **Preview deployment ID:** `dpl_FDFnDhhX5jvWHyrNbdQyaLASRpHx`
+- **Deployed source commit:** `27651555794a867c1d98c28b93fb0d2837c58280`
+- **Deployment target:** Preview (`target: preview`, state `READY`)
+- **Git metadata:** Vercel CLI local deployment did not attach Git metadata; `vercel inspect --json` reports no `meta`/`gitSource`. The working tree was clean at commit `2765155` when the Preview was built.
+- **Preview protection:** currently **NOT PROTECTED**. Vercel SSO protection was temporarily disabled to run deployed browser checks, and re-enabling failed after the Vercel CLI login became invalid (`forbidden` / `login_required`). This is a no-data, no-secret static shell, but the operator must re-authenticate and restore SSO protection.
+- **Production deployment:** Vercel auto-promoted the project's first deployment to Production at https://incident-witness.vercel.app because it was the first deployment. No production secrets, production database or real data were used, and no production release was approved. The operator should decide whether to remove/rename or otherwise clean up that auto-promotion.
+- **Production URL approval:** NOT APPROVED as a release; do not treat it as a production launch.
+- **Safe staging config:** CONFIRMED for content — explicit no-auth placeholder mode; no Supabase, API, database, analytics, production data or real credentials are connected. SSO protection restoration remains outstanding.
 
-The first frontend must be a navigable skeletal shell, deployed to Preview in Phase 1. The agent must report the exact URL and deployed SHA. Never invent a URL and never use production data/secrets in Preview.
+## Completed in Phase 1
 
-## Completed
+- Root npm workspace baseline with private root package, lockfile, Node pin, `.gitignore`, strict shared `tsconfig.base.json`, Prettier and ESLint configuration.
+- `apps/web` Next.js 16.4.3 App Router application with TypeScript strict and Tailwind CSS 4.x temporary styling.
+- All required routes:
+  - Public: `/`, `/login`, `/verify`, `/docs`, `/privacy`, `/terms`
+  - Protected placeholders: `/dashboard`, `/hosts`, `/hosts/new`, `/hosts/[hostId]`, `/incidents`, `/incidents/new`, `/incidents/[incidentId]`, `/settings`
+  - `not-found.tsx`, `error.tsx`, `loading.tsx`
+- Public header with keyboard-accessible mobile menu, dashboard sidebar navigation, responsive layouts and footer.
+- Footer links to real `/docs` route and the confirmed public GitHub repository.
+- `proxy.ts` Phase 1 pass-through placeholder with explicit comment that no authentication or access control exists.
+- `.env.local.example` with placeholder comments only; `.env.example` unchanged because Phase 1 needs no new variables.
+- CI workflow running `npm ci`, lint, typecheck and build on push/PR.
+- Playwright smoke suite covering every route, not-found handling, navigation, footer links, protected-area labelling, overflow and console errors at desktop and mobile viewports.
+- `README.md` Phase 1 status and verified commands.
+- Vercel project created and Preview deployed.
 
-- Incident Witness selected by operator and name confirmed.
-- Product specification and MVP boundary defined.
-- Main flows, roles, state machines, data entities and acceptance criteria specified.
-- Architecture, API surface, crypto protocol, security model and technology stack specified.
-- Phased implementation plan includes early frontend deployment, functionality gate, reference/mockup phase, explicit approval gate, final UI, docs/footer completion and production release gate.
+## Visible behaviour vs placeholders
 
-## Incomplete / not yet verified
+**Functional:**
 
-- Repository state and compatibility audit.
-- Actual Vercel/Supabase/Render project availability and credentials.
-- Host public DNS/HTTPS health endpoint and real Linux test machine.
-- Real GPU/NVIDIA and UPS/NUT availability.
-- User demand, marketplace acceptance, willingness to pay and originality/novelty are not validated.
-- Nosana access/credits/API execution are untested; not an MVP dependency.
-- Actual public GitHub repository URL is unknown; no footer GitHub link may be invented or shown.
-- Legal entity/contact details/approved Privacy and Terms copy are not supplied.
+- Static page rendering and client-side navigation.
+- Public and dashboard placeholder route structure.
+- Responsive header, mobile menu, sidebar, footer, skip link and focus styles.
+- 404/not-found handling and route error retry control.
+- `/docs` is a real reachable documentation index with repository links.
+- Footer Documentation and GitHub links.
+
+**Placeholder only:**
+
+- No login form or authentication; `/login` explicitly states no sign-in exists.
+- No file input or verification; `/verify` explicitly states the verifier is not connected.
+- No provider data. Dashboard, hosts, incidents and settings pages clearly state that no API, database, auth or session is connected.
+- No hosts, incidents, evidence timeline, assessments, bundles or signature verification.
+- No Phase 2+ backend, database, auth, agent, SDK, protocol, worker or CLI verifier.
 
 ## Tests and evidence
 
-- **Tests run:** NONE — no application exists in this handoff state.
-- **Build/lint/typecheck:** NOT RUN.
-- **E2E:** NOT RUN.
-- **Security tests:** NOT RUN.
-- **Deployed Preview tests:** NOT RUN.
-- Do not describe planned tests as passed.
+Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
+
+- `npm ci` — **PASS** (364 packages installed; `npm audit --omit=dev` reports 0 production vulnerabilities).
+- `npm run lint` — **PASS**.
+- `npm run typecheck` — **PASS**.
+- `npm run build` — **PASS** (Next.js 16.4.3; all 14 route entries plus proxy built).
+- `npm run test:e2e` — **PASS**: 36 Playwright tests passed across desktop Chromium and mobile Pixel 7 profiles.
+- Deployed Preview route check — **PASS**: 34 browser checks across 14 routes plus the not-found route at desktop and mobile viewport; navigation, footer links, overflow, console-error and page-error checks passed.
+- Client bundle scan — **PASS**: no `DATABASE_URL`, platform private-key, token-pepper, service-role or private-key markers found in local or deployed client assets/routes.
+- `npm audit` — full development tree reports 16 moderate `minimatch` advisories; no non-breaking fix is available (`npm audit fix --force` would downgrade/break ESLint). Production dependency audit reports 0 vulnerabilities.
+
+No tests are claimed beyond those run above. Vitest, pgTAP and API/security integration tests do not exist yet.
 
 ## Design reference and approval status
 
@@ -92,26 +119,25 @@ The first frontend must be a navigable skeletal shell, deployed to Preview in Ph
 - **Design references:** NOT COLLECTED/APPROVED.
 - **Mockups:** NOT CREATED.
 - **Operator approval:** NOT GRANTED.
-- Use only temporary skeletal UI before the end-to-end functionality gate. Later, collect references and show desktop/mobile mockups for explicit operator approval. No approval means no final design implementation.
+- Phase 1 uses temporary, generic Tailwind styling only. Do not treat it as an approved visual direction. Reference collection and desktop/mobile mockups remain Phase 6 work after the functionality gate.
 
 ## Documentation/footer status
 
-- Blueprint root docs exist as handoff files.
-- Repository `README.md` and operational docs are planned; this pack includes initial versions/templates.
-- Website `/docs` must become a real, reachable Docs destination.
-- GitHub footer link must wait until actual repository URL is verified public and operator approves sharing.
-- No invented public URL or private repo disclosure.
+- Root documentation and `docs/` remain the source of truth.
+- `/docs` route exists and is reachable on the Preview.
+- Footer contains the real Documentation link and the approved public GitHub repository link.
+- `/privacy` and `/terms` are clearly labelled placeholders; no legal copy is approved.
+- No support/contact address is published because none has been supplied.
 
-## Known risks
+## Known risks and operator actions
 
-1. Signatures do not prove sensor truth; host and renter sources can be compromised.
-2. Platform probe is operated by the same platform and is not an independent organisation.
-3. Market demand, marketplace evidence acceptance and willingness to pay are unvalidated.
-4. External endpoint monitoring has SSRF/DNS-rebinding risk and requires fixed target policy and pinned validated connection.
-5. Public hostname + HTTPS endpoint may be difficult for home GPU hosts behind NAT; NAT-only hosts are out of MVP.
-6. Host agent requires Linux x86_64 and operator permissions to install; actual user installation willingness is untested.
-7. Actual GPU/UPS data availability is conditional; missing signals must remain unavailable, not “normal.”
-8. Hackathon Round 2 submission cutoff time/timezone and detailed requirements must be rechecked against current official rules.
+1. **ADR-001 prerequisite for Phase 2:** resolve `docs/DEPLOYMENT.md` wording about `SET LOCAL ROLE` versus `ARCHITECTURE.md` §5.2, which specifies `iw_api` transactions and explicitly forbids `SET ROLE authenticated`. Do not implement Phase 2 DB identity until the role/GUC approach is decided and tested.
+2. **Vercel CLI auth expired:** `vercel whoami`, `vercel projects ls` and protection-enable commands now fail with `login_required`/`forbidden`. Do not attempt interactive login without operator direction. Re-authenticate through the operator's approved method.
+3. **Preview SSO protection is off:** re-enable it after re-authentication. The current Preview and auto-promoted Production deployment are static with no data or secrets, but they are publicly reachable.
+4. **First deployment auto-promoted to Production:** Vercel assigned the first deployment to Production despite the default command. No production release was approved; operator should decide how to handle the production alias.
+5. **No Vercel-attested Git SHA:** local CLI deployment metadata lacks a Git commit. Source commit `2765155` is known from the clean tree at build time, but `vercel inspect` cannot independently attest it. Future deployments should use Git-connected deployment metadata.
+6. **Development dependency advisories:** 16 moderate `minimatch` advisories in the ESLint toolchain; production dependency audit is clean. Revisit when upstream packages publish compatible fixes; do not use a forced breaking downgrade.
+7. **No Phase 2+ functionality:** no API, database, auth, agent, SDK, probe worker, protocol package or working verifier exists. Do not describe those as implemented.
 
 ## Things not to change
 
@@ -126,4 +152,4 @@ The first frontend must be a navigable skeletal shell, deployed to Preview in Ph
 
 ## Exact next task
 
-**Phase 0 only: perform a read-only inventory of the operator's existing repository/workspace and deployment configuration. Do not modify files, install packages, run migrations, create projects, deploy, commit, print secrets or choose a new repository. Report the current structure, stack, entry points, database/auth/deployment status, reusable parts, conflicts with this blueprint, risks and the smallest safe implementation mapping in your agent response. Do not create `REPOSITORY_AUDIT.md` or any other file during Phase 0. STOP and report findings for operator review. After the operator reviews the report, wait for explicit authorization before writing an audit file or starting Phase 1.**
+**Phase 2 only, awaiting explicit operator authorization.** Resolve ADR-001 first, then implement the backend/data/auth foundation as specified in `IMPLEMENTATION_PLAN.md` Phase 2. Do not start Phase 2 from this checkpoint.
