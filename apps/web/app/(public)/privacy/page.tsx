@@ -16,11 +16,12 @@ export default function PrivacyPage() {
         description="This page is a structural placeholder. Operator-approved privacy content is required before production; this text is not a legal policy."
       />
 
-      <PlaceholderNotice title="Phase 2 data boundary">
+      <PlaceholderNotice title="Current data boundary">
         <p>
-          Phase 2 includes Supabase Auth sessions and a provider API/database foundation. There is
-          no evidence-data workflow, analytics integration or evidence upload in this phase. Do not
-          submit personal data, credentials or incident evidence through placeholder screens.
+          This staging deployment includes Supabase Auth sessions, provider host and
+          evidence-session records, signed observations and sealed bundles. The browser verifier
+          processes a selected bundle locally and does not upload it. No third-party analytics is
+          included. Do not use real customer data, credentials or production evidence in staging.
         </p>
       </PlaceholderNotice>
 

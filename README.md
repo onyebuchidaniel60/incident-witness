@@ -30,7 +30,13 @@ harness in `tools/demo-harness`. The CLI validates schema/version, manifest dige
 key/signature, source certificates, event signatures/digests and deterministic ordering without any
 network request. The harness runs a fully labelled simulated power-pattern lifecycle against the
 staging database, seals/downloads the bundle, verifies it and demonstrates one-byte tamper detection.
-Phase 3F is implemented and tested; operator acceptance is pending.
+Phase 3F is accepted and closed.
+
+Phase 4 connects the provider workspace to the staging API: Supabase-authenticated API calls, host
+list/create/detail, DNS challenge and endpoint verification, enrollment-code display, host key
+revocation and archival, evidence-session list/create/detail, renter invitations, source health,
+timeline, end/seal/download and the local browser bundle verifier. The UI remains structurally plain
+because the final visual design is not approved. The API is still not deployed to Render.
 
 Phase 3B host/incident domain APIs are accepted and closed. The API supports owner-scoped host CRUD,
 DNS TXT endpoint verification with public-IP/SSRF checks, host enrollment and signed operational
@@ -40,7 +46,7 @@ enrollment, key revocation, host archival, audit events and `Idempotency-Key` ha
 Phase 2 backend/data/auth foundations remain in place: the Fastify API foundation, the Drizzle
 schema and SQL migrations for the 14 approved tables, restricted `iw_api`/`iw_worker` roles, RLS
 policies, Supabase JWT verification and Supabase email OTP sign-in. Provider routes are protected by
-the web auth guard; the data-backed web pages remain explicitly labelled placeholders.
+the web auth guard and now use real API data.
 
 Public routes are `/`, `/login`, `/verify`, `/docs`, `/privacy`, `/terms`, and the not-found route.
 Protected placeholder routes are `/dashboard`, `/hosts`, `/hosts/new`, `/hosts/[hostId]`,
@@ -90,8 +96,11 @@ API unit suites. The Phase 3B API integration suite is run explicitly with
 `npm run test:integration --workspace @incident-witness/api` because it requires staging
 credentials and must never be run against production. The probe-worker database/RLS integration test
 runs explicitly with `npm run test:integration --workspace @incident-witness/probe-worker`.
-`npm run test:e2e` runs the Playwright public-route, auth-redirect, navigation and footer checks at
-desktop and mobile viewport sizes.
+`npm run test:e2e` starts a local test-mode API and Next.js development server, then runs the
+Playwright public-route, auth-redirect, navigation, footer, provider lifecycle and local-verifier
+checks at desktop and mobile viewport sizes. The E2E servers use test-only authentication and DNS
+adapters (`IW_E2E_*`/`NEXT_PUBLIC_IW_E2E_*`) that are unavailable in production mode; they never use
+production credentials or production data.
 
 The database migration runner uses `DATABASE_URL_MIGRATOR`. The API and probe worker use the
 restricted `DATABASE_URL_IW_API` and `DATABASE_URL_IW_WORKER` roles. See `docs/CONFIGURATION.md`
@@ -101,9 +110,10 @@ Local Phase 3C verification on 2026-10-31 passed lint, typecheck, build, 20 prot
 12 correlator tests, 14 ADR-001 database tests, 17 API unit tests, 57 API integration tests and
 36 Playwright checks. Phase 3D added 49 host-agent tests. Phase 3E added 14 renter-SDK tests,
 20 probe-worker unit tests, one probe-worker database/RLS integration test and one correlator
-regression check for probe-service errors. Phase 3F adds 11 CLI verifier tests and two staging demo
-harness tests (158 unit tests total), plus a 57/57 API integration re-run and 1/1 probe-worker
-integration re-run. Actual results and remaining blockers are recorded in `AI_HANDOFF.md`.
+regression check for probe-service errors. Phase 3F added 11 CLI verifier tests and two staging demo
+harness tests. Phase 4 adds four API test-seam guard tests and a full-stack Playwright provider flow
+plus local-verifier checks (162 unit tests total; 42 Playwright checks, 41 passed and one mobile
+provider-flow skip). Actual results and remaining blockers are recorded in `AI_HANDOFF.md`.
 
 ### Renter SDK and probe worker
 
@@ -199,6 +209,12 @@ bundle is invalid or was modified. Exit code `2` means the bundle file is missin
 trust set cannot be loaded. The pinned public-key set is
 [`tools/iw-verify/trusted-platform-keys.json`](./tools/iw-verify/trusted-platform-keys.json); it
 contains public keys only. Use `--trust <path>` for a separately operated trust set.
+
+The public `/verify` page uses the same protocol browser export and a pinned public-key set in
+`apps/web/lib/verify/trusted-platform-keys.ts`. It reads the selected file with the browser File API
+and performs all checks locally; it does not upload the bundle or call the API. The page reports
+schema, manifest digest, pinned platform key/signature, source certificates, event
+signatures/digests, ordering and bundle consistency separately, and always shows the limitations.
 
 ### Synthetic integration demo
 

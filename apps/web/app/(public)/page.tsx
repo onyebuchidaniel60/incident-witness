@@ -6,17 +6,17 @@ const sources = [
   {
     title: "Provider host",
     detail:
-      "A future Linux x86_64 host agent will record bounded, typed observations such as heartbeats and available power or GPU signals.",
+      "The Linux x86_64 host agent records bounded, typed observations such as heartbeats and available power or GPU signals. Missing sensors are reported as unavailable.",
   },
   {
     title: "Renter client",
     detail:
-      "A future incident-scoped SDK will record workload-side heartbeats and endpoint observations without collecting workload content.",
+      "The incident-scoped SDK records workload-side heartbeats and endpoint observations without collecting workload content, prompts or model data.",
   },
   {
     title: "Platform probe",
     detail:
-      "A future platform-operated worker will check the provider's verified HTTPS health endpoint. It is not an independent third-party organisation.",
+      "A separate platform-operated worker checks the provider's verified HTTPS health endpoint. It is not an independent third-party organisation.",
   },
 ];
 
@@ -40,24 +40,25 @@ export default function HomePage() {
             href="/verify"
             className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-100"
           >
-            View verifier placeholder
+            Verify a bundle
           </Link>
           <Link
             href="/dashboard"
             className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-100"
           >
-            View workspace placeholders
+            Open provider dashboard
           </Link>
         </div>
       </section>
 
       <section className="rounded-lg border border-amber-300 bg-amber-50 p-5 text-sm leading-6 text-amber-950">
-        <h2 className="font-semibold">Phase 2 status</h2>
+        <h2 className="font-semibold">Current functionality</h2>
         <p className="mt-2">
-          The database, API foundation and Supabase Auth are connected. The host agent, renter SDK,
-          platform probe, evidence ingestion and working verifier are not connected. Provider data
-          workflows remain placeholders, and nothing on this site creates, stores or verifies
-          incident evidence yet.
+          The provider workspace, host/endpoint lifecycle, signed evidence ingestion, deterministic
+          assessment, bundle sealing and local browser/CLI verification are implemented against the
+          staging environment. Provider data is loaded from the authenticated API; there is no
+          fabricated host or evidence status. The API is not yet deployed to Render, and this public
+          site does not operate a production evidence service.
         </p>
       </section>
 
@@ -86,8 +87,8 @@ export default function HomePage() {
               sensor was truthful, a host was uncompromised or a cause is certain.
             </li>
             <li>
-              Missing UPS, GPU or renter observations are represented as unavailable or gaps, not
-              as normal readings.
+              Missing UPS, GPU or renter observations are represented as unavailable or gaps, not as
+              normal readings.
             </li>
             <li>
               Capture is bounded to an active session. The MVP does not reconstruct incidents that
@@ -101,18 +102,19 @@ export default function HomePage() {
         </div>
         <div>
           <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
-            Intended verification model
+            Verification model
           </h2>
           <p className="mt-4 text-sm leading-6 text-slate-700">
-            A future exported JSON bundle is intended to carry a signed manifest, source
-            certificates, bounded events, gap notices, a rule version and an assessment expressed
-            as an evidence pattern. Verification is intended to run locally in the browser or a
-            CLI against pinned trusted public keys. It will check integrity and signatures relative
-            to those keys, not sensor truth or marketplace acceptance.
+            An exported JSON bundle carries a signed manifest, source certificates, bounded events,
+            gap notices, a rule version and an assessment expressed as an evidence pattern.
+            Verification runs locally in the browser or the CLI against pinned trusted public keys.
+            It checks integrity and signatures relative to those keys, not sensor truth or
+            marketplace acceptance.
           </p>
           <p className="mt-3 text-sm leading-6 text-slate-700">
-            The public verifier is a structural placeholder in Phase 2. No file upload, network
-            submission or cryptographic verification is implemented.
+            The browser verifier processes the selected file locally; it does not upload the bundle.
+            A valid result means the listed cryptographic checks passed, not that a physical cause
+            is proven.
           </p>
         </div>
       </section>

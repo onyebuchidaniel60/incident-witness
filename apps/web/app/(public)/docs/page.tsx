@@ -21,11 +21,12 @@ export default function DocsPage() {
       <section className="rounded-lg border border-amber-300 bg-amber-50 p-5 text-sm leading-6 text-amber-950">
         <h2 className="font-semibold">Current phase</h2>
         <p className="mt-2">
-          Phase 2 adds a Fastify API foundation, the PostgreSQL schema and RLS policies, and
-          Supabase Auth email OTP. It does not include host-agent or renter SDK packages, a platform
-          probe, evidence ingestion, a working bundle verifier or the domain API. The documents
-          describe the approved design and planned phases; they are not claims that those features
-          are live.
+          Phase 3 is complete: the signed evidence protocol, host agent, renter SDK, platform probe
+          worker, deterministic correlator and sealed bundle lifecycle are implemented. Phase 4
+          connects the provider workspace, host and incident management and the local browser
+          verifier to the staging API. The API is not yet deployed to Render, and no production
+          evidence service or legal policy is live. The repository documents remain the source of
+          truth.
         </p>
       </section>
 

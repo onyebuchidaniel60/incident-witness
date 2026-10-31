@@ -8,11 +8,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Incident Witness — structural shell",
+    default: "Incident Witness",
     template: "%s | Incident Witness",
   },
   description:
-    "Incident Witness is a portable incident-evidence protocol for decentralized compute. This is the Phase 2 foundation frontend.",
+    "Incident Witness is a portable incident-evidence protocol for decentralized compute. Collect source-attributed observations, seal a signed evidence bundle and verify it locally.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
