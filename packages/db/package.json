@@ -18,7 +18,8 @@
     "test": "vitest run --config vitest.config.ts",
     "migrate": "tsx src/migrate.ts",
     "migrate:status": "tsx src/migrate.ts --status",
-    "provision-roles": "tsx src/provision-roles.ts"
+    "provision-roles": "tsx src/provision-roles.ts",
+    "provision-platform-key": "tsx src/provision-platform-key.ts"
   },
   "dependencies": {
     "dotenv": "18.0.9",

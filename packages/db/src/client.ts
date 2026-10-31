@@ -11,8 +11,14 @@ export type TransactionContext = {
   db: Database;
 };
 
+export type ApiTransactionMode =
+  | "provider"
+  | "machine_ingest"
+  | "machine_enroll"
+  | "system_lifecycle";
+
 export type ApiTransactionOptions = {
-  mode: "provider" | "machine_ingest" | "system_lifecycle";
+  mode: ApiTransactionMode;
   subject?: string;
   gucs?: Record<string, string>;
 };
@@ -21,6 +27,9 @@ const allowedGucNames = new Set([
   "request.jwt.claim.sub",
   "iw.request_mode",
   "iw.credential_hash_hex",
+  "iw.enrollment_token_hash_hex",
+  "iw.invitation_token_hash_hex",
+  "iw.owner_user_id",
   "iw.source_key_id",
   "iw.incident_id",
   "iw.host_id",
@@ -41,6 +50,17 @@ export function createWorkerPool(): Pool {
     max: 5,
     application_name: "incident-witness-worker",
   });
+}
+
+export async function setTransactionGuc(
+  client: PoolClient,
+  name: string,
+  value: string,
+): Promise<void> {
+  if (!allowedGucNames.has(name) || name === "iw.request_mode") {
+    throw new Error(`Unsupported transaction GUC: ${name}`);
+  }
+  await client.query("select set_config($1, $2, true)", [name, value]);
 }
 
 export async function assertRuntimeRole(
@@ -89,10 +109,7 @@ export async function withApiTransaction<T>(
     }
 
     for (const [name, value] of Object.entries(options.gucs ?? {})) {
-      if (!allowedGucNames.has(name) || name === "iw.request_mode") {
-        throw new Error(`Unsupported transaction GUC: ${name}`);
-      }
-      await client.query("select set_config($1, $2, true)", [name, value]);
+      await setTransactionGuc(client, name, value);
     }
 
     const db = drizzle(client, { schema });

@@ -24,6 +24,7 @@
     "db:migrate": "npm run migrate --workspace @incident-witness/db",
     "db:migrate:status": "npm run migrate:status --workspace @incident-witness/db",
     "db:provision-roles": "npm run provision-roles --workspace @incident-witness/db",
+    "db:provision-platform-key": "npm run provision-platform-key --workspace @incident-witness/db",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
