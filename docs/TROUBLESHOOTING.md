@@ -1,6 +1,7 @@
-# Troubleshooting Guide (Planned)
+# Troubleshooting Guide
 
-This guide describes expected user-facing error categories. Exact UI copy and commands will be added after implementation and testing; do not run guessed install commands.
+This guide describes current user-facing error categories. Host-agent commands are documented in
+`HOST_AGENT.md`; do not run guessed install commands or paste secrets into support threads.
 
 | Symptom | Likely cause | Safe action |
 |---|---|---|
@@ -9,10 +10,12 @@ This guide describes expected user-facing error categories. Exact UI copy and co
 | Host endpoint cannot verify | No public route, invalid TLS certificate, wrong health path/status, private DNS target | Confirm hostname/HTTPS 443 and fixed health path; NAT-only host is outside MVP |
 | Unsafe endpoint rejected | Hostname resolves to private/reserved/metadata address | Do not bypass guard; use a dedicated public endpoint that meets policy |
 | Enrollment code rejected | Expired, previously redeemed, wrong host or malformed code | Issue a new code; old one remains invalid |
-| Host agent stays offline | API URL/network, credential revoked, agent stopped, local permission or clock issue | Check local agent status and safe error code; never paste credential/private key into support chat |
+| Host agent stays offline | API URL/network, credential revoked, agent stopped, local permission or clock issue | Run `iw-agent status`; check the safe halt flag/error code; never paste credential/private key into support chat |
+| Agent upload halted on a 4xx error | Signature/schema/scope validation failure, revoked key or closed incident | Read the safe code in the agent log; do not delete queued events or retry blindly; fix the cause or re-enroll |
+| Presence sequence rejected | Local spool restored from an older copy, duplicated agent process or clock issue | Stop duplicate agents; do not reset the spool counter; revoke/re-enroll only if the key is compromised |
 | GPU telemetry unavailable | `nvidia-smi` absent, device/driver not available or command timeout | Dashboard should show unavailable; this is not proof of a GPU fault |
 | UPS telemetry unavailable | NUT not installed/configured or UPS unreachable | Dashboard should show unavailable; do not interpret as stable power |
-| Agent spool is full | API unavailable for an extended period or local disk quota reached | Restore connectivity/check disk; agent reports data gap; do not delete spool manually unless user accepts evidence loss |
+| Agent spool is full | API unavailable for an extended period or local disk quota reached | Restore connectivity/check disk; the agent drops oldest non-critical observations first and reports a gap; do not delete the spool manually unless the user accepts evidence loss |
 | Renter invitation expired | 15-minute TTL passed or invitation already redeemed | Provider issues a new invitation |
 | Renter observations absent | SDK not joined, runtime stopped or API unavailable | Check renter SDK status and invitation; absence is a gap, not evidence of normal workload |
 | Probe is missing | Worker unavailable, DNS/TLS failure, lease backlog or target not reachable | Check platform worker health; service failure is not classified as host outage |

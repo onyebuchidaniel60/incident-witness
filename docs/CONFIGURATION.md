@@ -65,14 +65,20 @@ The command reads the private key and key ID from the environment, writes only t
 
 ## Host agent local configuration
 
-| Setting | Secret? | Purpose |
+The host agent does not read credentials, the enrollment code or telemetry from environment
+variables. `iw-agent enroll` prompts for the one-time code and writes an owner-only configuration
+directory (default `~/.config/incident-witness/`, mode `0700`; files `0600`):
+
+| File | Secret? | Purpose |
 |---|---|---|
-| `IW_API_BASE_URL` | no | Approved API origin |
-| `IW_HOST_ID` | no | Enrolled host identifier |
-| `IW_DEVICE_CREDENTIAL` | yes | Revocable host ingestion credential; store with owner-only file permission |
-| `IW_DEVICE_PRIVATE_KEY_PATH` | path to secret | Local Ed25519 private key path; never sync or share |
-| `IW_NVIDIA_SMI_PATH` | no | Optional known executable path, not user-supplied shell string |
-| `IW_NUT_DEVICE` | no | Optional local configured NUT device alias |
+| `config.json` | no | API origin, enrolled host ID, source key ID and optional UPS alias |
+| `device-key.pem` | yes | Local Ed25519 private key; never transmitted |
+| `device-credential` | yes | Revocable host ingestion credential |
+| `spool.sqlite` | contains signed evidence | Local 50 MiB spool with durable event and presence sequences |
+
+Run with `iw-agent run --incident <uuid>`; operational presence runs without an incident, but
+evidence collectors require the active incident ID. See `HOST_AGENT.md`. Do not put any of these
+values in the web/API `.env` file.
 
 ## Migration/CI variables
 

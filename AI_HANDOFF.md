@@ -2,11 +2,11 @@
 
 **Last updated:** 2026-10-31
 
-**Project status:** Phase 0, Phase 1, Phase 2, Phase 3A, Phase 3B and Phase 3C are complete and accepted. Phase 3D Linux host agent implementation is in progress under explicit operator authorization.
+**Project status:** Phase 0, Phase 1, Phase 2, Phase 3A, Phase 3B and Phase 3C are complete and accepted. Phase 3D Linux host agent is implemented and locally tested; the Phase 3D checkpoint is pending operator acceptance.
 
-**Current phase:** Phase 3D — Linux host agent — IN PROGRESS.
+**Current phase:** Phase 3D — IMPLEMENTED, PENDING OPERATOR ACCEPTANCE.
 
-**Next task:** Complete Phase 3D only; do not start Phase 3E.
+**Next task:** Phase 3E only — awaiting explicit operator authorization.
 
 **Phase 2 acceptance:** Operator accepted the Phase 2 checkpoint and approved the `public.iw_uid()` security-definer wrapper on 2026-10-31.
 
@@ -41,13 +41,16 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 - `jose` JWT verification against Supabase JWKS; issuer, audience, expiry and UUID subject checks.
 - Accepted ADR-001 mechanism: API connects as restricted `iw_api`, sets transaction-local JWT subject and request mode, and never uses `SET ROLE authenticated`.
 - Supabase's staging `auth` schema is owned by `supabase_admin`; the migrator cannot grant `auth` USAGE to `iw_api`. Policies therefore call a narrow `SECURITY DEFINER` wrapper `public.iw_uid()` which calls `auth.uid()`. No role switch, service-role connection or auth-schema grant to `iw_api` is used. **Operator approved this wrapper on 2026-10-31.**
-- Linux host agent, renter SDK, platform probe worker and CLI verifier are **not implemented** (Phase 3D+).
+- Linux host agent (`packages/host-agent`, executable `iw-agent`) implements interactive enrollment, local Ed25519 key generation, owner-only credential storage, a durable SQLite spool, operational-presence and evidence heartbeats, fixed-argument `nvidia-smi`/`upsc` collectors and bounded retry/backoff. Renter SDK, platform probe worker and CLI verifier are **not implemented** (Phase 3E+).
 
 ## Repository state
 
 - **Repository URL:** confirmed public — https://github.com/onyebuchidaniel60/incident-witness
 - **Working directory/repo root:** `/root/incident-witness`
 - **Branch:** `main`
+- **Phase 3D commits:**
+  - `ab15e73` — `feat(agent): add enrollment and durable local spool`
+  - `eb46321` — `feat(agent): add safe collectors and upload loop`
 - **Phase 3C commits:**
   - `ebf6ab7974a5ed8f25f725880cb01f35fb2592d8` — `feat(correlator): add deterministic assessment rules`
   - `1c4905c575e029690b878b3f0a6b98ff2066b63a` — `feat(db): add phase 3c evidence access policies`
@@ -141,9 +144,84 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 - Migrations `0013`–`0017` add only grants/RLS policies for machine event reads, scoped incident locks, provider/system bundle inserts, platform-key lookup, system finalization visibility and the auto-end transition. No table or column definitions changed.
 - The machine incident policy avoids RLS recursion and prevents a host key from locking another host's incident; renter key scope is validated before the incident lock.
 
+## Completed in Phase 3D (pending operator acceptance)
+
+### Package and CLI
+
+- New workspace package `@incident-witness/host-agent` with executable `iw-agent`.
+- Commands: `enroll`, `run`, `status`, `version` and `help`.
+- Enrollment code is read interactively with terminal echo disabled; it is never accepted as a
+  command-line argument or environment variable and is not logged.
+- Ed25519 keypair generated locally with `node:crypto`. Only the public key is sent to
+  `POST /v1/agent/enroll`. The returned source certificate is validated against the local public key,
+  source key and host scope.
+- Configuration directory defaults to `~/.config/incident-witness/` (XDG-aware) and is forced to
+  `0700`. `config.json`, `device-key.pem`, `device-credential` and the SQLite spool are `0600`.
+  Secret paths reject symlinks, verify ownership and repair group/other-readable permissions.
+- Existing key material is never overwritten. Enrollment files are rolled back if a later local
+  write fails, and the operator is told to revoke/reissue if the server succeeded but local storage
+  failed.
+
+### Durable local spool
+
+- `better-sqlite3@13.0.3`, WAL mode, `synchronous=FULL`, busy timeout, `integrity_check` on open and
+  a bounded journal size. A corrupt spool fails closed; counters are never reset.
+- 50 MiB logical quota over exact canonical signed envelopes. Oldest non-critical observations
+  (heartbeats/periodic GPU summaries) are dropped first; power transitions and agent status are
+  preserved. If a critical record cannot fit, it is not queued and health becomes degraded.
+- Event and presence sequences are separate counters in SQLite metadata. The next value is committed
+  in an `IMMEDIATE` transaction before signing, so a crash leaves a gap rather than a reused number.
+- Closed incidents are recorded in a durable block table. Their local events are retained but not
+  uploaded again.
+
+### Presence and evidence
+
+- Operational presence every 15 seconds to `POST /v1/agent/heartbeat` using the domain-separated
+  `incident-witness-host-presence-v1\n` signature and its own durable monotonic sequence. It never
+  enters the evidence spool or a bundle.
+- Evidence `host_heartbeat` every 30 seconds when `run --incident <uuid>` is supplied, using the
+  shared durable event sequence.
+- `host_agent_status` `started`/`stopped` records queued as critical state transitions during a
+  configured incident.
+- The current API has no agent-scoped session-discovery route. The operator supplies the active
+  incident ID explicitly; this integration gap is documented and must be handled in the Phase 4
+  provider UI rather than hidden.
+
+### Collectors
+
+- `nvidia-smi` every 30 seconds with fixed executable and fixed argument array, device index 0 only,
+  `execFile` with `shell: false`, 2-second timeout and 64 KiB maximum output. Command failure,
+  malformed output and `[N/A]` fields produce `unavailable`/`partial`; no values are fabricated.
+- Optional NUT `upsc <validated-alias>` polled every 5 seconds, emitted on state transition and at
+  most once per 60 seconds when unchanged. Fixed `execFile` invocation, 2-second timeout and 64 KiB
+  output cap. `OL`/`OB`/`LB` map to explicit states; failure or malformed output is `unavailable`.
+- No `child_process.exec`, shell interpolation, arbitrary executable/arguments, system logs,
+  environment-variable telemetry or free-form payloads.
+
+### Upload and retry
+
+- FIFO upload of exact canonical envelope bytes with the host bearer credential.
+- Network errors, `429` and `5xx` retry with jittered exponential backoff (1 second base, 5 minute
+  cap) without deleting the event.
+- `4xx` validation/credential/key errors halt the uploader, log only a safe code and stop evidence
+  collectors; queued evidence is retained.
+- `409 INCIDENT_CLOSED` blocks that incident and stops its evidence collectors without deleting local
+  events.
+- Graceful `SIGINT`/`SIGTERM` queues a stopped status event where the incident is still open, attempts
+  a bounded flush and closes the spool.
+
+### Tests added
+
+- 49 host-agent tests covering spool persistence and restart, quota drop order and critical-record
+  preservation, durable event/presence sequence recovery, WAL/permissions/integrity failure,
+  presence signing and anti-replay, enrollment success/rejection/certificate mismatch and file
+  permissions, fixed collector invocation and malformed/timeout output, retry/backoff classification,
+  `INCIDENT_CLOSED`, credential rejection, event signature verification, graceful stop, log redaction
+  and an end-to-end local HTTP mock of enroll → presence → signed event upload → outage retry.
+
 ## Visible behaviour vs placeholders
 
-**Functional locally against staging:**
+**Functional locally (staging API or local mock):**
 
 - All Phase 3B host/incident/enrollment/renter/key/archive routes.
 - Signed host and renter event ingestion with canonical-byte rejection, signature verification, time-window checks and atomic budgets.
@@ -153,30 +231,45 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 - Sweeper auto-seal and `NO_EVIDENCE` cancellation.
 - Demo-session labelling and grade cap.
 - Owner isolation for bundles and incidents.
+- Host-agent enrollment, owner-only key/credential storage, signed operational presence, evidence spooling, fixed GPU/UPS collectors and upload/retry against a local mock of the documented API. Signed events verify against the generated public key.
 
 **Placeholder or unverified:**
 
-- Linux host agent, renter SDK, platform probe worker and CLI verifier are **not implemented** (Phase 3D–3F).
-- Event ingestion is tested with generated test keys/events, not an actual agent or SDK.
+- Renter SDK, platform probe worker and CLI verifier are **not implemented** (Phase 3E–3F).
+- The Phase 3D agent has not enrolled a real disposable host or reached a live staging incident. Its end-to-end test uses a local HTTP mock; real `nvidia-smi` and `upsc` execution is not run in CI.
+- Event ingestion against staging remains tested with generated test keys/events; an actual agent/SDK has not submitted to a live incident.
 - No real platform-probe observations or worker leases are produced; probe-lease behavior is tested with seeded rows.
 - Web host/incident/timeline/bundle pages remain Phase 1 placeholders and are not wired to these APIs (Phase 4).
-- API is not deployed to Render; no new Vercel deployment for Phase 3C.
+- API is not deployed to Render; no new Vercel deployment for Phase 3C/3D.
 - Source-certificate verification uses the current configured platform key. Platform-key rotation with old source certificates is not yet exercised.
 
 ## Tests and evidence
 
 Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 
-- `npm run db:migrate` — **PASS**: applied `0013`–`0017` after `0001`–`0012`.
-- `npm run db:migrate:status` — **PASS**: all migrations `0001`–`0017` applied.
-- `npm run lint` — **PASS** across protocol, correlator, db, API and web.
-- `npm run typecheck` — **PASS** across protocol, correlator, db, API and web.
-- `npm run build` — **PASS**: protocol ESM/CJS/declarations, correlator, DB, Fastify API and Next.js 16.4.3.
-- `npm test` — **PASS**: 20/20 protocol tests, 12/12 correlator tests, 14/14 ADR-001 staging tests, 17/17 API unit tests.
-- `npm run test:integration --workspace @incident-witness/api` — **PASS**: 57/57 API integration tests across Phase 3B and Phase 3C.
-- `npm run test:e2e` — **PASS**: 36/36 Playwright checks (desktop Chromium + mobile Pixel 7).
+- `npm run lint` — **PASS** across protocol, host-agent, correlator, db, API and web.
+- `npm run typecheck` — **PASS** across protocol, host-agent, correlator, db, API and web.
+- `npm run build` — **PASS**: protocol ESM/CJS/declarations, host-agent CLI, correlator, DB, Fastify API and Next.js 16.4.3.
+- `npm test` — **PASS**: 20/20 protocol tests, 12/12 correlator tests, 14/14 ADR-001 staging tests, 49/49 host-agent tests, 17/17 API unit tests (112 total).
+- `npm test --workspace @incident-witness/host-agent` — **PASS**: 49/49 host-agent tests across 9 files.
+- `node packages/host-agent/dist/cli.js version` — **PASS**: `iw-agent 0.1.0`; help output renders.
 - `npm audit --omit=dev` — **PASS**: 0 production vulnerabilities.
 - Full dependency audit still reports 20 moderate development-only advisories (ESLint/esbuild tooling); no non-breaking fix is available without a forced breaking downgrade.
+- `npm run test:integration --workspace @incident-witness/api` — **NOT RE-RUN in Phase 3D**: no API, DB, protocol or web files changed. The Phase 3C run remains 57/57 PASS.
+- `npm run test:e2e` — **NOT RE-RUN in Phase 3D**: no frontend files changed. The Phase 3C run remains 36/36 PASS.
+- Real staging/disposable-host enrollment and real `nvidia-smi`/`upsc` execution — **NOT RUN**: no accessible DNS-verified disposable host; CI deliberately uses injected collectors and a local HTTP mock.
+
+### Phase 3D host-agent coverage
+
+- Spool persistence across restart; durable event and presence sequence allocation without reuse after a simulated crash.
+- 50 MiB quota drop order: oldest non-critical observations dropped first; critical transitions preserved; critical-only overflow rejected.
+- WAL mode, `0600` spool file mode, integrity-check failure on corrupt input, blocked-incident skipping.
+- Presence signature verification with the domain separator; independent sequences; restart continuity; sequence consumption on network failure; halt on credential rejection.
+- Enrollment request shape, local key/credential/config file permissions, certificate mismatch rejection, server rejection mapping and no-overwrite protection.
+- Fixed collector invocation with exact `nvidia-smi`/`upsc` arguments, timeout and output caps; malformed and unavailable output; alias injection rejection; static check that `exec.ts` uses `execFile` with `shell: false` and no `exec(`.
+- Retry on network/429/5xx with jittered exponential backoff; no retry on 4xx; halt on revoked credentials; `INCIDENT_CLOSED` blocks only that incident.
+- Agent signs heartbeats, GPU and UPS events; uploaded envelopes verify with the generated public key; graceful stop emits a stopped status; status output contains no secret material.
+- Local HTTP mock workflow: interactive-equivalent enrollment, presence anti-replay, canonical signed event upload, 503 outage retained in spool and resumed without duplicate sequence.
 
 ### Phase 3C integration coverage
 
@@ -215,28 +308,36 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - **Design references:** NOT COLLECTED/APPROVED.
 - **Mockups:** NOT CREATED.
 - **Operator approval:** NOT GRANTED.
-- Phase 3C did not change frontend styling or visual behaviour.
+- Phase 3C and Phase 3D did not change frontend styling or visual behaviour.
 
 ## Documentation/footer status
 
-- `docs/API_REFERENCE.md` updated with event ingestion, sealing, bundle download, error codes and correlator rules.
-- `docs/PROTOCOL.md` updated with rule version `iw-rules-v1`, correlation windows and digest semantics.
-- `README.md` updated with Phase 3C status and test counts.
+- `docs/HOST_AGENT.md` rewritten with Phase 3D CLI, configuration, permissions, spool/quota, collectors, retry and limitations.
+- `docs/CONFIGURATION.md` updated: host-agent configuration is file/CLI-based, not web/API environment variables.
+- `docs/TROUBLESHOOTING.md` updated with host-agent status, spool, 4xx and presence-replay guidance.
+- `docs/API_REFERENCE.md` updated to show the host agent consumes the existing contracts without adding API routes.
+- `README.md` updated with Phase 3D status, host-agent build/run entry points and test counts.
+- `.env.example` no longer suggests host credentials/private keys belong in the web/API environment file.
 - `/docs` route and footer Documentation/GitHub links remain unchanged and reachable from Phase 2.
 - `/privacy` and `/terms` remain clearly labelled placeholders; no legal copy is approved.
 
 ## Known risks and operator actions
 
-1. **Phase 3C accepted:** signed ingestion, correlation, sealing and bundle download were accepted by the operator on 2026-10-31 and are closed.
-2. **No agent/SDK/probe/CLI yet:** Phase 3D host-agent implementation is in progress; the renter SDK and platform probe worker remain Phase 3E. The platform probe worker does not exist, so probe observations and leases are simulated with seeded test rows.
-3. **Platform-key rotation:** source certificates are verified against the current configured platform key. A future rotation must preserve old certificate verification or re-enroll source keys; this is not yet exercised.
-4. **Manual end clamp:** `endedAt` is clamped to the latest accepted observation to keep the capture window consistent. `captureEndsAt` remains the bounded scheduled end due the Phase 2 minimum-2-minute constraint.
-5. **Demo cap:** demo sessions are labelled and capped at `LOW` even when their events are real; this is conservative and matches the permanent simulation-label requirement.
-6. **API not deployed:** no Render API deployment or new Vercel deployment for Phase 3C. Local staging verification only.
-7. **Event rejection auditing:** rejected events are not inserted into `audit_events`; the API returns safe error codes and does not log payloads/signatures. Revisit in Phase 9 if DB-level security audit of rejects is required.
-8. **Development advisories:** 20 moderate development-only npm advisories remain; `npm audit --omit=dev` is clean.
-9. **Fastify deprecation warning:** `requestIdLogLabel` is deprecated in Fastify 5 and will be removed in Fastify 6. Existing Phase 2 configuration; non-blocking.
-10. **No Phase 4 UI integration:** the web pages do not yet display events, assessments or bundle downloads.
+1. **Phase 3D pending acceptance:** host agent enrollment, spool, presence/evidence loops, collectors and upload are implemented and locally tested; the operator has not accepted the checkpoint. Do not start Phase 3E.
+2. **No agent session discovery:** the API has no agent-scoped route that lists active incidents. The operator must pass `--incident <uuid>` to `iw-agent run`. Phase 4 must integrate this value into the provider UI; do not hide the manual step or claim automatic session detection.
+3. **No live host acceptance:** no disposable DNS-verified host with a public HTTPS endpoint was available. Enrollment/upload was verified against a local HTTP mock of the documented contracts. Real `nvidia-smi`/`upsc` execution and real staging enrollment remain unverified.
+4. **No release packaging:** there is no signed binary, installer or systemd unit. The agent is built from the repository and run as a foreground process under the operator's supervisor.
+5. **Single GPU:** `nvidia-smi -i 0` only. Multi-GPU summarisation and per-device events require a later approved change.
+6. **Enrollment certificate trust:** the agent validates certificate shape, source key, public key and host scope, but does not verify the platform certificate signature against a locally pinned platform public key. It relies on the configured HTTPS API and TLS. A pinned platform key or certificate bundle should be added before release.
+7. **Halted uploader recovery:** non-retryable 4xx responses retain the spool and stop evidence collection until the operator fixes the cause and restarts. There is no in-process reset command.
+8. **Platform-key rotation:** source certificates are verified against the current configured platform key. A future rotation must preserve old certificate verification or re-enroll source keys; this is not yet exercised.
+9. **Manual end clamp:** `endedAt` is clamped to the latest accepted observation to keep the capture window consistent. `captureEndsAt` remains the bounded scheduled end due the Phase 2 minimum-2-minute constraint.
+10. **Demo cap:** demo sessions are labelled and capped at `LOW` even when their events are real; this is conservative and matches the permanent simulation-label requirement.
+11. **API not deployed:** no Render API deployment or new Vercel deployment for Phase 3C/3D. Local staging verification only.
+12. **Event rejection auditing:** rejected events are not inserted into `audit_events`; the API returns safe error codes and does not log payloads/signatures. Revisit in Phase 9 if DB-level security audit of rejects is required.
+13. **Development advisories:** 20 moderate development-only npm advisories remain; `npm audit --omit=dev` is clean.
+14. **Fastify deprecation warning:** `requestIdLogLabel` is deprecated in Fastify 5 and will be removed in Fastify 6. Existing Phase 2 configuration; non-blocking.
+15. **No Phase 4 UI integration:** the web pages do not yet display events, assessments or bundle downloads, and cannot yet launch an agent with the active incident ID.
 
 ## Things not to change
 
@@ -251,4 +352,5 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 
 ## Exact next task
 
-**Phase 3D only — Linux host agent — in progress under explicit operator authorization.** Do not start Phase 3E.
+**Phase 3E only — renter SDK and platform probe worker — awaiting explicit operator authorization.**
+Do not start Phase 3E from this checkpoint.

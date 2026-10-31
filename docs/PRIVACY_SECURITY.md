@@ -43,6 +43,8 @@ Ed25519/JCS prove that signed bytes verify against a public key. They do not est
 - Strict bounded schemas, body/queue/bundle caps and rate limits.
 - SSRF-safe fixed HTTPS endpoint probes with DNS challenge, no redirects and pinned validated IP.
 - Fixed local telemetry commands with no shell invocation.
+- Host-agent private key and device credential stored only on the provider host in a `0700` directory with `0600` files; the private key is never transmitted.
+- Host-agent evidence spool capped at 50 MiB locally; operational-presence heartbeats are separate and never written to the evidence spool or bundle.
 - Pino redaction, secret scanning and limited DB roles.
 - Separate Preview and Production services/secrets.
 

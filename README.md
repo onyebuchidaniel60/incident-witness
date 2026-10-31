@@ -8,12 +8,17 @@ Incident Witness is a portable incident-evidence protocol for decentralized comp
 
 ## Project status
 
-Phase 3C API-side signed event ingestion, deterministic correlation and bundle sealing are
-implemented and pending operator acceptance. The API now accepts canonical Ed25519-signed host and
-renter events, enforces incident time windows and atomic evidence budgets, runs the pure
-`@incident-witness/correlator` rule engine, seals an immutable bundle in one transaction, and serves
-the exact bundle to its owner. The host agent, renter SDK, probe worker and CLI verifier remain
-Phase 3D–3F.
+Phase 3C API-side signed event ingestion, deterministic correlation and bundle sealing are accepted
+and closed. The API accepts canonical Ed25519-signed host and renter events, enforces incident time
+windows and atomic evidence budgets, runs the pure `@incident-witness/correlator` rule engine, seals
+an immutable bundle in one transaction, and serves the exact bundle to its owner.
+
+Phase 3D adds the Linux x86_64 host agent in `packages/host-agent`: interactive enrollment with a
+local Ed25519 key, owner-only key/credential storage, a 50 MiB SQLite spool with durable event and
+presence sequences, signed operational-presence heartbeats, evidence heartbeats, fixed-argument
+`nvidia-smi`/`upsc` collectors, and bounded retry/backoff. It is implemented and locally tested;
+operator acceptance of the Phase 3D checkpoint is pending. The renter SDK, probe worker and CLI
+verifier remain Phase 3E–3F.
 
 Phase 3B host/incident domain APIs are accepted and closed. The API supports owner-scoped host CRUD,
 DNS TXT endpoint verification with public-IP/SSRF checks, host enrollment and signed operational
@@ -80,7 +85,23 @@ and the accepted ADR for the role/GUC design.
 
 Local Phase 3C verification on 2026-10-31 passed lint, typecheck, build, 20 protocol tests,
 12 correlator tests, 14 ADR-001 database tests, 17 API unit tests, 57 API integration tests and
-36 Playwright checks. Actual results and any remaining blockers are recorded in `AI_HANDOFF.md`.
+36 Playwright checks. Phase 3D local verification adds 49 host-agent tests (spool persistence and
+quota, durable sequence recovery, presence anti-replay, safe fixed-command collectors, retry/backoff,
+enrollment file permissions and a local mock-API enrollment/upload workflow). Actual results and any
+remaining blockers are recorded in `AI_HANDOFF.md`.
+
+### Host agent
+
+The Phase 3D Linux host agent is built with:
+
+```bash
+npm run build --workspace @incident-witness/host-agent
+node packages/host-agent/dist/cli.js version
+```
+
+Enrollment prompts for the one-time code on standard input; the code is never accepted as an
+argument or environment variable. See [`docs/HOST_AGENT.md`](./docs/HOST_AGENT.md) for enrollment,
+configuration permissions, spool/quota behaviour, fixed collectors and limitations.
 
 ### Database setup
 
