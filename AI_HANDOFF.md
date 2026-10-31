@@ -2,9 +2,9 @@
 
 **Last updated:** 2026-10-31
 
-**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**. Phase 6 reference-driven mockups (revision 0.3) are **APPROVED**. Phase 7 final UI implementation is implemented, tested and deployed; operator acceptance is pending.
+**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**. Phase 6 reference-driven mockups (revision 0.3) are **APPROVED**. Phase 7 final UI implementation is implemented and deployed; the critical magic-link session bug is fixed and verified. Operator acceptance is pending.
 
-**Current phase:** Phase 7 — implemented, tested and deployed. Awaiting operator acceptance; Phase 8 is not authorized.
+**Current phase:** Phase 7 — implemented, tested and deployed; critical auth session bug fixed. Awaiting operator acceptance; Phase 8 is not authorized.
 
 **Next task:** Operator acceptance of the Phase 7 checkpoint. Phase 8 only after explicit authorization.
 
@@ -709,6 +709,50 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - **Preview verification result:** one browser load of `/` returned HTTP 200, `document.fonts.check("16px Satoshi")` was true, the first action button computed to a 4px radius, and there was no horizontal overflow or console error. The Preview subsequently returned Vercel's security checkpoint to automated requests; this is an edge challenge, not an application authentication failure.
 - **Safe staging:** the Preview uses the existing staging Supabase configuration; no production database, platform private signing key, host credential or renter credential is exposed. The local browser verifier remains local-only.
 - **Production note:** no separate `vercel deploy --prod` was run. The Git-connected project auto-created the production deployment from the authorized push. Production release approval remains a separate operator decision under the project rules.
+
+## Critical auth fix — magic-link session loss (2026-10-31)
+
+### Bug
+
+After clicking a Supabase magic link, `/auth/callback` completed but redirected to `/dashboard`, which immediately bounced to `/login`. The session cookie was not present on the redirect.
+
+### Root cause
+
+`apps/web/app/auth/callback/route.ts` created the Supabase client through `createSupabaseServerClient()`, which writes cookies to the `next/headers` store, then returned a **separate** `NextResponse.redirect("/dashboard")`. The `Set-Cookie` headers produced by `exchangeCodeForSession` were not attached to the response actually returned to the browser.
+
+The independent hardening gap was that no Supabase client passed explicit cookie options, so the library defaulted to `path: "/"` and `sameSite: "lax"` but did not set `secure` in production.
+
+### Fix applied
+
+- Added `createSupabaseRouteHandlerClient(response)` in `apps/web/lib/supabase/server.ts`. Its `setAll` writes every Supabase cookie directly to `response.cookies`.
+- The callback route now builds the redirect response first, exchanges the code, and returns that same response.
+- Added `getSupabaseCookieOptions()` and applied it to the route-handler, server, browser and proxy clients: `path: "/"`, `sameSite: "lax"`, `secure: NODE_ENV === "production"`.
+- The callback resolves the redirect origin from `x-forwarded-host` / `Host`, so local development does not set the cookie on one host and redirect to another.
+- `apps/web/proxy.ts` already called `supabase.auth.getUser()` for `/dashboard`, `/hosts`, `/incidents` and `/settings` and refreshed cookies onto the response; it now also uses the explicit cookie options. Its matcher remains scoped to protected paths.
+- `apps/web/components/auth-guard.tsx` remains a server component using `supabase.auth.getUser()`; there is no client-side session race.
+- `@supabase/ssr` remains pinned at `0.12.7`.
+
+### Test coverage
+
+- New `apps/web/tests/e2e/auth-session.spec.ts`:
+  - simulates a successful callback through a test-only `code=e2e-magic-link` seam guarded by `IW_E2E_TEST_AUTH` and non-production `NODE_ENV`;
+  - asserts the session cookie exists with `path=/` and `SameSite=Lax`;
+  - verifies `/dashboard` and `/hosts` do not redirect;
+  - reloads `/dashboard` to prove the session survives a refresh;
+  - verifies the proxy redirects to `/login?next=/dashboard` without a cookie and returns the dashboard with a test-injected cookie;
+  - asserts production cookie options are path-scoped, lax and secure.
+- Full E2E: **50 tests, 49 passed, 1 intentional mobile provider-flow skip**.
+- API integration: **60/60 passed**.
+- Web lint, typecheck and production build: **PASS**.
+
+### Manual verification
+
+- Direct callback request returned `307` with `Set-Cookie: iw_e2e_session=…; Path=/; SameSite=lax` and `Location: http://127.0.0.1:3300/dashboard`.
+- `/dashboard` and `/hosts` returned `200` with that cookie, and the rendered HTML contained “Provider dashboard” and “Your hosts”.
+- The E2E journey also reloads `/dashboard` and confirms the session persists.
+- A real Supabase email magic link still requires an operator-side inbox click; the local automated seam cannot consume the real email. No Supabase project or redirect configuration was changed.
+
+**Phase 7 visual verification was blocked by this auth bug.** Phase 8 was not started.
 
 ## Design reference and approval status
 
