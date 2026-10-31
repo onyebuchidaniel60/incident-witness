@@ -119,7 +119,7 @@ regression check for probe-service errors. Phase 3F added 11 CLI verifier tests 
 harness tests. Phase 4 adds four API test-seam guard tests and a full-stack Playwright provider flow
 plus local-verifier checks. Phase 5 adds platform-probe sealing, sequence-rollback, readiness, worker
 effective-end and telemetry/stale UI coverage. Final results: 164 unit tests, 60 API integration
-tests, 2 probe-worker integration tests, 42 Playwright checks (41 passed, one intentional mobile
+tests, 2 probe-worker integration tests, 44 Playwright checks (43 passed, one intentional mobile
 provider-flow skip) and a clean demo harness. Actual results and remaining blockers are recorded in
 `AI_HANDOFF.md`.
 
@@ -187,10 +187,12 @@ environment-specific detail is recorded in `AI_HANDOFF.md`.
 
 ### Authentication setup
 
-The web login uses Supabase email OTP through the pinned `@supabase/ssr` adapter. The Supabase
-email template must include the one-time token, and the local/Preview origins must be allow-listed
-in the Supabase Auth redirect settings. Those dashboard settings are not verifiable from the
-repository and remain an operational prerequisite for a live OTP delivery test.
+The web login uses Supabase magic-link email through the pinned `@supabase/ssr` adapter. The form
+calls `signInWithOtp` with `emailRedirectTo` set to `/auth/callback`; that route exchanges the code
+for a session and redirects to `/dashboard`. The local/Preview/production origins and the
+`/auth/callback` path must be allow-listed in Supabase Auth redirect settings. Those dashboard
+settings are not verifiable from the repository and remain an operational prerequisite for live
+email delivery. No custom SMTP or external email service is used.
 
 ## Configuration
 

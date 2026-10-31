@@ -20,6 +20,8 @@
 
 **Phase 3F acceptance:** Operator reviewed the Phase 3F checkpoint report and accepted it on 2026-10-31. The offline CLI verifier and the staging E2E demo-harness proof are accepted. Phase 3F is **COMPLETE AND CLOSED**, and Phase 3 is entirely **COMPLETE**.
 
+**Authentication deviation (operator-approved 2026-10-31):** The provider login was changed from a six-digit Supabase email OTP to Supabase's default magic-link flow. This bypasses the Supabase free-tier requirement for custom SMTP and an editable email template. The form calls `signInWithOtp` with `emailRedirectTo=/auth/callback`; the callback exchanges the code for a session and redirects to `/dashboard`, or redirects to `/login?error=invalid_link` on failure. The Supabase Auth redirect allow-list must include the deployment origin and `/auth/callback`. No external email service or backend/database change was introduced.
+
 ## Project
 
 Incident Witness is a portable incident-evidence protocol for decentralized compute. It collects signed observations from a provider's Linux host, a renter-side client and a separately operated platform probe; correlates a bounded timeline; and seals a portable JSON evidence bundle for local signature/integrity verification.
@@ -519,7 +521,7 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 - `npm run test:integration --workspace @incident-witness/api` — **PASS**: 60/60.
 - `npm run test:integration --workspace @incident-witness/probe-worker` — **PASS**: 2/2.
 - `npm test` — **PASS**: 164/164 unit tests.
-- `npm run test:e2e` — **PASS**: 42 Playwright checks, 41 passed and one intentional mobile
+- `npm run test:e2e` — **PASS**: 44 Playwright checks, 43 passed and one intentional mobile
   provider-flow skip. The desktop journey covers host/DNS/enrollment, demo incident, renter
   invitation, synthetic events including `gpu_telemetry` unavailable, end/seal/download, stale
   polling warning/retry and the local verifier valid/tampered checks.
@@ -578,7 +580,7 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - `npm test --workspace @incident-witness/probe-worker` — **PASS**: 20/20.
 - `npm run test:integration --workspace @incident-witness/api` — **PASS**: 60/60 (Phase 5 re-run).
 - `npm run test:integration --workspace @incident-witness/probe-worker` — **PASS**: 2/2 staging `iw_worker` lease/insert/counter/schedule and effective-capture-end tests.
-- `npm run test:e2e` — **PASS**: 42 Playwright checks, 41 passed and one intentional mobile provider-flow skip. The desktop journey covers test login → host creation/DNS → enrollment → demo incident → renter invitation/events (including `gpu_telemetry: unavailable`) → end/seal/download → stale-poll warning/retry; verifier tests run on desktop and mobile.
+- `npm run test:e2e` — **PASS**: 44 Playwright checks, 43 passed and one intentional mobile provider-flow skip. The desktop journey covers test login → host creation/DNS → enrollment → demo incident → renter invitation/events (including `gpu_telemetry: unavailable`) → end/seal/download → stale-poll warning/retry; verifier tests run on desktop and mobile.
 - `npm run db:provision-probe-key -- --generate --out <temp>` — **PASS** against staging with a disposable random key ID: file mode `0600`, `platform_probe` row active, row and file removed afterwards.
 - `node tools/iw-verify/dist/cli.js --version` and `node_modules/.bin/iw-verify --version` — **PASS**.
 - `npm audit --omit=dev` — **PASS**: 0 production vulnerabilities. 20 moderate development-only advisories remain.
@@ -691,7 +693,7 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - `README.md` updated with Phase 3F CLI/demo commands, probe-key generation and test counts.
 - `docs/PROTOCOL.md` updated to record the Phase 3F CLI verifier status.
 - `docs/PROBE_WORKER.md` updated for generated-key provisioning.
-- `README.md` updated for Phase 4 web integration, local browser verification, full-stack Playwright tests, `render.yaml` and Phase 5 hardening.
+- `README.md` updated for Phase 4 web integration, local browser verification, full-stack Playwright tests, `render.yaml`, Phase 5 hardening and magic-link authentication.
 - `docs/DEPLOYMENT.md` updated with the Render `render.yaml` linking and migration prerequisites.
 - `docs/PROTOCOL.md` and `docs/API_REFERENCE.md` updated for the Phase 4 browser verifier and connected workspace.
 - `.env.example` includes conservative probe-worker defaults and key-provisioning guidance.
@@ -720,6 +722,7 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 18. **Fastify deprecation warning:** `requestIdLogLabel` is deprecated in Fastify 5 and will be removed in Fastify 6. Existing Phase 2 configuration; non-blocking.
 19. **E2E test auth seam:** Playwright uses a static test token and a file-backed DNS resolver through `IW_E2E_*` flags. The API seam is disabled unless `NODE_ENV=test` and the explicit flag are set; the web seam is disabled in production. Real Supabase email OTP delivery and session refresh are not exercised by the automated provider journey. No production credential or production data is used.
 20. **P2 worker lease bookkeeping:** retry/dead/cancel updates are not conditioned on the current lease owner. Deterministic event IDs prevent duplicate evidence, but a stale worker can still disturb job status after lease expiry. Revisit with a lease-owner-conditioned update.
+21. **Magic-link redirect configuration:** live email delivery requires the deployment origin and `/auth/callback` to be allow-listed in Supabase Auth. Automated E2E uses the gated local test session instead of consuming a real email link; no custom SMTP is configured.
 
 ## Things not to change
 

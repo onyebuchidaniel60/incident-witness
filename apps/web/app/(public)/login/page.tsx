@@ -8,17 +8,29 @@ export const metadata = {
   title: "Provider sign-in",
 };
 
-export default function LoginPage() {
+export const dynamic = "force-dynamic";
+
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const params = await searchParams;
+  const initialError =
+    params.error === "invalid_link"
+      ? "That login link is invalid or expired. Request a new link."
+      : null;
+
   return (
     <div className="space-y-8">
       <PageIntro
         eyebrow="Provider access"
         title="Provider sign-in"
-        description="Use a one-time email code to access the provider workspace. There is no password stored by Incident Witness."
+        description="Enter your email address and we will send a magic sign-in link. There is no password stored by Incident Witness."
       />
 
       <div className="max-w-md rounded-lg border border-slate-200 bg-white p-5">
-        <LoginForm />
+        <LoginForm initialError={initialError} />
       </div>
 
       <div className="max-w-md">
@@ -26,12 +38,12 @@ export default function LoginPage() {
       </div>
 
       <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
-        <p className="font-semibold">Email one-time code</p>
+        <p className="font-semibold">Magic-link sign-in</p>
         <p className="mt-1">
-          The login form is connected to Supabase Auth. The Supabase email template must include the
-          one-time code for this flow, and the deployment origin must be allow-listed in Supabase
-          Auth settings. Until those dashboard settings are confirmed, email delivery may fail even
-          though the application is configured.
+          Supabase sends the default email login link, so no custom SMTP template is required. The
+          deployment origin and <code className="font-mono text-xs">/auth/callback</code> path must
+          be allow-listed in the Supabase Auth redirect settings. If email delivery is unavailable,
+          the sign-in link cannot be issued.
         </p>
       </div>
 

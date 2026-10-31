@@ -53,13 +53,19 @@ for (const path of protectedRoutes) {
   });
 }
 
-test("login form exposes request and verification controls without submitting", async ({
-  page,
-}) => {
+test("login form requests a magic link without a code field", async ({ page }) => {
   await page.goto("/login");
 
   await expect(page.getByLabel("Provider email address")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Send one-time code" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Send login link" })).toBeVisible();
+  await expect(page.getByLabel("One-time code")).toHaveCount(0);
+});
+
+test("invalid auth callback redirects to login with a safe error", async ({ page }) => {
+  await page.goto("/auth/callback");
+
+  await expect(page).toHaveURL(/\/login\?error=invalid_link$/);
+  await expect(page.getByRole("alert").filter({ hasText: "invalid or expired" })).toBeVisible();
 });
 
 test("not-found route returns 404 with useful navigation", async ({ page }) => {
