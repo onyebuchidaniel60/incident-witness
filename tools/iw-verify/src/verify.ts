@@ -87,10 +87,7 @@ function failDetails(failures: string[], limit = 8): string {
   return `${shown.join("; ")}${remaining > 0 ? `; and ${remaining} more` : ""}`;
 }
 
-function trustedKeyFor(
-  trust: TrustSet,
-  platformKeyId: string,
-): TrustedPlatformKey | null {
+function trustedKeyFor(trust: TrustSet, platformKeyId: string): TrustedPlatformKey | null {
   return trust.keys.get(platformKeyId) ?? null;
 }
 

@@ -1,4 +1,9 @@
-import { generateKeyPairSync, createPrivateKey, createPublicKey, type KeyObject } from "node:crypto";
+import {
+  generateKeyPairSync,
+  createPrivateKey,
+  createPublicKey,
+  type KeyObject,
+} from "node:crypto";
 import { mkdir, unlink, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { parseArgs } from "node:util";
@@ -72,9 +77,9 @@ async function main(): Promise<void> {
     await mkdir(dirname(generatedPrivateKeyFile), { recursive: true, mode: 0o700 });
     const pair = generateKeyPairSync("ed25519");
     probePrivateKey = pair.privateKey;
-    const encoded = Buffer.from(
-      pair.privateKey.export({ format: "der", type: "pkcs8" }),
-    ).toString("base64");
+    const encoded = Buffer.from(pair.privateKey.export({ format: "der", type: "pkcs8" })).toString(
+      "base64",
+    );
     try {
       await writeFile(generatedPrivateKeyFile, `${encoded}\n`, {
         mode: 0o600,

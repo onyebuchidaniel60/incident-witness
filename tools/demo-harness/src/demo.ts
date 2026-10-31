@@ -5,11 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import {
-  assertRuntimeRole,
-  createApiPool,
-  requireEnvironment,
-} from "@incident-witness/db";
+import { assertRuntimeRole, createApiPool, requireEnvironment } from "@incident-witness/db";
 import {
   bundleSchema,
   canonicalJsonBytes,
@@ -188,7 +184,9 @@ async function cleanupDemoData(pool: Pool): Promise<void> {
     await client.query(`delete from evidence_bundles where incident_id in (${incidents})`, [
       DEMO_USER_ID,
     ]);
-    await client.query(`delete from probe_jobs where incident_id in (${incidents})`, [DEMO_USER_ID]);
+    await client.query(`delete from probe_jobs where incident_id in (${incidents})`, [
+      DEMO_USER_ID,
+    ]);
     await client.query(
       `delete from source_credentials
         where source_key_id in (
@@ -278,8 +276,7 @@ function runCli(args: string[]): Promise<CliRun> {
  */
 export async function runDemo(options: DemoOptions = {}): Promise<DemoResult> {
   const log = options.log ?? ((line: string) => process.stdout.write(`${line}\n`));
-  const artifactDirectory =
-    options.outputDirectory ?? (await mkdtemp(join(tmpdir(), "iw-demo-")));
+  const artifactDirectory = options.outputDirectory ?? (await mkdtemp(join(tmpdir(), "iw-demo-")));
   const keepArtifacts = options.keepArtifacts ?? true;
   const bundlePath = join(artifactDirectory, "phase3f-demo-bundle.json");
   const tamperedBundlePath = join(artifactDirectory, "phase3f-demo-bundle-tampered.json");
@@ -345,7 +342,9 @@ export async function runDemo(options: DemoOptions = {}): Promise<DemoResult> {
       });
 
     log("[demo] Phase 3F synthetic incident harness");
-    log("[demo] All events are generated locally, marked simulation_mode=true, and are not real hardware telemetry.");
+    log(
+      "[demo] All events are generated locally, marked simulation_mode=true, and are not real hardware telemetry.",
+    );
     log("[demo] 1/10 Resetting disposable provider data in the configured staging database");
     await cleanupDemoData(migrator);
     await seedDemoProvider(migrator);
@@ -380,11 +379,9 @@ export async function runDemo(options: DemoOptions = {}): Promise<DemoResult> {
     responseData<{ verified: boolean }>(verifyResponse, "endpoint verification");
 
     log("[demo] 3/10 Enrolling a simulated host agent with a fresh local Ed25519 key");
-    const enrollmentCodeResponse = await call(
-      "POST",
-      `/v1/hosts/${hostId}/enrollment-codes`,
-      { token: DEMO_TOKEN },
-    );
+    const enrollmentCodeResponse = await call("POST", `/v1/hosts/${hostId}/enrollment-codes`, {
+      token: DEMO_TOKEN,
+    });
     const enrollmentCode = responseData<{ enrollmentCode: string }>(
       enrollmentCodeResponse,
       "enrollment code",
@@ -580,9 +577,7 @@ export async function runDemo(options: DemoOptions = {}): Promise<DemoResult> {
     const bundleBytes = bundleResponse.rawPayload;
     await writeFile(bundlePath, bundleBytes);
     const bundle = bundleSchema.parse(JSON.parse(bundleBytes.toString("utf8")) as Bundle);
-    const allEventsSimulated = bundle.manifest.events.every(
-      (entry) => entry.event.simulation_mode,
-    );
+    const allEventsSimulated = bundle.manifest.events.every((entry) => entry.event.simulation_mode);
     if (!bundle.manifest.simulation_present || !allEventsSimulated) {
       throw new Error("Sealed bundle is not fully labelled as simulated");
     }
@@ -619,7 +614,9 @@ export async function runDemo(options: DemoOptions = {}): Promise<DemoResult> {
     log(`[demo] Host: ${hostId}`);
     log(`[demo] Incident: ${incident.incidentId}`);
     log(`[demo] Assessment: ${sealed.assessment.code} / ${sealed.assessment.evidenceGrade}`);
-    log(`[demo] Events: ${sealed.eventCount}; simulation_present=${bundle.manifest.simulation_present}`);
+    log(
+      `[demo] Events: ${sealed.eventCount}; simulation_present=${bundle.manifest.simulation_present}`,
+    );
     log(`[demo] Valid bundle verifier exit: ${validRun.exitCode}`);
     log(`[demo] Tampered bundle verifier exit: ${tamperedRun.exitCode} (expected 1)`);
     log(`[demo] Artifacts: ${artifactDirectory}`);

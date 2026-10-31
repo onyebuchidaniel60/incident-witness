@@ -101,10 +101,7 @@ function makeEvent(input: {
   };
 }
 
-async function writeFixture(
-  directory: string,
-  options: FixtureOptions = {},
-): Promise<Fixture> {
+async function writeFixture(directory: string, options: FixtureOptions = {}): Promise<Fixture> {
   const platform = generateKeyPairSync("ed25519");
   const source = generateKeyPairSync("ed25519");
   const platformKeyId = "test-platform-key";
@@ -142,8 +139,16 @@ async function writeFixture(
   });
 
   const events = [
-    { event: first.envelope, received_at: new Date(Date.now() - 25_000).toISOString(), event_sha256: first.digest },
-    { event: second.envelope, received_at: new Date(Date.now() - 15_000).toISOString(), event_sha256: second.digest },
+    {
+      event: first.envelope,
+      received_at: new Date(Date.now() - 25_000).toISOString(),
+      event_sha256: first.digest,
+    },
+    {
+      event: second.envelope,
+      received_at: new Date(Date.now() - 15_000).toISOString(),
+      event_sha256: second.digest,
+    },
   ];
   if (options.reverseEvents) events.reverse();
 
