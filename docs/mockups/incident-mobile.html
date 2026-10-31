@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Incident Witness — Mobile incident mockup</title>
+    <link rel="stylesheet" href="assets/mockup.css" />
+  </head>
+  <body class="theme-workspace mobile-page">
+    <p class="device-label">Mobile · 390 px · incident timeline</p>
+    <div class="device">
+      <div class="prototype-bar">
+        <strong>Static mockup</strong> · Phase 6 · illustrative data
+      </div>
+
+      <header class="m-header">
+        <a class="wordmark" href="dashboard-mobile.html">Incident Witness</a>
+        <details class="m-menu">
+          <summary aria-label="Open workspace navigation">
+            <span class="m-menu__glyph" aria-hidden="true"></span>
+          </summary>
+          <nav class="m-menu__panel" aria-label="Workspace navigation">
+            <a href="dashboard-mobile.html">Dashboard</a>
+            <a href="host-setup-mobile.html">Hosts</a>
+            <a href="incident-mobile.html" aria-current="page">Sessions</a>
+            <a href="verify-mobile.html">Verify</a>
+          </nav>
+        </details>
+      </header>
+
+      <main class="m-content" id="main">
+        <div class="m-page-head">
+          <div class="row wrap" style="align-items: center">
+            <span class="mono-label">IW-8F2A</span>
+            <span class="status status--warn">Collecting</span>
+          </div>
+          <h1 style="margin-top: 7px">Power interruption on db-01</h1>
+          <p>host_01J8F2A · 14:02–14:32 UTC · 18 min left</p>
+        </div>
+
+        <div class="m-actions" style="margin: 0 0 10px">
+          <button class="btn btn--secondary btn--block" type="button">
+            Copy renter invite
+          </button>
+          <button class="btn btn--danger btn--block" type="button">
+            End session
+          </button>
+          <button class="btn btn--primary btn--block" type="button" disabled>
+            Seal bundle
+          </button>
+        </div>
+
+        <div class="notice notice--warn" style="margin-bottom: 10px">
+          <span class="notice__mark" aria-hidden="true">!</span>
+          <span>
+            <strong>Host observations are stale.</strong> No signed host
+            heartbeat since 14:07:31. The gap is preserved, not treated as
+            normal.
+          </span>
+        </div>
+
+        <section class="m-card" aria-labelledby="m-timeline-title">
+          <div class="m-card__head">
+            <div>
+              <h2 id="m-timeline-title">Evidence timeline</h2>
+              <p class="m-session-meta">128 accepted · latest 50 · UTC</p>
+            </div>
+            <span class="status status--plain">Live</span>
+          </div>
+
+          <div class="m-timeline-legend" aria-label="Source legend">
+            <span class="legend-host" style="color: var(--host)"
+              ><i></i>Host</span
+            >
+            <span class="legend-renter" style="color: var(--renter)"
+              ><i></i>Renter</span
+            >
+            <span class="legend-probe" style="color: var(--probe)"
+              ><i></i>Platform probe</span
+            >
+          </div>
+
+          <div class="m-event">
+            <time datetime="2026-10-31T14:02:04Z">14:02</time>
+            <div>
+              <div class="m-event__top">
+                <span class="source source--host">Host</span>
+                <span class="m-event__type">host_agent_status</span>
+              </div>
+              <p class="m-event__summary">
+                Agent started · <span class="mono">0.4.1</span> · Linux x86_64
+              </p>
+              <p class="m-event__meta">seq 0041 · 14:02:04.218</p>
+            </div>
+          </div>
+
+          <div class="m-event">
+            <time datetime="2026-10-31T14:02:06Z">14:02</time>
+            <div>
+              <div class="m-event__top">
+                <span class="source source--probe">Probe</span>
+                <span class="m-event__type">probe_result</span>
+                <span class="status status--ok">Reachable</span>
+              </div>
+              <p class="m-event__summary">
+                HTTPS 200 · <span class="mono">84 ms</span> · public IP
+              </p>
+              <p class="m-event__meta">seq 0118 · platform-operated</p>
+            </div>
+          </div>
+
+          <div class="m-event">
+            <time datetime="2026-10-31T14:02:09Z">14:02</time>
+            <div>
+              <div class="m-event__top">
+                <span class="source source--renter">Renter</span>
+                <span class="m-event__type">renter_heartbeat</span>
+              </div>
+              <p class="m-event__summary">
+                Workload client enrolled · endpoint check active
+              </p>
+              <p class="m-event__meta">seq 0022 · incident-scoped key</p>
+            </div>
+          </div>
+
+          <div class="m-event">
+            <time datetime="2026-10-31T14:06:00Z">14:06</time>
+            <div>
+              <div class="m-event__top">
+                <span class="source source--host">Host</span>
+                <span class="m-event__type">gpu_telemetry</span>
+                <span class="status">Unavailable</span>
+              </div>
+              <p class="m-event__summary">
+                GPU telemetry <span class="mono">UNAVAILABLE</span> — no
+                <span class="mono">nvidia-smi</span> data. No values fabricated.
+              </p>
+              <p class="m-event__meta">seq 0042 · collection_status unavailable</p>
+            </div>
+          </div>
+
+          <div class="m-event">
+            <time datetime="2026-10-31T14:07:30Z">14:07</time>
+            <div>
+              <div class="m-event__top">
+                <span class="source source--host">Host</span>
+                <span class="m-event__type">ups_state</span>
+                <span class="status status--warn">On battery</span>
+              </div>
+              <p class="m-event__summary">
+                UPS <span class="mono">on_battery</span> · charge
+                <span class="mono">98%</span> · runtime
+                <span class="mono">742 s</span>
+              </p>
+              <p class="m-event__meta">seq 0043 · 14:07:30.006</p>
+            </div>
+          </div>
+
+          <div class="m-event">
+            <time datetime="2026-10-31T14:07:31Z">14:07</time>
+            <div>
+              <div class="m-event__top">
+                <span class="source source--host">Host</span>
+                <span class="m-event__type">host_heartbeat</span>
+                <span class="status">Last</span>
+              </div>
+              <p class="m-event__summary">Last accepted host heartbeat.</p>
+              <p class="m-event__meta">seq 0044 · 14:07:31.092</p>
+            </div>
+          </div>
+
+          <div class="m-event m-event--gap" role="note">
+            <div class="m-event__top">
+              <span class="gap-label">Evidence gap</span>
+              <span class="status">Host unavailable</span>
+            </div>
+            <p class="m-event__summary">
+              No signed host observation from 14:07:31 to 14:14:08 (6m 37s).
+              The gap remains open while collecting.
+            </p>
+          </div>
+
+          <div class="m-event">
+            <time datetime="2026-10-31T14:07:36Z">14:07</time>
+            <div>
+              <div class="m-event__top">
+                <span class="source source--renter">Renter</span>
+                <span class="m-event__type">endpoint_result</span>
+                <span class="status status--danger">Unreachable</span>
+              </div>
+              <p class="m-event__summary">Timeout after 3000 ms.</p>
+              <p class="m-event__meta">seq 0025 · 14:07:36.771</p>
+            </div>
+          </div>
+
+          <div class="m-event">
+            <time datetime="2026-10-31T14:07:42Z">14:07</time>
+            <div>
+              <div class="m-event__top">
+                <span class="source source--probe">Probe</span>
+                <span class="m-event__type">probe_result</span>
+                <span class="status status--danger">Unreachable</span>
+              </div>
+              <p class="m-event__summary">
+                <span class="mono">connection_timeout</span> · 3000 ms
+              </p>
+              <p class="m-event__meta">seq 0120 · platform-operated</p>
+            </div>
+          </div>
+
+          <div class="m-event">
+            <time datetime="2026-10-31T14:09:18Z">14:09</time>
+            <div>
+              <div class="m-event__top">
+                <span class="source source--renter">Renter</span>
+                <span class="m-event__type">renter_heartbeat</span>
+                <span class="status status--ok">Online</span>
+              </div>
+              <p class="m-event__summary">
+                Workload heartbeat resumed while the host source stayed silent.
+              </p>
+              <p class="m-event__meta">seq 0026 · 14:09:18.205</p>
+            </div>
+          </div>
+
+          <div class="m-event">
+            <time datetime="2026-10-31T14:13:56Z">14:13</time>
+            <div>
+              <div class="m-event__top">
+                <span class="source source--renter">Renter</span>
+                <span class="m-event__type">endpoint_result</span>
+                <span class="status status--ok">Reachable</span>
+              </div>
+              <p class="m-event__summary">
+                Endpoint recovered · <span class="mono">200</span> ·
+                <span class="mono">118 ms</span>.
+              </p>
+              <p class="m-event__meta">seq 0027 · 14:13:56.844</p>
+            </div>
+          </div>
+
+          <div class="m-event">
+            <time datetime="2026-10-31T14:14:00Z">14:14</time>
+            <div>
+              <div class="m-event__top">
+                <span class="source source--probe">Probe</span>
+                <span class="m-event__type">probe_result</span>
+                <span class="status status--ok">Reachable</span>
+              </div>
+              <p class="m-event__summary">
+                HTTPS 200 · <span class="mono">91 ms</span> · public IP
+              </p>
+              <p class="m-event__meta">seq 0121 · platform-operated</p>
+            </div>
+          </div>
+
+          <p class="micro faint" style="margin-top: 10px">
+            Showing latest 50 of 128 accepted events. Deterministic order:
+            observed time → source → key → sequence.
+          </p>
+        </section>
+
+        <section class="m-card" style="margin-top: 10px" aria-labelledby="m-health-title">
+          <div class="m-card__head">
+            <h2 id="m-health-title">Source health</h2>
+            <span class="status status--plain">3 sources</span>
+          </div>
+          <div class="m-data-list">
+            <div class="m-data-row">
+              <div class="m-data-row__top">
+                <div>
+                  <p class="m-data-row__title">Host agent</p>
+                  <p class="m-data-row__meta">last 14:07:31 · seq 0044</p>
+                </div>
+                <span class="status status--warn">Stale</span>
+              </div>
+              <p class="m-data-row__meta">no observation for 6m 37s</p>
+            </div>
+            <div class="m-data-row">
+              <div class="m-data-row__top">
+                <div>
+                  <p class="m-data-row__title">Renter client</p>
+                  <p class="m-data-row__meta">last 14:13:56 · seq 0027</p>
+                </div>
+                <span class="status status--ok">Online</span>
+              </div>
+            </div>
+            <div class="m-data-row">
+              <div class="m-data-row__top">
+                <div>
+                  <p class="m-data-row__title">Platform probe</p>
+                  <p class="m-data-row__meta">last 14:14:00 · seq 0121</p>
+                </div>
+                <span class="status status--ok">Online</span>
+              </div>
+              <p class="m-data-row__meta">platform-operated, not independent</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="m-card" style="margin-top: 10px" aria-labelledby="m-assessment-title">
+          <div class="m-card__head">
+            <div>
+              <h2 id="m-assessment-title">Assessment</h2>
+              <p class="m-session-meta">Deterministic · at seal</p>
+            </div>
+            <span class="status status--plain">Pending</span>
+          </div>
+          <div class="assessment-pending">
+            <p class="assessment-pending__label">Current state</p>
+            <h3>Pending</h3>
+            <p>
+              Rules run only after capture ends and the bundle is sealed. No
+              probability score or AI diagnosis.
+            </p>
+            <div class="grade-scale">
+              <span class="grade">HIGH</span>
+              <span class="grade">MEDIUM</span>
+              <span class="grade">LOW</span>
+              <span class="grade">INSUFFICIENT</span>
+            </div>
+          </div>
+          <p class="micro faint" style="margin-top: 8px; line-height: 1.55">
+            UNKNOWN is a valid result when evidence is insufficient. It is not a
+            healthy result.
+          </p>
+        </section>
+
+        <section class="m-card" style="margin-top: 10px" aria-labelledby="m-invite-title">
+          <div class="m-card__head">
+            <div>
+              <h2 id="m-invite-title">Renter invitation</h2>
+              <p class="m-session-meta">single use · incident-scoped</p>
+            </div>
+            <span class="status status--ok">Active</span>
+          </div>
+          <div class="invite-box">
+            <div class="invite-box__line">
+              <span class="micro muted">Invitation link</span>
+              <button class="btn btn--ghost btn--sm" type="button">Copy</button>
+            </div>
+            <p class="invite-box__code">iwr_7f2a9c1e...4b8d</p>
+            <p class="invite-box__meta">1 use · expires 14:29 UTC</p>
+          </div>
+          <p class="micro faint" style="margin-top: 8px; line-height: 1.55">
+            The integrator also supplies the endpoint hostname; enrollment does
+            not return it.
+          </p>
+        </section>
+
+        <section class="m-card" style="margin-top: 10px" aria-labelledby="m-bundle-title">
+          <div class="m-card__head">
+            <h2 id="m-bundle-title">Bundle</h2>
+          </div>
+          <button class="btn btn--secondary btn--block" type="button" disabled>
+            Download bundle
+          </button>
+          <p class="micro faint" style="margin-top: 9px; line-height: 1.55">
+            Available after sealing. Verify locally without uploading.
+          </p>
+          <a
+            class="btn btn--ghost btn--sm"
+            href="verify-mobile.html"
+            style="margin-top: 6px; padding-left: 0"
+            >Open local verifier →</a
+          >
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

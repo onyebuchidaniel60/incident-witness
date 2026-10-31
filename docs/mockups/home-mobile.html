@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Incident Witness mobile home mockup: signed incident evidence from host, renter and platform-operated probe sources."
+    />
+    <title>Incident Witness — Mobile home mockup</title>
+    <link rel="stylesheet" href="assets/mockup.css" />
+  </head>
+  <body class="theme-public mobile-page">
+    <p class="device-label">Mobile · 390 px · public home</p>
+    <div class="device">
+      <div class="prototype-bar">
+        <strong>Static mockup</strong> · Phase 6 · illustrative data
+      </div>
+
+      <header class="m-header">
+        <a class="wordmark" href="home-mobile.html">Incident Witness</a>
+        <details class="m-menu">
+          <summary aria-label="Open navigation">
+            <span class="m-menu__glyph" aria-hidden="true"></span>
+          </summary>
+          <nav class="m-menu__panel" aria-label="Mobile navigation">
+            <a href="#m-sources">Sources</a>
+            <a href="#m-verification">Verification</a>
+            <a href="verify-mobile.html">Verify a bundle</a>
+            <a href="dashboard-mobile.html">Open workspace</a>
+          </nav>
+        </details>
+      </header>
+
+      <main id="main" class="m-content">
+        <section class="m-hero">
+          <p class="eyebrow">
+            <span class="eyebrow__dot"></span>Incident evidence
+          </p>
+          <h1>A signed record of what happened when a GPU host went down.</h1>
+          <p>
+            Bounded observations from the provider host, the renter workload and
+            a platform-operated probe — correlated into a portable bundle.
+          </p>
+          <div class="m-actions">
+            <a class="btn btn--primary btn--block" href="dashboard-mobile.html"
+              >Sign in to create a session</a
+            >
+            <a class="btn btn--secondary btn--block" href="verify-mobile.html"
+              >Verify a bundle</a
+            >
+          </div>
+          <p class="micro faint" style="margin-top: 12px; line-height: 1.6">
+            No root-cause claims. No automatic marketplace action.
+          </p>
+        </section>
+
+        <section class="m-card" aria-label="Illustrative incident preview">
+          <div class="m-card__head">
+            <div>
+              <span class="mono-label">Incident · IW-8F2A</span>
+              <h2 class="m-session-title">Power interruption · db-01</h2>
+              <p class="m-session-meta">14:02–14:32 UTC · 24 min left</p>
+            </div>
+            <span class="status status--warn">Collecting</span>
+          </div>
+
+          <div class="m-event">
+            <time datetime="2026-10-31T14:07:30Z">14:07</time>
+            <div>
+              <div class="m-event__top">
+                <span class="source source--host">Host</span>
+                <span class="m-event__type">ups_state</span>
+              </div>
+              <p class="m-event__summary">
+                On battery, charge <span class="mono">98%</span>
+              </p>
+            </div>
+          </div>
+          <div class="m-event">
+            <time datetime="2026-10-31T14:07:36Z">14:07</time>
+            <div>
+              <div class="m-event__top">
+                <span class="source source--renter">Renter</span>
+                <span class="m-event__type">endpoint_result</span>
+              </div>
+              <p class="m-event__summary">
+                <span class="mono">unreachable</span> · timeout
+              </p>
+            </div>
+          </div>
+          <div class="m-event">
+            <time datetime="2026-10-31T14:07:42Z">14:07</time>
+            <div>
+              <div class="m-event__top">
+                <span class="source source--probe">Platform probe</span>
+              </div>
+              <p class="m-event__summary">
+                Fixed HTTPS check · <span class="mono">connection_timeout</span>
+              </p>
+            </div>
+          </div>
+          <div class="m-event m-event--gap">
+            <div class="m-event__top">
+              <span class="gap-label">Evidence gap</span>
+            </div>
+            <p class="m-event__summary">
+              GPU telemetry <span class="mono">UNAVAILABLE</span> — no
+              <span class="mono">nvidia-smi</span> response. This is missing
+              data, not a healthy status.
+            </p>
+          </div>
+        </section>
+
+        <section class="m-section" id="m-sources">
+          <p class="eyebrow"><span class="eyebrow__dot"></span>Three sources</p>
+          <h2>Separate observations. One record.</h2>
+          <div class="m-stack" style="margin-top: 16px">
+            <article class="m-source-card">
+              <span class="source source--host">Host agent</span>
+              <h3>Provider host</h3>
+              <p>
+                Unprivileged Linux agent. Host heartbeats, GPU telemetry
+                availability, UPS transitions and agent status.
+              </p>
+              <p class="m-source-card__meta">HOST-SIGNED · ED25519</p>
+            </article>
+            <article class="m-source-card">
+              <span class="source source--renter">Renter client</span>
+              <h3>Workload client</h3>
+              <p>
+                Incident-scoped SDK. Workload heartbeats and endpoint
+                reachability from the renter's side.
+              </p>
+              <p class="m-source-card__meta">RENTER-SIGNED · SCOPED KEY</p>
+            </article>
+            <article class="m-source-card">
+              <span class="source source--probe">Platform probe</span>
+              <h3>Platform-operated probe</h3>
+              <p>
+                Separate worker checks the verified public endpoint with a fixed
+                HTTPS GET. Platform-operated, not an independent third party.
+              </p>
+              <p class="m-source-card__meta">PLATFORM-OPERATED</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="m-section" id="m-verification">
+          <p class="eyebrow">
+            <span class="eyebrow__dot"></span>Offline verification
+          </p>
+          <h2>Check the bundle locally.</h2>
+          <p>
+            The browser verifier recomputes digests and checks every signature.
+            The file never leaves the device.
+          </p>
+          <div class="m-card" style="margin-top: 14px">
+            <div class="m-result">
+              <div class="m-result__top">
+                <span class="m-result__mark" aria-hidden="true">✓</span>
+                <h3>Bundle verified</h3>
+              </div>
+              <p>All required checks passed. No file was uploaded.</p>
+            </div>
+            <div style="margin-top: 9px">
+              <div class="m-check"><span>Manifest digest</span><span>PASS</span></div>
+              <div class="m-check">
+                <span>Platform signature</span><span>PASS</span>
+              </div>
+              <div class="m-check">
+                <span>Source certificates</span><span>PASS</span>
+              </div>
+              <div class="m-check">
+                <span>Event signatures</span><span>PASS</span>
+              </div>
+              <div class="m-check">
+                <span>Deterministic order</span><span>PASS</span>
+              </div>
+            </div>
+            <p class="micro faint" style="margin-top: 10px; line-height: 1.55">
+              Signature verification confirms integrity and provenance from a
+              key. It does not prove sensor truth or root cause.
+            </p>
+          </div>
+        </section>
+
+        <section class="m-section">
+          <p class="eyebrow"><span class="eyebrow__dot"></span>Limits</p>
+          <h2>Useful for a timeline. Not an outage verdict.</h2>
+          <div class="m-card" style="margin-top: 13px">
+            <h3 style="font-size: 11px">Can help support</h3>
+            <p class="small muted" style="margin-top: 4px">
+              A source-attributed sequence, a deterministic evidence pattern and
+              tamper detection.
+            </p>
+            <h3 style="font-size: 11px; margin-top: 13px">Cannot establish</h3>
+            <p class="small muted" style="margin-top: 4px">
+              Sensor truth, root cause, fault or intent, or whether downtime
+              should be excused.
+            </p>
+            <p class="micro faint" style="margin-top: 12px; line-height: 1.55">
+              Missing observations are shown as gaps or unavailable data — never
+              as normal.
+            </p>
+          </div>
+        </section>
+      </main>
+
+      <footer class="m-footer">
+        <a class="wordmark" href="home-mobile.html">Incident Witness</a>
+        <p>
+          Portable, signature-verifiable incident evidence for decentralized GPU
+          compute.
+        </p>
+        <div class="m-footer__links">
+          <a href="#m-sources">Sources</a>
+          <a href="verify-mobile.html">Verify</a>
+          <a href="../DESIGN_DECISIONS.md">Design record</a>
+          <a href="https://github.com/onyebuchidaniel60/incident-witness"
+            >GitHub</a
+          >
+        </div>
+        <p>
+          © 2026 Incident Witness · Static Phase 6 mockup · illustrative data.
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>

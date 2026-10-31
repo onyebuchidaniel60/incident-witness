@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Incident Witness — Dashboard mockup</title>
+    <link rel="stylesheet" href="assets/mockup.css" />
+  </head>
+  <body class="theme-workspace">
+    <div class="prototype-bar">
+      <strong>Static design mockup</strong> · Phase 6 · illustrative data · not
+      production UI
+    </div>
+
+    <div class="ws-shell">
+      <aside class="ws-sidebar" aria-label="Workspace sidebar">
+        <div class="ws-brand">
+          <a class="wordmark" href="dashboard-desktop.html">Incident Witness</a>
+          <span class="ws-kicker">Provider workspace</span>
+        </div>
+
+        <nav class="ws-nav" aria-label="Workspace">
+          <span class="ws-nav__label">Workspace</span>
+          <a href="dashboard-desktop.html" aria-current="page">
+            Dashboard <span class="ws-nav__count">1</span>
+          </a>
+          <a href="host-setup-desktop.html">Hosts</a>
+          <a href="incident-desktop.html">Sessions</a>
+          <a href="verify-desktop.html">Verify</a>
+        </nav>
+
+        <nav class="ws-nav" aria-label="Resources">
+          <span class="ws-nav__label">Resources</span>
+          <a href="../DESIGN_DECISIONS.md">Documentation</a>
+          <a href="../DESIGN_DECISIONS.md">Settings</a>
+        </nav>
+
+        <div class="ws-sidebar__foot">
+          <span class="env-badge">Staging</span>
+          <div class="ws-user">
+            <span class="avatar" aria-hidden="true">OP</span>
+            <div class="ws-user__meta">
+              <strong>Operator</strong>
+              <span>operator@example.net</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <div class="ws-main">
+        <header class="ws-topbar">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="dashboard-desktop.html">Workspace</a>
+            <span class="breadcrumb__sep" aria-hidden="true">/</span>
+            <span aria-current="page">Dashboard</span>
+          </nav>
+          <div class="ws-topbar__right">
+            <span class="ws-clock">14:14:08 UTC</span>
+            <a class="btn btn--primary btn--sm" href="incident-desktop.html"
+              >New session</a
+            >
+          </div>
+        </header>
+
+        <main class="ws-content" id="main">
+          <div class="page-head">
+            <div>
+              <h1>Dashboard</h1>
+              <p class="page-head__sub">
+                Provider workspace · staging data · one active capture
+              </p>
+            </div>
+            <div class="page-actions">
+              <a class="btn btn--secondary btn--sm" href="host-setup-desktop.html"
+                >Add host</a
+              >
+              <a class="btn btn--primary btn--sm" href="incident-desktop.html"
+                >Create session</a
+              >
+            </div>
+          </div>
+
+          <div class="notice notice--warn" role="status">
+            <span class="notice__mark" aria-hidden="true">!</span>
+            <span>
+              <strong>1 telemetry stream is unavailable.</strong> GPU telemetry
+              is missing on <span class="mono">db-02</span>. Missing observations
+              remain explicit gaps and are not treated as normal.
+            </span>
+          </div>
+
+          <div class="stat-grid" style="margin-top: 12px">
+            <div class="stat">
+              <span class="stat__label">Active sessions</span>
+              <span class="stat__value">1</span>
+              <p class="stat__meta">1 collecting · 0 awaiting finalize</p>
+            </div>
+            <div class="stat">
+              <span class="stat__label">Hosts online</span>
+              <span class="stat__value">2<span class="faint"> / 3</span></span>
+              <p class="stat__meta">1 degraded · 0 archived</p>
+            </div>
+            <div class="stat">
+              <span class="stat__label">Sealed records</span>
+              <span class="stat__value">12</span>
+              <p class="stat__meta">Last sealed 31 Oct · 13:48 UTC</p>
+            </div>
+            <div class="stat">
+              <span class="stat__label">Open evidence gaps</span>
+              <span class="stat__value">1</span>
+              <p class="stat__meta">Unavailable, not normal</p>
+            </div>
+          </div>
+
+          <div class="content-grid">
+            <section class="card span-2" aria-labelledby="active-session-title">
+              <div class="card__head">
+                <div>
+                  <h2 id="active-session-title">Active session</h2>
+                  <p class="card__sub">One host · three source categories</p>
+                </div>
+                <span class="status status--warn">Collecting</span>
+              </div>
+              <div class="session-panel">
+                <div class="session-panel__top">
+                  <div>
+                    <span class="mono-label">IW-8F2A · db-01</span>
+                    <h2>Power interruption · workload inference</h2>
+                    <p class="session-panel__meta">
+                      14:02:00–14:32:00 UTC · 18 min remaining
+                    </p>
+                  </div>
+                  <a class="btn btn--secondary btn--sm" href="incident-desktop.html"
+                    >Open session</a
+                  >
+                </div>
+
+                <div class="session-sources">
+                  <div class="source-tile">
+                    <div class="source-tile__top">
+                      <span class="source-tile__name">Host agent</span>
+                      <span class="status status--warn">Gap</span>
+                    </div>
+                    <p class="source-tile__meta">last 14:07:29 · 6m 39s ago</p>
+                  </div>
+                  <div class="source-tile">
+                    <div class="source-tile__top">
+                      <span class="source-tile__name">Renter client</span>
+                      <span class="status status--ok">Online</span>
+                    </div>
+                    <p class="source-tile__meta">last 14:13:56 · 12s ago</p>
+                  </div>
+                  <div class="source-tile">
+                    <div class="source-tile__top">
+                      <span class="source-tile__name">Platform probe</span>
+                      <span class="status status--ok">Online</span>
+                    </div>
+                    <p class="source-tile__meta">last 14:14:00 · 8s ago</p>
+                  </div>
+                </div>
+
+                <div class="session-progress">
+                  <div class="session-progress__labels">
+                    <span>Capture window · bounded session</span>
+                    <span>18:00 remaining</span>
+                  </div>
+                  <div class="meter"><span style="width: 40%"></span></div>
+                </div>
+
+                <div class="session-panel__actions">
+                  <a class="btn btn--secondary btn--sm" href="incident-desktop.html"
+                    >Open timeline</a
+                  >
+                  <button class="btn btn--ghost btn--sm" type="button">
+                    Copy renter invitation
+                  </button>
+                  <span class="micro faint" style="margin-left: auto">
+                    Assessment is produced at sealing.
+                  </span>
+                </div>
+              </div>
+            </section>
+
+            <section class="card" aria-labelledby="source-health-title">
+              <div class="card__head">
+                <div>
+                  <h2 id="source-health-title">Source health</h2>
+                  <p class="card__sub">Active session · IW-8F2A</p>
+                </div>
+                <span class="status status--plain">3 sources</span>
+              </div>
+              <div class="card__body">
+                <div class="health-list">
+                  <div class="health-row">
+                    <div class="health-row__top">
+                      <span class="health-row__name">
+                        <span class="dot dot--warn"></span>Host agent
+                      </span>
+                      <span class="status status--warn">Stale</span>
+                    </div>
+                    <p class="health-row__meta">last seq 0043 · 14:07:29</p>
+                    <p class="health-row__meta">no heartbeat for 6m 39s</p>
+                  </div>
+                  <div class="health-row">
+                    <div class="health-row__top">
+                      <span class="health-row__name">
+                        <span class="dot dot--ok"></span>Renter client
+                      </span>
+                      <span class="status status--ok">Online</span>
+                    </div>
+                    <p class="health-row__meta">last seq 0026 · 14:13:56</p>
+                    <p class="health-row__meta">endpoint reachable</p>
+                  </div>
+                  <div class="health-row">
+                    <div class="health-row__top">
+                      <span class="health-row__name">
+                        <span class="dot dot--ok"></span>Platform probe
+                      </span>
+                      <span class="status status--ok">Online</span>
+                    </div>
+                    <p class="health-row__meta">last seq 0120 · 14:14:00</p>
+                    <p class="health-row__meta">platform-operated</p>
+                  </div>
+                </div>
+                <p class="micro faint" style="margin-top: 12px; line-height: 1.55">
+                  Stale sources remain visible. A gap is not converted into a
+                  healthy result.
+                </p>
+              </div>
+            </section>
+
+            <section class="card span-2" aria-labelledby="hosts-title">
+              <div class="card__head">
+                <div>
+                  <h2 id="hosts-title">Hosts</h2>
+                  <p class="card__sub">Owner-scoped endpoints and agent presence</p>
+                </div>
+                <a class="micro muted" href="host-setup-desktop.html">View all</a>
+              </div>
+              <table class="data-table">
+                <caption class="sr-only">
+                  Host inventory with endpoint, agent presence and latest source
+                  status
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Host</th>
+                    <th scope="col">Endpoint</th>
+                    <th scope="col">Agent presence</th>
+                    <th scope="col">Latest source</th>
+                    <th scope="col">Last seen</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <span class="data-table__primary">db-01</span>
+                      <p class="data-table__sub">host_01J8F2A</p>
+                    </td>
+                    <td class="mono">gpu-01.example.net</td>
+                    <td><span class="status status--ok">Online</span></td>
+                    <td><span class="status status--warn">Host gap</span></td>
+                    <td class="mono">14:07:29</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="data-table__primary">db-02</span>
+                      <p class="data-table__sub">host_01J8F3C</p>
+                    </td>
+                    <td class="mono">gpu-02.example.net</td>
+                    <td><span class="status status--ok">Online</span></td>
+                    <td><span class="status">GPU unavailable</span></td>
+                    <td class="mono">14:13:42</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="data-table__primary">db-03</span>
+                      <p class="data-table__sub">host_01J8F4K</p>
+                    </td>
+                    <td class="mono">gpu-03.example.net</td>
+                    <td><span class="status">Unknown</span></td>
+                    <td><span class="status">No observation</span></td>
+                    <td class="mono">—</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p class="micro faint" style="padding: 0 14px 12px">
+                Operational presence is separate from incident evidence and is
+                not included in a sealed bundle.
+              </p>
+            </section>
+
+            <section class="card" aria-labelledby="recent-title">
+              <div class="card__head">
+                <div>
+                  <h2 id="recent-title">Recent sealed records</h2>
+                  <p class="card__sub">Deterministic assessment · immutable</p>
+                </div>
+                <a class="micro muted" href="incident-sealed-desktop.html"
+                  >View all</a
+                >
+              </div>
+              <div class="card__body">
+                <div class="record-list">
+                  <div class="record">
+                    <div class="record__main">
+                      <p class="record__title">Power interruption · db-01</p>
+                      <p class="record__meta">31 Oct · 13:48 UTC · 128 events</p>
+                    </div>
+                    <div class="record__result">
+                      <span class="mono">POWER_RELATED</span>
+                      <span class="status status--accent">Medium</span>
+                    </div>
+                  </div>
+                  <div class="record">
+                    <div class="record__main">
+                      <p class="record__title">Reachability loss · db-04</p>
+                      <p class="record__meta">31 Oct · 11:21 UTC · 64 events</p>
+                    </div>
+                    <div class="record__result">
+                      <span class="mono">UNKNOWN</span>
+                      <span class="status">Insufficient</span>
+                    </div>
+                  </div>
+                  <div class="record">
+                    <div class="record__main">
+                      <p class="record__title">
+                        Workload exit · db-02
+                        <span class="source source--system">Simulated</span>
+                      </p>
+                      <p class="record__meta">30 Oct · 18:05 UTC · 41 events</p>
+                    </div>
+                    <div class="record__result">
+                      <span class="mono">HOST_OR_WORKLOAD_EXIT</span>
+                      <span class="status status--warn">Low · demo cap</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <p class="micro faint" style="margin-top: 16px">
+            Illustrative staging data. Assessment codes are deterministic and
+            versioned; <span class="mono">UNKNOWN</span> is a valid result when
+            evidence is insufficient.
+          </p>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

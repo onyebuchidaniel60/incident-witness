@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Incident Witness — Phase 6 mockups</title>
+    <link rel="stylesheet" href="assets/mockup.css" />
+  </head>
+  <body class="theme-public">
+    <div class="prototype-bar">
+      <strong>Static design mockup</strong> · Phase 6 · illustrative data · not
+      production UI
+    </div>
+
+    <header class="pub-header">
+      <div class="container pub-nav">
+        <a class="wordmark" href="index.html">Incident Witness</a>
+        <nav class="pub-nav__links" aria-label="Primary">
+          <a href="home-desktop.html">Home</a>
+          <a href="verify-desktop.html">Verify</a>
+        </nav>
+        <div class="pub-nav__actions">
+          <a class="btn btn--secondary btn--sm" href="../DESIGN_DECISIONS.md"
+            >Design record</a
+          >
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="container index-hero">
+        <p class="eyebrow"><span class="eyebrow__dot"></span>Phase 6 review</p>
+        <h1>Structural mockups for operator review.</h1>
+        <p>
+          A named hybrid: light-first public pages with a clean, modern SaaS
+          hierarchy, and a dark-first authenticated workspace built for dense
+          evidence work. These are standalone HTML/CSS prototypes under
+          <span class="mono">docs/mockups/</span>. Nothing here is connected to
+          the application.
+        </p>
+        <div class="index-meta">
+          <span class="status status--accent">Hybrid B + A</span>
+          <span class="status status--ok">Public: light-first</span>
+          <span class="status status--plain">Workspace: dark-first</span>
+          <span class="status status--plain">Inter + monospace</span>
+        </div>
+      </section>
+
+      <section class="container index-grid" aria-label="Mockup inventory">
+        <article class="index-card">
+          <div class="index-card__top">
+            <span class="mono-label">01 · Public</span>
+            <span class="source source--host">Light</span>
+          </div>
+          <h2>Public home page</h2>
+          <p>
+            Problem statement, three source categories, verification flow,
+            explicit limitations and footer. The hero includes a compact
+            evidence preview.
+          </p>
+          <div class="index-card__links">
+            <a class="btn btn--primary btn--sm" href="home-desktop.html"
+              >Desktop</a
+            >
+            <a class="btn btn--secondary btn--sm" href="home-mobile.html"
+              >Mobile</a
+            >
+          </div>
+        </article>
+
+        <article class="index-card">
+          <div class="index-card__top">
+            <span class="mono-label">02 · Workspace</span>
+            <span class="source source--probe">Dark</span>
+          </div>
+          <h2>Authenticated dashboard</h2>
+          <p>
+            Sidebar navigation, active-session summary, host health, source
+            availability, recent sealed records and an explicit stale-source
+            notice.
+          </p>
+          <div class="index-card__links">
+            <a class="btn btn--primary btn--sm" href="dashboard-desktop.html"
+              >Desktop</a
+            >
+            <a class="btn btn--secondary btn--sm" href="dashboard-mobile.html"
+              >Mobile</a
+            >
+          </div>
+        </article>
+
+        <article class="index-card">
+          <div class="index-card__top">
+            <span class="mono-label">03 · Workspace</span>
+            <span class="source source--probe">Dark</span>
+          </div>
+          <h2>Host setup and enrollment</h2>
+          <p>
+            DNS endpoint proof, one-time enrollment code, source-key status,
+            readiness checklist and the honest manual incident-ID requirement
+            for the host agent.
+          </p>
+          <div class="index-card__links">
+            <a class="btn btn--primary btn--sm" href="host-setup-desktop.html"
+              >Desktop</a
+            >
+            <a class="btn btn--secondary btn--sm" href="host-setup-mobile.html"
+              >Mobile</a
+            >
+          </div>
+        </article>
+
+        <article class="index-card">
+          <div class="index-card__top">
+            <span class="mono-label">04 · Workspace</span>
+            <span class="source source--probe">Dark</span>
+          </div>
+          <h2>Incident timeline</h2>
+          <p>
+            Collecting state with three distinct sources, explicit gaps and
+            unavailable telemetry, source health, deterministic assessment
+            pending at seal, and lifecycle actions.
+          </p>
+          <div class="index-card__links">
+            <a class="btn btn--primary btn--sm" href="incident-desktop.html"
+              >Desktop</a
+            >
+            <a class="btn btn--secondary btn--sm" href="incident-mobile.html"
+              >Mobile</a
+            >
+          </div>
+        </article>
+
+        <article class="index-card">
+          <div class="index-card__top">
+            <span class="mono-label">04b · Sealed state</span>
+            <span class="source source--probe">Dark</span>
+          </div>
+          <h2>Sealed assessment and bundle</h2>
+          <p>
+            Additional state for the incident screen: completed capture,
+            deterministic assessment, evidence gaps, bundle metadata and local
+            verification entry point.
+          </p>
+          <div class="index-card__links">
+            <a
+              class="btn btn--primary btn--sm"
+              href="incident-sealed-desktop.html"
+              >Desktop</a
+            >
+            <a
+              class="btn btn--secondary btn--sm"
+              href="incident-sealed-mobile.html"
+              >Mobile</a
+            >
+          </div>
+        </article>
+
+        <article class="index-card">
+          <div class="index-card__top">
+            <span class="mono-label">05 · Public</span>
+            <span class="source source--host">Light</span>
+          </div>
+          <h2>Local verifier</h2>
+          <p>
+            Local-only upload, check-by-check result, bundle assessment and a
+            state gallery for pass, tampered and unknown-platform-key outcomes.
+          </p>
+          <div class="index-card__links">
+            <a class="btn btn--primary btn--sm" href="verify-desktop.html"
+              >Desktop</a
+            >
+            <a class="btn btn--secondary btn--sm" href="verify-mobile.html"
+              >Mobile</a
+            >
+          </div>
+        </article>
+      </section>
+
+      <section class="container" style="padding-bottom: 28px">
+        <article class="index-card" style="min-height: auto">
+          <div class="index-card__top">
+            <span class="mono-label">06 · State coverage</span>
+            <span class="status status--plain">Both themes</span>
+          </div>
+          <h2>Loading, empty, error and restricted states</h2>
+          <p>
+            Static treatments for verifier failures, stale polling, empty
+            resources, blocked actions, form validation and permission-safe
+            not-found responses.
+          </p>
+          <div class="index-card__links">
+            <a class="btn btn--primary btn--sm" href="states.html"
+              >Review state treatments</a
+            >
+          </div>
+        </article>
+      </section>
+
+      <section class="container index-notes" aria-label="Design notes">
+        <div class="index-note">
+          <h3>Borrowed from Direction B</h3>
+          <ul>
+            <li>Light surfaces, crisp type and generous public whitespace.</li>
+            <li>Calm navigation, direct calls to action and soft elevation.</li>
+            <li>Strong form and verification-result hierarchy.</li>
+          </ul>
+        </div>
+        <div class="index-note">
+          <h3>Borrowed from Direction A</h3>
+          <ul>
+            <li>Dark, compact workspace shell with persistent navigation.</li>
+            <li>Monospace metadata for IDs, timestamps, sequences and digests.</li>
+            <li>Dense tables, source tiles and a timeline-led incident view.</li>
+          </ul>
+        </div>
+        <div class="index-note">
+          <h3>Product-specific constraints</h3>
+          <ul>
+            <li>Status always includes text; colour is secondary.</li>
+            <li>Unknown and unavailable states are neutral gray, not red.</li>
+            <li>Platform probe is always labelled platform-operated.</li>
+            <li>No confidence scores, claims of cause or decorative dashboards.</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <footer class="pub-footer">
+      <div class="container">
+        <div class="pub-footer__bottom">
+          <p>
+            Static Phase 6 mockups. Illustrative hostnames, IDs and telemetry
+            only. No final visual implementation has been applied to
+            <span class="mono">apps/web</span>.
+          </p>
+          <a href="../DESIGN_DECISIONS.md">Design decisions</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

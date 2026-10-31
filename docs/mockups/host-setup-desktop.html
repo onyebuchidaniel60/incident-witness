@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Incident Witness — Host setup mockup</title>
+    <link rel="stylesheet" href="assets/mockup.css" />
+  </head>
+  <body class="theme-workspace">
+    <div class="prototype-bar">
+      <strong>Static design mockup</strong> · Phase 6 · illustrative data · not
+      production UI
+    </div>
+
+    <div class="ws-shell">
+      <aside class="ws-sidebar" aria-label="Workspace sidebar">
+        <div class="ws-brand">
+          <a class="wordmark" href="dashboard-desktop.html">Incident Witness</a>
+          <span class="ws-kicker">Provider workspace</span>
+        </div>
+        <nav class="ws-nav" aria-label="Workspace">
+          <span class="ws-nav__label">Workspace</span>
+          <a href="dashboard-desktop.html">
+            Dashboard <span class="ws-nav__count">1</span>
+          </a>
+          <a href="host-setup-desktop.html" aria-current="page">Hosts</a>
+          <a href="incident-desktop.html">Sessions</a>
+          <a href="verify-desktop.html">Verify</a>
+        </nav>
+        <nav class="ws-nav" aria-label="Resources">
+          <span class="ws-nav__label">Resources</span>
+          <a href="../DESIGN_DECISIONS.md">Documentation</a>
+          <a href="../DESIGN_DECISIONS.md">Settings</a>
+        </nav>
+        <div class="ws-sidebar__foot">
+          <span class="env-badge">Staging</span>
+          <div class="ws-user">
+            <span class="avatar" aria-hidden="true">OP</span>
+            <div class="ws-user__meta">
+              <strong>Operator</strong>
+              <span>operator@example.net</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <div class="ws-main">
+        <header class="ws-topbar">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="dashboard-desktop.html">Workspace</a>
+            <span class="breadcrumb__sep" aria-hidden="true">/</span>
+            <a href="dashboard-desktop.html#hosts-title">Hosts</a>
+            <span class="breadcrumb__sep" aria-hidden="true">/</span>
+            <span aria-current="page">db-03</span>
+          </nav>
+          <div class="ws-topbar__right">
+            <span class="ws-clock">14:14:08 UTC</span>
+            <a class="btn btn--secondary btn--sm" href="dashboard-desktop.html"
+              >Back to dashboard</a
+            >
+          </div>
+        </header>
+
+        <main class="ws-content" id="main">
+          <div class="page-head">
+            <div>
+              <div class="host-title">
+                <h1>db-03</h1>
+                <span class="status status--ok">Endpoint verified</span>
+                <span class="status status--warn">Enrollment pending</span>
+              </div>
+              <p class="page-head__sub">
+                <span class="host-id">host_01J8F4K</span> ·
+                <span class="mono">gpu-03.example.net</span> · created 31 Oct
+                2026
+              </p>
+            </div>
+            <div class="page-actions">
+              <button class="btn btn--secondary btn--sm" type="button">
+                Refresh challenge
+              </button>
+              <button class="btn btn--danger btn--sm" type="button">
+                Archive host
+              </button>
+            </div>
+          </div>
+
+          <div class="notice notice--info" style="margin-bottom: 12px">
+            <span class="notice__mark" aria-hidden="true">i</span>
+            <span>
+              Enrollment is a one-time step. The code is single use and expires
+              after <strong>10 minutes</strong>. The agent generates its key
+              locally; only the public key is sent to the API.
+            </span>
+          </div>
+
+          <div class="detail-grid">
+            <div class="detail-stack">
+              <section class="card" aria-labelledby="endpoint-title">
+                <div class="card__head">
+                  <div class="section-title">
+                    <span class="step-number" aria-hidden="true">1</span>
+                    <div>
+                      <h2 id="endpoint-title">Prove endpoint ownership</h2>
+                      <p>Add this TXT record at the host's public DNS provider.</p>
+                    </div>
+                  </div>
+                  <span class="status status--ok">Verified</span>
+                </div>
+                <div class="card__body">
+                  <div class="record-box">
+                    <dl>
+                      <div class="record-row">
+                        <dt>Record type</dt>
+                        <dd>TXT</dd>
+                        <span></span>
+                      </div>
+                      <div class="record-row">
+                        <dt>Name</dt>
+                        <dd>_incident-witness.gpu-03.example.net</dd>
+                        <button class="btn btn--ghost btn--sm" type="button">
+                          Copy
+                        </button>
+                      </div>
+                      <div class="record-row">
+                        <dt>Value</dt>
+                        <dd>iw-verify=7c1e9a4d8b2f6a0c</dd>
+                        <button class="btn btn--ghost btn--sm" type="button">
+                          Copy
+                        </button>
+                      </div>
+                      <div class="record-row">
+                        <dt>TTL</dt>
+                        <dd>300 seconds</dd>
+                        <span></span>
+                      </div>
+                    </dl>
+                  </div>
+                  <div
+                    class="row row--between wrap"
+                    style="margin-top: 12px; align-items: center"
+                  >
+                    <p class="micro faint">
+                      Verified 31 Oct 2026 · 14:04 UTC against a public DNS
+                      resolver.
+                    </p>
+                    <button class="btn btn--secondary btn--sm" type="button">
+                      Re-check DNS
+                    </button>
+                  </div>
+                  <p class="micro faint" style="margin-top: 10px; line-height: 1.55">
+                    The challenge proves control of the hostname. It does not
+                    prove that the host is honest, available or correctly
+                    configured.
+                  </p>
+                </div>
+              </section>
+
+              <section class="card" aria-labelledby="agent-title">
+                <div class="card__head">
+                  <div class="section-title">
+                    <span class="step-number" aria-hidden="true">2</span>
+                    <div>
+                      <h2 id="agent-title">Install and enroll the host agent</h2>
+                      <p>Run unprivileged on Linux x86_64.</p>
+                    </div>
+                  </div>
+                  <span class="status">Not enrolled</span>
+                </div>
+                <div class="card__body">
+                  <div class="stack">
+                    <div>
+                      <p class="micro faint" style="margin-bottom: 6px">
+                        1 · Confirm the agent is installed
+                      </p>
+                      <code class="code">iw-agent --version</code>
+                    </div>
+                    <div>
+                      <p class="micro faint" style="margin-bottom: 6px">
+                        2 · Start enrollment and paste the one-time code when
+                        prompted
+                      </p>
+                      <code class="code">iw-agent enroll</code>
+                    </div>
+                    <div class="enrollment-box">
+                      <div>
+                        <p class="enrollment-box__label">
+                          One-time enrollment code · shown once
+                        </p>
+                        <p class="enrollment-code">IW-7Q4K-9M2X</p>
+                        <p class="enrollment-expiry">
+                          Expires 14:24 UTC · single use · illustrative only
+                        </p>
+                      </div>
+                      <button class="btn btn--primary btn--sm" type="button">
+                        Copy code
+                      </button>
+                    </div>
+                    <p class="micro faint" style="line-height: 1.55">
+                      The agent reads the code interactively with terminal echo
+                      disabled. It is never accepted as a command-line argument
+                      or environment variable, and it is not logged. Do not paste
+                      the code into a shell history.
+                    </p>
+                  </div>
+                </div>
+              </section>
+
+              <section class="card" aria-labelledby="keys-title">
+                <div class="card__head">
+                  <div>
+                    <h2 id="keys-title">Source keys</h2>
+                    <p class="card__sub">
+                      Public keys registered for this host
+                    </p>
+                  </div>
+                  <span class="status status--plain">0 active</span>
+                </div>
+                <div class="card__body">
+                  <div class="empty-note">
+                    No source key is enrolled yet. After enrollment, the agent's
+                    Ed25519 public key and platform-signed certificate will
+                    appear here.
+                  </div>
+                  <p class="micro faint" style="margin-top: 10px; line-height: 1.55">
+                    Revoking a key prevents new events. It does not invalidate
+                    signatures on events that were already accepted before
+                    revocation.
+                  </p>
+                </div>
+              </section>
+            </div>
+
+            <div class="rail-stack">
+              <section class="card" aria-labelledby="summary-title">
+                <div class="card__head">
+                  <h2 id="summary-title">Host summary</h2>
+                </div>
+                <div class="card__body">
+                  <dl>
+                    <div class="kv">
+                      <dt>Host ID</dt>
+                      <dd class="mono">host_01J8F4K</dd>
+                    </div>
+                    <div class="kv">
+                      <dt>Endpoint</dt>
+                      <dd class="mono">gpu-03.example.net</dd>
+                    </div>
+                    <div class="kv">
+                      <dt>Endpoint proof</dt>
+                      <dd><span class="status status--ok">Verified</span></dd>
+                    </div>
+                    <div class="kv">
+                      <dt>Agent presence</dt>
+                      <dd><span class="status">Not seen</span></dd>
+                    </div>
+                    <div class="kv">
+                      <dt>Agent version</dt>
+                      <dd class="mono">—</dd>
+                    </div>
+                    <div class="kv">
+                      <dt>OS / arch</dt>
+                      <dd class="mono">Linux x86_64</dd>
+                    </div>
+                    <div class="kv">
+                      <dt>Created</dt>
+                      <dd class="mono">2026-10-31 14:02 UTC</dd>
+                    </div>
+                  </dl>
+                </div>
+              </section>
+
+              <section class="card" aria-labelledby="readiness-title">
+                <div class="card__head">
+                  <h2 id="readiness-title">Readiness</h2>
+                  <span class="status status--warn">1 of 4</span>
+                </div>
+                <div class="card__body">
+                  <div class="readiness-list">
+                    <div class="readiness-item readiness-item--done">
+                      <span class="readiness-item__mark" aria-hidden="true">✓</span>
+                      <div>
+                        <strong>Endpoint verified</strong>
+                        <span>Public DNS TXT record matched</span>
+                      </div>
+                    </div>
+                    <div class="readiness-item readiness-item--current">
+                      <span class="readiness-item__mark" aria-hidden="true">2</span>
+                      <div>
+                        <strong>Agent enrolled</strong>
+                        <span>Waiting for the one-time code</span>
+                      </div>
+                    </div>
+                    <div class="readiness-item">
+                      <span class="readiness-item__mark" aria-hidden="true">3</span>
+                      <div>
+                        <strong>Operational presence</strong>
+                        <span>No signed heartbeat yet</span>
+                      </div>
+                    </div>
+                    <div class="readiness-item">
+                      <span class="readiness-item__mark" aria-hidden="true">4</span>
+                      <div>
+                        <strong>First evidence session</strong>
+                        <span>Create a bounded capture</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="card" aria-labelledby="agent-note-title">
+                <div class="card__head">
+                  <h2 id="agent-note-title">Starting a capture</h2>
+                </div>
+                <div class="card__body">
+                  <p class="small muted">
+                    The agent does not discover active sessions automatically.
+                    Start it with the incident ID supplied by the provider
+                    workspace:
+                  </p>
+                  <code class="code" style="margin-top: 9px"
+                    >iw-agent run --incident &lt;uuid&gt;</code
+                  >
+                  <p class="micro faint" style="margin-top: 9px; line-height: 1.55">
+                    The explicit incident ID is a current product limitation, not
+                    an automatic integration.
+                  </p>
+                </div>
+              </section>
+
+              <section class="card danger-zone" aria-labelledby="archive-title">
+                <div class="card__head">
+                  <h2 id="archive-title">Archive host</h2>
+                </div>
+                <div class="card__body">
+                  <p class="small muted">
+                    Archiving is terminal for this host and prevents new
+                    enrollment or evidence collection.
+                  </p>
+                  <button
+                    class="btn btn--danger btn--sm"
+                    type="button"
+                    style="margin-top: 10px"
+                  >
+                    Archive db-03
+                  </button>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

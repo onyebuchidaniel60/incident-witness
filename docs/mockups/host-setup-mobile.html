@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Incident Witness — Mobile host setup mockup</title>
+    <link rel="stylesheet" href="assets/mockup.css" />
+  </head>
+  <body class="theme-workspace mobile-page">
+    <p class="device-label">Mobile · 390 px · host setup</p>
+    <div class="device">
+      <div class="prototype-bar">
+        <strong>Static mockup</strong> · Phase 6 · illustrative data
+      </div>
+
+      <header class="m-header">
+        <a class="wordmark" href="dashboard-mobile.html">Incident Witness</a>
+        <details class="m-menu">
+          <summary aria-label="Open workspace navigation">
+            <span class="m-menu__glyph" aria-hidden="true"></span>
+          </summary>
+          <nav class="m-menu__panel" aria-label="Workspace navigation">
+            <a href="dashboard-mobile.html">Dashboard</a>
+            <a href="host-setup-mobile.html" aria-current="page">Hosts</a>
+            <a href="incident-mobile.html">Sessions</a>
+            <a href="verify-mobile.html">Verify</a>
+          </nav>
+        </details>
+      </header>
+
+      <main class="m-content" id="main">
+        <div class="m-page-head">
+          <div class="row wrap" style="align-items: center">
+            <h1 style="margin: 0">db-03</h1>
+            <span class="status status--ok">Endpoint verified</span>
+            <span class="status status--warn">Enrollment pending</span>
+          </div>
+          <p>host_01J8F4K · gpu-03.example.net</p>
+        </div>
+
+        <div class="notice notice--info" style="margin-bottom: 10px">
+          <span class="notice__mark" aria-hidden="true">i</span>
+          <span>
+            The enrollment code is single use and expires after 10 minutes.
+            The agent generates its key locally.
+          </span>
+        </div>
+
+        <section class="m-card" aria-labelledby="m-endpoint-title">
+          <div class="m-card__head">
+            <div>
+              <span class="mono-label">Step 1</span>
+              <h2 id="m-endpoint-title">Prove endpoint ownership</h2>
+            </div>
+            <span class="status status--ok">Verified</span>
+          </div>
+          <dl>
+            <div class="m-dns-row">
+              <dt>Record type</dt>
+              <dd>TXT</dd>
+            </div>
+            <div class="m-dns-row">
+              <dt>Name</dt>
+              <dd>_incident-witness.gpu-03.example.net</dd>
+            </div>
+            <div class="m-dns-row">
+              <dt>Value</dt>
+              <dd>iw-verify=7c1e9a4d8b2f6a0c</dd>
+            </div>
+            <div class="m-dns-row">
+              <dt>TTL</dt>
+              <dd>300 seconds</dd>
+            </div>
+          </dl>
+          <p class="micro faint" style="margin-top: 9px">
+            Verified 31 Oct 2026 · 14:04 UTC.
+          </p>
+          <button
+            class="btn btn--secondary btn--block"
+            type="button"
+            style="margin-top: 10px"
+          >
+            Re-check DNS
+          </button>
+        </section>
+
+        <section class="m-card" style="margin-top: 10px" aria-labelledby="m-agent-title">
+          <div class="m-card__head">
+            <div>
+              <span class="mono-label">Step 2</span>
+              <h2 id="m-agent-title">Install and enroll</h2>
+            </div>
+            <span class="status">Not enrolled</span>
+          </div>
+          <p class="small muted" style="margin-bottom: 7px">
+            1 · Confirm the agent is installed
+          </p>
+          <code class="m-code">iw-agent --version</code>
+          <p class="small muted" style="margin: 9px 0 7px">
+            2 · Enroll and paste the one-time code when prompted
+          </p>
+          <code class="m-code">iw-agent enroll</code>
+
+          <div class="m-enrollment">
+            <p class="enrollment-box__label">One-time code · shown once</p>
+            <p class="m-enrollment__code">IW-7Q4K-9M2X</p>
+            <p class="m-enrollment__meta">
+              Expires 14:24 UTC · single use · illustrative only
+            </p>
+            <button
+              class="btn btn--primary btn--block"
+              type="button"
+              style="margin-top: 9px"
+            >
+              Copy code
+            </button>
+          </div>
+          <p class="micro faint" style="margin-top: 9px; line-height: 1.55">
+            The code is read interactively with terminal echo disabled. It is
+            never passed as an argument or environment variable.
+          </p>
+        </section>
+
+        <section class="m-card" style="margin-top: 10px" aria-labelledby="m-keys-title">
+          <div class="m-card__head">
+            <h2 id="m-keys-title">Source keys</h2>
+            <span class="status status--plain">0 active</span>
+          </div>
+          <div class="empty-note">
+            No key enrolled. The agent's public key appears here after
+            enrollment.
+          </div>
+          <p class="micro faint" style="margin-top: 9px; line-height: 1.55">
+            Revoking a key prevents new events; it does not invalidate valid
+            historic signatures.
+          </p>
+        </section>
+
+        <section class="m-card" style="margin-top: 10px" aria-labelledby="m-readiness-title">
+          <div class="m-card__head">
+            <h2 id="m-readiness-title">Readiness</h2>
+            <span class="status status--warn">1 of 4</span>
+          </div>
+          <div class="readiness-list">
+            <div class="readiness-item readiness-item--done">
+              <span class="readiness-item__mark" aria-hidden="true">✓</span>
+              <div>
+                <strong>Endpoint verified</strong>
+                <span>Public DNS TXT record matched</span>
+              </div>
+            </div>
+            <div class="readiness-item readiness-item--current">
+              <span class="readiness-item__mark" aria-hidden="true">2</span>
+              <div>
+                <strong>Agent enrolled</strong>
+                <span>Waiting for the one-time code</span>
+              </div>
+            </div>
+            <div class="readiness-item">
+              <span class="readiness-item__mark" aria-hidden="true">3</span>
+              <div>
+                <strong>Operational presence</strong>
+                <span>No signed heartbeat yet</span>
+              </div>
+            </div>
+            <div class="readiness-item">
+              <span class="readiness-item__mark" aria-hidden="true">4</span>
+              <div>
+                <strong>First evidence session</strong>
+                <span>Create a bounded capture</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="m-card" style="margin-top: 10px" aria-labelledby="m-summary-title">
+          <div class="m-card__head">
+            <h2 id="m-summary-title">Host summary</h2>
+          </div>
+          <dl>
+            <div class="m-kv">
+              <dt>Host ID</dt>
+              <dd>host_01J8F4K</dd>
+            </div>
+            <div class="m-kv">
+              <dt>Endpoint</dt>
+              <dd>gpu-03.example.net</dd>
+            </div>
+            <div class="m-kv">
+              <dt>Agent presence</dt>
+              <dd>Not seen</dd>
+            </div>
+            <div class="m-kv">
+              <dt>OS / arch</dt>
+              <dd>Linux x86_64</dd>
+            </div>
+            <div class="m-kv">
+              <dt>Created</dt>
+              <dd>2026-10-31 14:02 UTC</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="m-card" style="margin-top: 10px" aria-labelledby="m-run-title">
+          <div class="m-card__head">
+            <h2 id="m-run-title">Starting a capture</h2>
+          </div>
+          <p class="small muted">
+            The agent does not discover active sessions automatically. Pass the
+            incident ID explicitly:
+          </p>
+          <code class="m-code" style="margin-top: 8px"
+            >iw-agent run --incident &lt;uuid&gt;</code
+          >
+          <p class="micro faint" style="margin-top: 8px">
+            This is a current product limitation, not automatic discovery.
+          </p>
+        </section>
+
+        <section
+          class="m-card"
+          style="margin-top: 10px; border-color: var(--danger-border)"
+          aria-labelledby="m-archive-title"
+        >
+          <div class="m-card__head">
+            <h2 id="m-archive-title" style="color: var(--danger)">Archive host</h2>
+          </div>
+          <p class="small muted">
+            Archiving is terminal and prevents new enrollment or evidence.
+          </p>
+          <button
+            class="btn btn--danger btn--block"
+            type="button"
+            style="margin-top: 9px"
+          >
+            Archive db-03
+          </button>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

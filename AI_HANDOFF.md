@@ -2,11 +2,11 @@
 
 **Last updated:** 2026-10-31
 
-**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**.
+**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**. Phase 6 mockups are created and presented; operator mockup approval is pending.
 
-**Current phase:** Phase 5 is **COMPLETE AND CLOSED**. Phase 6 — design reference collection is in progress; operator design direction is pending.
+**Current phase:** Phase 6 — structural mockups created and presented; **awaiting explicit operator approval**. Phase 7 is not authorized.
 
-**Next task:** Phase 6 only — after the operator selects a design direction, create desktop/mobile structural mockups for all principal screens and states; no UI code until explicit approval.
+**Next task:** Operator review of the Phase 6 mockup set. Revise only from operator feedback, then stop again for explicit approval; do not implement final UI code.
 
 **Phase 2 acceptance:** Operator accepted the Phase 2 checkpoint and approved the `public.iw_uid()` security-definer wrapper on 2026-10-31.
 
@@ -674,13 +674,24 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - **Phase 4 schema:** no migrations, table/column or API contract changes. Only the test-only API runtime seam was added, guarded by `NODE_ENV=test` and `IW_E2E_TEST_AUTH=true`.
 - **Phase 5 schema:** migrations `0020`–`0022` add RLS/grants only; no table or column definitions change. The incident-detail timeline response now includes the owner-visible event `payload` and `simulationMode` fields. API readiness expects `0022`.
 
+## Phase 6 mockups (created and presented 2026-10-31; approval pending)
+
+- Standalone HTML/CSS prototypes live under `docs/mockups/` with a local index and shared stylesheet.
+- The approved hybrid direction is Direction B (light-first public pages) plus Direction A (dark-first, data-dense workspace).
+- Covered screens: public home, dashboard, host setup/enrollment, incident timeline, sealed assessment/bundle, local verifier and a state-treatment gallery. Desktop and mobile layouts are separate files for the five principal screens.
+- Covered states include collecting, awaiting assessment, sealed, stale polling, host gap, unavailable GPU telemetry, empty resources, loading, error/retry, validation, action blocked, permission-safe not-found and verifier pass/tampered/unknown-key failures.
+- No file under `apps/web` was changed. No final CSS, Tailwind tokens or UI implementation was written.
+- Static validation: 14 pages rendered at 1440 px and 430 px in Chromium with no console errors or horizontal overflow; no duplicate IDs, unnamed buttons or unlabelled inputs; one `h1` and no heading-order jumps per page.
+- Operator direction is recorded in `docs/DESIGN_DECISIONS.md`; the mockup set is presented and awaiting explicit approval.
+
 ## Design reference and approval status
 
 - **Final visual design:** NOT STARTED.
-- **Design references:** CANDIDATES PROPOSED — Direction A (technical/data-dense), Direction B (clean/modern SaaS) and Direction C (operator-supplied); operator selection is PENDING.
-- **Mockups:** NOT CREATED — blocked on reference selection.
-- **Operator approval:** NOT GRANTED.
-- Phase 6 scope and candidate directions are recorded in `docs/DESIGN_DECISIONS.md`; no final styling or UI code has been written.
+- **Approved design direction:** HYBRID — Direction B (clean/modern SaaS) for light-first public pages; Direction A (technical/data-dense) for the dark-first authenticated workspace.
+- **Design references:** RECORDED — visual-language references Datadog, Vercel, Linear and Stripe Dashboard, plus the operator's written direction. No external assets, screenshots, logos or code were copied.
+- **Mockups:** CREATED v0.1 and PRESENTED on 2026-10-31 under `docs/mockups/`; desktop/mobile coverage and state treatments included.
+- **Operator approval:** NOT GRANTED — awaiting an explicit approval message for the complete mockup direction.
+- Phase 6 scope, tokens, borrowed attributes, intentional deviations and the approval record are in `docs/DESIGN_DECISIONS.md`; no final styling or UI code has been written.
 - Phase 3C, Phase 3D, Phase 3E and Phase 3F did not change frontend styling or visual behaviour.
 - Phase 4/5 connect functional UI and state handling but retain temporary structural styling; final visual design is still not approved or implemented.
 - Phase 4 connects functional UI but keeps temporary structural styling; final visual design is still not approved or implemented.
@@ -702,6 +713,8 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - `.env.example` includes conservative probe-worker defaults and key-provisioning guidance.
 - `/docs` route and footer Documentation/GitHub links remain unchanged and reachable from Phase 2.
 - `/privacy` and `/terms` remain clearly labelled placeholders; no legal copy is approved.
+- `docs/DESIGN_DECISIONS.md` now records the approved hybrid direction, reference register, proposed mockup tokens, screen/state coverage and pending approval.
+- `docs/mockups/README.md` explains how to open and review the static mockup set; `docs/mockups/index.html` is the local review entry point.
 
 ## Known risks and operator actions
 
@@ -740,5 +753,5 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 
 ## Exact next task
 
-**Phase 6 — Design references and mockups — awaiting operator design direction.**
-Phase 5 is accepted and closed. Candidate directions are recorded in `docs/DESIGN_DECISIONS.md`. Do not create mockups, final CSS, Tailwind styling or UI code until the operator selects a direction; then present all principal desktop/mobile mockups and stop again for explicit mockup approval.
+**Phase 6 — Mockup review and explicit approval gate.**
+The mockups are presented under `docs/mockups/`. Wait for operator feedback. Revise the mockups only as directed, update `docs/DESIGN_DECISIONS.md`, and stop again. Do not implement final CSS, Tailwind styling, component restyling or UI code in `apps/web` until the operator explicitly approves the complete mockup direction.
