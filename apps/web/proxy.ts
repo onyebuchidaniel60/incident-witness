@@ -6,7 +6,7 @@ import {
   e2eServerAuthEnabled,
   e2eSessionToken,
 } from "@/lib/e2e-auth";
-import { getSupabasePublicEnvironment } from "@/lib/supabase/env";
+import { getSupabaseCookieOptions, getSupabasePublicEnvironment } from "@/lib/supabase/env";
 
 const protectedPathPrefixes = ["/dashboard", "/hosts", "/incidents", "/settings"];
 
@@ -29,6 +29,7 @@ export async function proxy(request: NextRequest) {
   const { url, publishableKey } = getSupabasePublicEnvironment();
 
   const supabase = createServerClient(url, publishableKey, {
+    cookieOptions: getSupabaseCookieOptions(),
     cookies: {
       getAll() {
         return request.cookies.getAll();
@@ -39,7 +40,10 @@ export async function proxy(request: NextRequest) {
         }
         response = NextResponse.next({ request });
         for (const { name, value, options } of cookiesToSet) {
-          response.cookies.set(name, value, options);
+          response.cookies.set(name, value, {
+            ...getSupabaseCookieOptions(),
+            ...options,
+          });
         }
         for (const [key, value] of Object.entries(headers)) {
           response.headers.set(key, value);

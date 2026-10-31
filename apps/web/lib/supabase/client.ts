@@ -1,8 +1,10 @@
 import { createBrowserClient } from "@supabase/ssr";
 
-import { getSupabasePublicEnvironment } from "./env";
+import { getSupabaseCookieOptions, getSupabasePublicEnvironment } from "./env";
 
 export function createSupabaseBrowserClient() {
   const { url, publishableKey } = getSupabasePublicEnvironment();
-  return createBrowserClient(url, publishableKey);
+  return createBrowserClient(url, publishableKey, {
+    cookieOptions: getSupabaseCookieOptions(),
+  });
 }
