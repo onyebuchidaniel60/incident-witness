@@ -2,13 +2,15 @@
 
 **Last updated:** 2026-10-31
 
-**Project status:** Phase 0, Phase 1, Phase 2 and Phase 3A are complete/accepted. Phase 3B host/incident domain APIs and transactional lifecycle are implemented and tested; the Phase 3B checkpoint is pending operator acceptance.
+**Project status:** Phase 0, Phase 1, Phase 2, Phase 3A and Phase 3B are complete and accepted. Phase 3B host/incident domain APIs and transactional lifecycle are closed.
 
-**Current phase:** Phase 3B — IMPLEMENTED, PENDING OPERATOR ACCEPTANCE.
+**Current phase:** Phase 3B — COMPLETE AND CLOSED (operator accepted 2026-10-31). Phase 3C is authorized and not yet started.
 
-**Next task:** Phase 3C only, awaiting explicit operator authorization.
+**Next task:** Phase 3C only — signed event ingestion, correlation and sealing.
 
 **Phase 2 acceptance:** Operator accepted the Phase 2 checkpoint and approved the `public.iw_uid()` security-definer wrapper on 2026-10-31.
+
+**Phase 3B acceptance:** Operator accepted the Phase 3B checkpoint on 2026-10-31 and explicitly approved the recorded deviations: the generated staging platform key, migrations `0009`–`0012` (grants/RLS only, no table/column changes), and the `endedAt` vs `captureEndsAt` manual-end constraint.
 
 ## Project
 
@@ -198,7 +200,7 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 
 ## Known risks and operator actions
 
-1. **Phase 3B pending acceptance:** host/incident APIs are implemented and tested but not operator-accepted. Do not start Phase 3C without explicit authorization.
+1. **Phase 3B accepted and closed:** host/incident APIs are operator-accepted. The staging platform key, migrations `0009`–`0012` and manual-end `endedAt`/`captureEndsAt` semantics are approved.
 2. **Staging platform key generated:** `.env` lacked the required platform signing key. A staging key was generated and registered as `iw-platform-staging-1`. The operator should confirm this trust anchor or rotate it through the documented overlap process.
 3. **Manual end semantics:** `POST /end` records actual `endedAt` but leaves `captureEndsAt` as the bounded scheduled end because the Phase 2 schema enforces a minimum 2-minute capture window. Phase 3C must use `endedAt` as the effective end when earlier.
 4. **Sweeper scope:** only auto-ends at `capture_ends_at`. Grace-expiry auto-seal/auto-cancel is Phase 3C.
