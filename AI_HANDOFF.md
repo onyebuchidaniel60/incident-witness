@@ -47,6 +47,7 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
   - `b3cd94b58fc3595f7731bbe7655fe0d69037db3d` — `feat(db): add phase 3b domain access policies`
   - `5d62e12595b12889a1fe768bb9a2abdebdcdce62` — `feat(api): implement host and incident domain lifecycle`
   - `69a7c94093cefd6186f614c7356c9fa855ea4d66` — `test(api): cover isolation concurrency and lifecycle`
+  - `b273548181dbc6d8b77563704972c503aad6e8a6` — `fix(api): serialize enrollment and invitation lock ordering`
 - **Working tree:** clean after the final docs/handoff commit.
 - **Node runtime:** confirmed `v26.13.0`; npm `11.20.0`; `.node-version` pins `26.13.0`.
 
@@ -99,6 +100,7 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 ### Transactions, idempotency and audit
 
 - All lifecycle state transitions use transactions and row locks (or owner/incident advisory locks).
+- Enrollment and invitation issuance/redemption use consistent host-before-token and incident-before-invitation lock ordering to avoid deadlocks.
 - `Idempotency-Key` is required for `POST /v1/hosts` and `POST /v1/incidents`; keyed request hash and non-secret resource ID are stored for 24 hours. Same key/different body returns `IDEMPOTENCY_CONFLICT`.
 - Audit events are appended for host creation/update, challenge issue/verify, enrollment-code issue, host enrollment, incident creation/end, renter invitation/enrollment, key revocation, host archive and sweeper transitions. Metadata contains no raw tokens, credentials or private keys.
 - Raw enrollment codes, invitation tokens, DNS challenge values and device/renter credentials are never stored in plaintext; only HMAC-SHA-256 hashes using `IW_TOKEN_PEPPER`.
