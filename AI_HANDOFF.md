@@ -810,6 +810,15 @@ When unauthenticated or after the session disappeared, protected routes could br
 - No client bundle or API request is served for those redirects.
 - No `/workspace` route exists in the current app; `/dashboard` is the provider workspace entry.
 
+### Protected-route fix deployment
+
+- **Preview URL:** https://incident-witness-68k5j4fss-uhhh2.vercel.app
+- **Preview deployment ID:** `dpl_HZQTzsG1N1d2ypsDBo8c6QCnCx9m`
+- **Preview status/target:** `READY`; `preview`
+- **Deployed code SHA:** `82c2adc`
+- `/dashboard` and `/hosts` without a session returned `307` to `/login?next=…` at the edge; `/login` returned `200`.
+- No client API request can be made from these redirect responses because the protected route HTML is never served.
+
 **Phase 8 was not started.** The Phase 7 checkpoint remains pending operator acceptance.
 
 ## Design reference and approval status
