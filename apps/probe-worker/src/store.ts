@@ -49,6 +49,8 @@ type ClaimRow = {
 type IncidentRow = {
   status: string;
   capture_ends_at: Date;
+  ended_at: Date | null;
+  ingestion_deadline: Date;
   accepted_event_count: number;
   accepted_event_bytes: string | number;
 };
@@ -138,17 +140,24 @@ export class PostgresProbeJobStore implements ProbeJobStore {
   async appendObservation(job: ClaimedJob, build: EventBuilder): Promise<AppendResult> {
     return this.transaction(async (client) => {
       const incidentResult = await client.query<IncidentRow>(
-        `select status, capture_ends_at, accepted_event_count, accepted_event_bytes
+        `select status, capture_ends_at, ended_at, ingestion_deadline,
+                accepted_event_count, accepted_event_bytes
            from incidents
           where id = $1
           for update`,
         [job.incidentId],
       );
       const incident = incidentResult.rows[0];
+      const effectiveEnd =
+        incident?.ended_at && incident.ended_at.getTime() < incident.capture_ends_at.getTime()
+          ? incident.ended_at
+          : incident?.capture_ends_at;
       if (
         !incident ||
-        !["collecting", "awaiting_finalize"].includes(incident.status) ||
-        Date.now() > incident.capture_ends_at.getTime()
+        incident.status !== "collecting" ||
+        !effectiveEnd ||
+        Date.now() > effectiveEnd.getTime() ||
+        Date.now() > incident.ingestion_deadline.getTime()
       ) {
         await this.markCancelled(client, job.jobId, "INCIDENT_CLOSED");
         return { kind: "closed" };

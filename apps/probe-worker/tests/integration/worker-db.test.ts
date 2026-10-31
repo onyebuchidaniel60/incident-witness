@@ -114,6 +114,75 @@ describe("iw_worker probe access", () => {
     await worker.end();
   });
 
+  it("refuses a new observation after the provider ends the capture window", async () => {
+    const endedJobId = randomUUID();
+    await migrator.query(
+      `insert into probe_jobs (id, incident_id, host_id, scheduled_at, status)
+       values ($1, $2, $3, now() - interval '1 second', 'pending')`,
+      [endedJobId, INCIDENT_ID, HOST_ID],
+    );
+    await migrator.query(
+      `update incidents
+          set status = 'awaiting_finalize', ended_at = now() - interval '1 second'
+        where id = $1`,
+      [INCIDENT_ID],
+    );
+
+    const store = new PostgresProbeJobStore(worker, {
+      workerId: "phase5-ended-worker",
+      sourceKeyId: KEY_ID,
+      intervalSeconds: 15,
+    });
+
+    const result = await store.appendObservation(
+      {
+        jobId: endedJobId,
+        incidentId: INCIDENT_ID,
+        hostId: HOST_ID,
+        hostname: "gpu.example.com",
+        scheduledAt: new Date(),
+        attemptCount: 1,
+        incidentStatus: "awaiting_finalize",
+        captureEndsAt: new Date(Date.now() + 10 * 60_000),
+        hostStatus: "active",
+      },
+      (sequence, receivedAt) =>
+        buildWorkerEvent({
+          jobId: endedJobId,
+          attempt: 1,
+          incidentId: INCIDENT_ID,
+          sourceKeyId: KEY_ID,
+          privateKey,
+          eventType: "platform_probe_result",
+          payload: {
+            target_host_id: HOST_ID,
+            probe_status: "completed",
+            dns_result: "resolved",
+            tls_result: "valid",
+            http_result: "expected",
+            latency_ms: 10,
+            response_class: "expected",
+            observed_ip_class: "public",
+          },
+          sequence,
+          observedAt: receivedAt,
+          receivedAt,
+        }),
+    );
+    expect(result.kind).toBe("closed");
+
+    const jobs = await migrator.query<{ status: string }>(
+      `select status from probe_jobs where id = $1`,
+      [endedJobId],
+    );
+    expect(jobs.rows[0]?.status).toBe("cancelled");
+
+    await migrator.query(
+      `update incidents set status = 'collecting', ended_at = null where id = $1`,
+      [INCIDENT_ID],
+    );
+  });
+
   it("claims an expired lease and appends a signed platform event with counters", async () => {
     const store = new PostgresProbeJobStore(worker, {
       workerId: "phase3e-test-worker",
