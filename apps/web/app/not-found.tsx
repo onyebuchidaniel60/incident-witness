@@ -3,7 +3,6 @@ import Link from "next/link";
 export default function NotFound() {
   return (
     <main id="main-content" tabIndex={-1} className="iw-container py-16">
-      <title>Page not found | Incident Witness</title>
       <div className="iw-panel max-w-2xl p-6">
         <p className="iw-eyebrow">
           <span className="iw-eyebrow-dot" />

@@ -94,6 +94,7 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
   - `fb95f54` — `feat(web): add site metadata, icons and safe error states`
   - `8440ce1` — `docs(web): add real documentation and legal status pages`
   - `d2168de` — `docs: update readme for phase 8 completeness`
+  - Final `fix(web)` commit removes duplicate document titles on the 404 and error routes.
   - Final `docs(handoff)` commit records the Phase 8 checkpoint and deployment evidence.
 - **Phase 3E commits:**
   - `d810d5c` — `feat(db): add phase 3e worker probe access`
@@ -858,6 +859,7 @@ When unauthenticated or after the session disappeared, protected routes could br
 - Added `app/icon.svg` as the favicon and a generated 1200×630 `opengraph-image` using the approved emerald/charcoal design language.
 - Added `robots.ts` and `sitemap.ts`. The sitemap contains only public routes. `robots.txt` disallows `/dashboard`, `/hosts`, `/incidents`, `/settings`, `/login` and `/auth/`.
 - The authenticated layout and `/login` emit `noindex, nofollow`. The 404 route emits the framework's `noindex` tag only (the conflicting root `index, follow` tag was removed).
+- Removed duplicate document `<title>` tags from the 404 and route-error components; both routes use the single root title, and the 404 keeps the framework's automatic `noindex`.
 
 ### Accessibility and completeness
 
@@ -883,7 +885,7 @@ When unauthenticated or after the session disappeared, protected routes could br
 - **Vercel Preview URL:** https://incident-witness-5kbj8bthc-uhhh2.vercel.app
 - **Preview deployment ID:** `dpl_C9A6ZiM8nffQGnsahx5B9WjmyKAF`
 - **Preview target/status:** `preview`; `READY`; no Deployment Protection.
-- **Source commit:** `d2168de5c865559aa740b5d795ff9ff86eda19f9` (`docs: update readme for phase 8 completeness`), built from a clean working tree with the Phase 8 commits `fb95f54`, `8440ce1` and `d2168de`.
+- **Source code:** Phase 8 commits `fb95f54`, `8440ce1` and `d2168de`, plus the final duplicate-title cleanup commit; both the Preview and Git-connected production build reported commit `d2168de5c865559aa740b5d795ff9ff86eda19f9` before that cleanup.
 - **Route checks on the Preview:** `/`, `/docs`, `/privacy`, `/terms`, `/verify`, `/robots.txt`, `/sitemap.xml`, `/icon.svg` and `/opengraph-image` returned HTTP 200. `/login` returned 200 with `x-robots-tag: noindex`. `/dashboard`, `/hosts`, `/incidents` and `/settings` returned 307 to `/login?next=…` with `x-robots-tag: noindex`.
 - **Content checks on the Preview:** the deployed `/docs` HTML contains the overview, host-agent, renter-SDK, protocol, limitations and reference sections plus the expected commands; the footer contains `/docs`, `/privacy`, `/terms`, `/verify` and the public GitHub repository link.
 - **External link check:** https://github.com/onyebuchidaniel60/incident-witness and https://github.com/onyebuchidaniel60/incident-witness/blob/main/docs/HOST_AGENT.md returned HTTP 200.

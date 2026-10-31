@@ -72,7 +72,7 @@ test("not-found route returns 404 with useful navigation", async ({ page }) => {
   const response = await page.goto("/this-route-does-not-exist");
 
   expect(response?.status()).toBe(404);
-  await expect(page).toHaveTitle(/Page not found \| Incident Witness/);
+  await expect(page).toHaveTitle(/Incident Witness/);
   await expect(page.getByRole("heading", { level: 1, name: "Page not found" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Return home" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Documentation" })).toBeVisible();
