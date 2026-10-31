@@ -60,3 +60,6 @@ Thumbs.db
 
 # Vercel local OIDC token file (never commit)
 .env.local
+
+# Next.js generated agent rules
+apps/web/AGENTS.md

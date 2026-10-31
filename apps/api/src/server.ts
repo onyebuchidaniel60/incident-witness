@@ -1,7 +1,9 @@
 import { buildApp } from "./app.js";
 import { config } from "./config.js";
+import { createE2eRuntime } from "./testing/e2e.js";
 
-const app = await buildApp({ config });
+const e2e = createE2eRuntime(config);
+const app = await buildApp({ config, ...(e2e ?? {}) });
 
 async function shutdown(signal: string): Promise<void> {
   app.log.info({ signal }, "shutting_down");

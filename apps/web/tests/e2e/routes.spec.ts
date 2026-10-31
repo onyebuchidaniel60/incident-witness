@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 const publicRoutes = [
   { path: "/", heading: "A common record of what each source observed." },
   { path: "/login", heading: "Provider sign-in" },
-  { path: "/verify", heading: "The local bundle verifier is not connected in Phase 2." },
+  { path: "/verify", heading: "Verify an evidence bundle" },
   { path: "/docs", heading: "Incident Witness documentation" },
   { path: "/privacy", heading: "Privacy policy not yet approved." },
   { path: "/terms", heading: "Terms of service not yet approved." },
@@ -53,7 +53,9 @@ for (const path of protectedRoutes) {
   });
 }
 
-test("login form exposes request and verification controls without submitting", async ({ page }) => {
+test("login form exposes request and verification controls without submitting", async ({
+  page,
+}) => {
   await page.goto("/login");
 
   await expect(page.getByLabel("Provider email address")).toBeVisible();
@@ -88,7 +90,10 @@ test("footer provides real documentation and repository destinations", async ({ 
   await page.goto("/");
 
   const footer = page.getByRole("contentinfo");
-  await expect(footer.getByRole("link", { name: "Documentation" })).toHaveAttribute("href", "/docs");
+  await expect(footer.getByRole("link", { name: "Documentation" })).toHaveAttribute(
+    "href",
+    "/docs",
+  );
   await expect(footer.getByRole("link", { name: "GitHub" })).toHaveAttribute(
     "href",
     "https://github.com/onyebuchidaniel60/incident-witness",

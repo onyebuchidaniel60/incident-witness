@@ -4,10 +4,7 @@ import { resolve } from "node:path";
 import { config as loadEnv } from "dotenv";
 import type { NextConfig } from "next";
 
-for (const candidate of [
-  resolve(process.cwd(), "../../.env"),
-  resolve(process.cwd(), ".env"),
-]) {
+for (const candidate of [resolve(process.cwd(), "../../.env"), resolve(process.cwd(), ".env")]) {
   if (existsSync(candidate)) {
     loadEnv({ path: candidate, override: false, quiet: true });
     break;
@@ -17,6 +14,7 @@ for (const candidate of [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  allowedDevOrigins: ["127.0.0.1", "localhost"],
   async headers() {
     return [
       {
