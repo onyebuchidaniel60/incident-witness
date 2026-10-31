@@ -176,3 +176,23 @@ The mockups are otherwise presented as the translation of the references. Any of
 - **Conditions/comments:** The approved direction includes the five documented translation choices (mobile top bar/stacked cards, dark public landing, host green / renter blue / platform cyan, all-dark theme, mono initials). Phase 7 must preserve business logic, API contracts, database schemas, evidence language and the local-only browser verifier.
 
 **Approval gate passed.** Phase 7 may implement the approved visual system. Any deviation that changes design intent, product behaviour, data exposure, APIs, security or architecture requires separate operator approval.
+
+## Phase 7 implementation record (2026-10-31)
+
+The approved visual system is applied in `apps/web`:
+
+- Satoshi WOFF2 files are served from `apps/web/public/fonts/` and loaded with `@font-face` in `apps/web/app/globals.css`; Inter remains a fallback.
+- The emerald `#26D18C` palette, tinted charcoal surfaces, 4px controls/cards and 3px chips are implemented as Tailwind v4 theme tokens and shared component classes.
+- Public shell, workspace shell, navigation, footer, status chips, buttons, forms, tables and the verifier use the approved dark glass command-center aesthetic.
+- The timeline distinguishes Host agent (emerald), Renter client (blue) and platform-operated probe (cyan), with monospace event types, UTC times and sequence numbers.
+- Mobile uses the approved top bar/menu and stacked cards; no horizontal-only evidence tables remain.
+
+### Intentional implementation deviations
+
+1. **Navigation pane instead of a persistent session list.** The authenticated middle pane contains workspace navigation, not a live list of sessions. Session selection remains on `/incidents`; this avoids adding a new data-driven navigation feature in a visual-only phase.
+2. **No fabricated preview telemetry.** The public home page uses an honest three-source evidence-surface panel rather than illustrative host status or incident telemetry.
+3. **Route heading hierarchy preserved.** The incident route keeps the existing `h1` “Evidence session” for route semantics; the incident title is displayed prominently as an `h2`.
+4. **Compact UTC timeline times.** The timeline uses `HH:MM:SS UTC` for scanability, while full timestamps remain in metadata and tooltips.
+5. **Verifier results remain inline.** Result states are rendered in the approved two-pane verifier after file selection, not as a separate state gallery.
+
+No business logic, API contract, database schema, assessment wording or verifier behaviour changed.

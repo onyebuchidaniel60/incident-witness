@@ -35,8 +35,14 @@ Phase 3F is accepted and closed.
 Phase 4 connects the provider workspace to the staging API: Supabase-authenticated API calls, host
 list/create/detail, DNS challenge and endpoint verification, enrollment-code display, host key
 revocation and archival, evidence-session list/create/detail, renter invitations, source health,
-timeline, end/seal/download and the local browser bundle verifier. The UI remains structurally plain
-because the final visual design is not approved. The API is still not deployed to Render.
+timeline, end/seal/download and the local browser bundle verifier. The API is still not deployed to
+Render.
+
+Phase 6 collected operator-supplied visual references and produced the approved dark emerald
+command-center mockups. Phase 7 applies that approved direction to the functional web app: locally
+bundled Satoshi, the `#26D18C` emerald token set, 4px control/card geometry, a floating glass
+workspace shell, source-specific timeline chips and the approved mobile top-bar/stacked-card
+layouts. Business logic, API contracts, database schemas and the local-only verifier are unchanged.
 
 Phase 5 hardens the MVP gate: platform-probe source certificates can be read by the seal transaction,
 event sequence rollback is rejected, probe observations stop at the effective capture end, stale

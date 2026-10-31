@@ -43,7 +43,7 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 ## Current architecture
 
 - Node.js 26.13.0 LTS, TypeScript strict, npm workspaces.
-- Next.js 16.4.3 App Router + Tailwind CSS 4.x frontend; temporary styling only.
+- Next.js 16.4.3 App Router + Tailwind CSS 4.x frontend; approved Satoshi/emerald design applied in Phase 7.
 - Fastify 5.12.7 API with Pino redaction, request IDs, CORS, rate limiting, Helmet and the documented error envelope.
 - `@incident-witness/protocol` pure TypeScript package with strict v1 schemas, RFC 8785 JCS via pinned `canonicalize@5.1.0`, Node Ed25519 signing via `node:crypto`, browser public-key verification via `@noble/ed25519@3.2.0`, source-key certificates and signed bundle manifests. No DB/network/UI imports; no browser private-key code.
 - `@incident-witness/correlator` pure TypeScript package implementing rule version `iw-rules-v1`; input-order independent, no timestamps or random values.
@@ -684,6 +684,19 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - Reference analysis, translation, intentional deviations and the five translation choices are recorded in `docs/DESIGN_DECISIONS.md`.
 - **Operator approval:** explicit **"I approve these mockups."** on 2026-10-31. Phase 7 is authorized for visual implementation only.
 
+## Completed in Phase 7 (implemented and verified 2026-10-31; pending operator acceptance)
+
+- Copied the approved Satoshi WOFF2 files to `apps/web/public/fonts/` with attribution/license, and loaded them globally through `@font-face` in `apps/web/app/globals.css`.
+- Added Tailwind v4 theme tokens for the emerald palette (`#26D18C`), tinted charcoal surfaces, typography, 4px card/control radii and 3px chips.
+- Reworked the public shell, workspace shell, navigation, footer, buttons, chips, notices, forms, tables and verifier into the approved floating glass command-center aesthetic.
+- Added the desktop icon rail and workspace navigation pane; mobile uses a top bar with a toggle menu and stacked cards.
+- Restyled all existing routes: `/`, `/login`, `/dashboard`, `/hosts`, `/hosts/new`, `/hosts/[hostId]`, `/incidents`, `/incidents/new`, `/incidents/[incidentId]`, `/settings`, `/verify`, `/docs`, `/privacy`, `/terms`, `error`, `loading` and `not-found`.
+- Timeline now distinguishes Host agent (emerald), Renter client (blue) and platform-operated probe (cyan), with mono event types, UTC times and sequence numbers.
+- No business logic, API contract, database schema, evidence wording or verifier behaviour changed.
+- Phase 7 implementation deviations are recorded in `docs/DESIGN_DECISIONS.md`.
+- Test evidence: `npm run test:e2e` — **PASS**, 44 checks, 43 passed and one intentional mobile provider-flow skip; `npm run lint --workspace @incident-witness/web` — **PASS**; `npm run typecheck --workspace @incident-witness/web` — **PASS**; `npm run build --workspace @incident-witness/web` — **PASS**.
+- Preview/deployment verification remains pending at the time of this entry.
+
 ## Design reference and approval status
 
 - **Final visual design:** **APPROVED** (revision 0.3).
@@ -694,8 +707,8 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - **Implementation authorization:** Phase 7 visual implementation only. Business logic, API contracts, database schemas, security and evidence language must not change.
 - Phase 6 scope, reference analysis, translation, deviations and the approval record are in `docs/DESIGN_DECISIONS.md`.
 - Phase 3C, Phase 3D, Phase 3E and Phase 3F did not change frontend styling or visual behaviour.
-- Phase 4/5 connect functional UI and state handling but retain temporary structural styling; final visual design is still not approved or implemented.
-- Phase 4 connects functional UI but keeps temporary structural styling; final visual design is still not approved or implemented.
+- Phase 4/5 connect functional UI and state handling; Phase 7 applies the approved final visual design. Business logic, API contracts and schemas remain unchanged.
+- Phase 4 connects functional UI and state handling; the final visual design is now implemented and awaiting operator acceptance.
 
 ## Documentation/footer status
 
