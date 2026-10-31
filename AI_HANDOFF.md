@@ -2,11 +2,11 @@
 
 **Last updated:** 2026-10-31
 
-**Project status:** Phase 0, Phase 1, Phase 2, Phase 3A, Phase 3B, Phase 3C and Phase 3D are complete and accepted. Phase 3E renter SDK and platform probe worker implementation is in progress under explicit operator authorization.
+**Project status:** Phase 0, Phase 1, Phase 2, Phase 3A, Phase 3B, Phase 3C and Phase 3D are complete and accepted. Phase 3E renter SDK and platform probe worker are implemented and tested; the Phase 3E checkpoint is pending operator acceptance.
 
-**Current phase:** Phase 3E — Renter SDK and platform probe worker — IN PROGRESS.
+**Current phase:** Phase 3E — IMPLEMENTED, PENDING OPERATOR ACCEPTANCE.
 
-**Next task:** Complete Phase 3E only; do not start Phase 3F.
+**Next task:** Phase 3F only — awaiting explicit operator authorization.
 
 **Phase 2 acceptance:** Operator accepted the Phase 2 checkpoint and approved the `public.iw_uid()` security-definer wrapper on 2026-10-31.
 
@@ -43,13 +43,20 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 - `jose` JWT verification against Supabase JWKS; issuer, audience, expiry and UUID subject checks.
 - Accepted ADR-001 mechanism: API connects as restricted `iw_api`, sets transaction-local JWT subject and request mode, and never uses `SET ROLE authenticated`.
 - Supabase's staging `auth` schema is owned by `supabase_admin`; the migrator cannot grant `auth` USAGE to `iw_api`. Policies therefore call a narrow `SECURITY DEFINER` wrapper `public.iw_uid()` which calls `auth.uid()`. No role switch, service-role connection or auth-schema grant to `iw_api` is used. **Operator approved this wrapper on 2026-10-31.**
-- Linux host agent (`packages/host-agent`, executable `iw-agent`) implements interactive enrollment, local Ed25519 key generation, owner-only credential storage, a durable SQLite spool, operational-presence and evidence heartbeats, fixed-argument `nvidia-smi`/`upsc` collectors and bounded retry/backoff. Renter SDK, platform probe worker and CLI verifier are **not implemented** (Phase 3E+).
+- Linux host agent (`packages/host-agent`, executable `iw-agent`) implements interactive enrollment, local Ed25519 key generation, owner-only credential storage, a durable SQLite spool, operational-presence and evidence heartbeats, fixed-argument `nvidia-smi`/`upsc` collectors and bounded retry/backoff.
+- `@incident-witness/renter-sdk` implements one-use invitation redemption, an in-memory/optional durable incident-scoped Ed25519 key, 5 MiB bounded queue, `renter_heartbeat` and `renter_endpoint_result` emission, deadline/closed-incident handling and scoped event signing.
+- `apps/probe-worker` is a separate `iw_worker` background process: `FOR UPDATE SKIP LOCKED` job leases, 30-second lease recovery, a custom DNS-resolving and IP-pinned HTTPS client with SSRF/DNS-rebinding controls, fixed health-check validation, platform-probe event signing and direct DB append with incident counters.
+- The CLI verifier is **not implemented** (Phase 3F).
 
 ## Repository state
 
 - **Repository URL:** confirmed public — https://github.com/onyebuchidaniel60/incident-witness
 - **Working directory/repo root:** `/root/incident-witness`
 - **Branch:** `main`
+- **Phase 3E commits:**
+  - `d810d5c` — `feat(db): add phase 3e worker probe access`
+  - `0d5a9ea` — `feat(sdk): add renter client`
+  - `8546bac` — `feat(worker): add secure SSRF-safe probe worker`
 - **Phase 3D commits:**
   - `ab15e73` — `feat(agent): add enrollment and durable local spool`
   - `eb46321` — `feat(agent): add safe collectors and upload loop`
@@ -221,6 +228,54 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
   `INCIDENT_CLOSED`, credential rejection, event signature verification, graceful stop, log redaction
   and an end-to-end local HTTP mock of enroll → presence → signed event upload → outage retry.
 
+## Completed in Phase 3E (pending operator acceptance)
+
+### Renter SDK (`packages/renter-sdk`)
+
+- `RenterClient.enroll` redeems a one-use invitation through `POST /v1/renter/enroll`, generates an
+  Ed25519 key locally, validates the returned renter certificate against the source key, public key
+  and incident, and never stores the invitation token.
+- In-memory state by default; optional explicit `stateDir` persists the incident-scoped private key,
+  credential, sequence and queue with directory `0700` and file `0600`. `RenterClient.resume`
+  reloads without reusing the invitation.
+- `renter_heartbeat` immediately and every 30 seconds; `renter_endpoint_result` immediately, every
+  60 seconds and on reachability-state change.
+- Endpoint checks are fixed HTTPS port 443 / `/.well-known/incident-witness/health`, no redirects,
+  3-second timeout and 1 KiB body cap. Invalid/absent results are explicit, never fabricated healthy.
+- One shared durable sequence across event types; 5 MiB bounded queue with explicit dropped-event
+  count; jittered retry for network/429/5xx with `Retry-After`; halt on non-retryable 4xx,
+  `INCIDENT_CLOSED`, revocation or the ingestion deadline.
+- The SDK only builds events for the enrollment incident/source key. The server remains the final
+  scope authority.
+
+### Probe worker (`apps/probe-worker`)
+
+- Separate Node background process using the restricted `iw_worker` DB role; no inbound listener.
+- Claims due/expired `probe_jobs` in a short transaction with `FOR UPDATE SKIP LOCKED`; 30-second
+  lease, attempt counter and expired-lease recovery.
+- Completes each attempt by locking the incident, allocating the next platform-probe sequence under a
+  per-key advisory lock, inserting the signed event, updating evidence counters and scheduling the
+  next 15-second job in one transaction. Bounded retries and dead-letter state.
+- Custom HTTPS client only: manual A/AAAA resolution, blocked-range validation, IPv4-mapped IPv6
+  rejection, mixed-answer fail-closed, first validated IP pinned as the TCP host, hostname retained
+  for SNI/`Host`, TLS validation, no redirects, no proxy env, 3-second timeout and 1 KiB body cap.
+- `platform_probe_result` payloads carry only bounded result categories, latency and IP class; raw
+  hostnames/IP addresses are not logged or exported. Policy/infrastructure errors use
+  `probe_status: error`, which the correlator excludes from causal rules.
+- Correlator `isProbeFailure` corrected so `probe_status: error` is not treated as host-down
+  evidence; rule version remains `iw-rules-v1` because no prior probe-error events existed.
+- `db:provision-probe-key` operator script registers the public key and platform-signed
+  `platform_probe` certificate; the worker runtime never receives the API root key.
+
+### Database access changes
+
+- `0018_phase3e_worker_probe_access.sql`: grants/RLS only for worker probe-job insert/schedule,
+  incident evidence-counter updates and deterministic event-sequence reads.
+- `0019_phase3e_worker_counter_select.sql`: grants only for worker reads of accepted-event counters.
+- No table or column definitions changed; no existing policy was weakened.
+
+
+
 ## Visible behaviour vs placeholders
 
 **Functional locally (staging API or local mock):**
@@ -234,33 +289,50 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 - Demo-session labelling and grade cap.
 - Owner isolation for bundles and incidents.
 - Host-agent enrollment, owner-only key/credential storage, signed operational presence, evidence spooling, fixed GPU/UPS collectors and upload/retry against a local mock of the documented API. Signed events verify against the generated public key.
+- Renter SDK one-use enrollment, scoped signed heartbeats/endpoint results, 5 MiB queue recovery, deadline/`INCIDENT_CLOSED` handling and endpoint state-change emission against a local mock API.
+- Probe worker SSRF/DNS-rebinding unit tests, signed `platform_probe_result` events, lease-expiry recovery/retry/dead-letter and a real staging `iw_worker` integration test for claim, event insert, counter update and next-job scheduling.
 
 **Placeholder or unverified:**
 
-- Renter SDK, platform probe worker and CLI verifier are **not implemented** (Phase 3E–3F).
+- CLI verifier is **not implemented** (Phase 3F).
+- The renter SDK has not submitted to a live staging incident; its end-to-end tests use a local mock API. The provider endpoint hostname is not returned by the enrollment API and must be supplied explicitly by the integration context.
+- No platform-probe key is configured in the current `.env` and no `platform_probe` row exists in staging; a live worker cannot start until `npm run db:provision-probe-key` is run with operator-provided secrets.
+- The probe worker has not run against a real public provider endpoint and is not deployed to Render. SSRF/DNS-rebinding behavior is proven with injected resolvers/transports; the real network path is unverified.
 - The Phase 3D agent has not enrolled a real disposable host or reached a live staging incident. Its end-to-end test uses a local HTTP mock; real `nvidia-smi` and `upsc` execution is not run in CI.
-- Event ingestion against staging remains tested with generated test keys/events; an actual agent/SDK has not submitted to a live incident.
-- No real platform-probe observations or worker leases are produced; probe-lease behavior is tested with seeded rows.
+- No real platform-probe observations or worker leases are produced in normal staging operation; probe-lease behavior is tested with disposable seeded rows.
 - Web host/incident/timeline/bundle pages remain Phase 1 placeholders and are not wired to these APIs (Phase 4).
-- API is not deployed to Render; no new Vercel deployment for Phase 3C/3D.
+- API is not deployed to Render; no new Vercel deployment for Phase 3C/3D/3E.
 - Source-certificate verification uses the current configured platform key. Platform-key rotation with old source certificates is not yet exercised.
 
 ## Tests and evidence
 
 Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 
-- `npm run lint` — **PASS** across protocol, host-agent, correlator, db, API and web.
-- `npm run typecheck` — **PASS** across protocol, host-agent, correlator, db, API and web.
-- `npm run build` — **PASS**: protocol ESM/CJS/declarations, host-agent CLI, correlator, DB, Fastify API and Next.js 16.4.3.
-- `npm test` — **PASS**: 20/20 protocol tests, 12/12 correlator tests, 14/14 ADR-001 staging tests, 49/49 host-agent tests, 17/17 API unit tests (112 total).
-- `npm test --workspace @incident-witness/host-agent` — **PASS**: 49/49 host-agent tests across 9 files.
-- `node packages/host-agent/dist/cli.js version` — **PASS**: `iw-agent 0.1.0`; help output renders.
-- `setpriv --reuid=nobody --regid=nogroup --clear-groups node .../cli.js version|status` — **PASS**: the built CLI opened an enrolled test configuration and SQLite spool as an unprivileged user; config directory `0700`, all files `0600`. This proves basic operation does not require root in this test environment.
-- `npm audit --omit=dev` — **PASS**: 0 production vulnerabilities.
-- Full dependency audit still reports 20 moderate development-only advisories (ESLint/esbuild tooling); no non-breaking fix is available without a forced breaking downgrade.
-- `npm run test:integration --workspace @incident-witness/api` — **NOT RE-RUN in Phase 3D**: no API, DB, protocol or web files changed. The Phase 3C run remains 57/57 PASS.
-- `npm run test:e2e` — **NOT RE-RUN in Phase 3D**: no frontend files changed. The Phase 3C run remains 36/36 PASS.
-- Real staging/disposable-host enrollment and real `nvidia-smi`/`upsc` execution — **NOT RUN**: no accessible DNS-verified disposable host; CI deliberately uses injected collectors and a local HTTP mock.
+- `npm run lint` — **PASS** across protocol, host-agent, renter SDK, correlator, db, probe worker, API and web.
+- `npm run typecheck` — **PASS** across protocol, host-agent, renter SDK, correlator, db, probe worker, API and web.
+- `npm run build` — **PASS**: protocol ESM/CJS/declarations, host-agent CLI, renter SDK, correlator, DB, probe worker, Fastify API and Next.js 16.4.3.
+- `npm test` — **PASS**: 20/20 protocol, 13/13 correlator, 14/14 ADR-001 staging, 49/49 host-agent, 14/14 renter SDK, 20/20 probe worker and 17/17 API unit tests (147 total).
+- `npm test --workspace @incident-witness/host-agent` — **PASS**: 49/49.
+- `npm test --workspace @incident-witness/renter-sdk` — **PASS**: 14/14.
+- `npm test --workspace @incident-witness/probe-worker` — **PASS**: 20/20.
+- `npm run test:integration --workspace @incident-witness/api` — **PASS**: 57/57 (re-run after migration `0019`).
+- `npm run test:integration --workspace @incident-witness/probe-worker` — **PASS**: 1/1 staging `iw_worker` lease/insert/counter/schedule test.
+- `npm run test:e2e` — **NOT RE-RUN in Phase 3E**: no frontend files changed. The Phase 3C result remains 36/36 PASS.
+- `node packages/host-agent/dist/cli.js version` — **PASS**.
+- `setpriv --reuid=nobody --regid=nogroup --clear-groups node .../cli.js version|status` — **PASS**: unprivileged host-agent config/spool test.
+- `npm audit --omit=dev` — **PASS**: 0 production vulnerabilities. 20 moderate development-only advisories remain.
+- Real staging/disposable-host enrollment, real `nvidia-smi`/`upsc`, and a live public probe target — **NOT RUN**: no accessible disposable host, probe key, or approved target; CI uses injected collectors/resolvers/transports and a local mock API.
+
+### Phase 3E renter SDK and worker coverage
+
+- One-use invitation redemption, certificate/source/incident mismatch rejection, owner-only state files and no stored invitation token.
+- Scoped signed heartbeat/endpoint events; queue cap and dropped-event reporting; persisted queue/sequence recovery across restart; capture-window and ingestion-deadline behavior; `INCIDENT_CLOSED` halt; endpoint state-change and 60-second emission.
+- IPv4/IPv6 blocked range classification including loopback, private, CGNAT, link-local/metadata, documentation, benchmark, multicast, reserved, ULA, IPv4-mapped IPv6, NAT64, 6to4 and Teredo.
+- Mixed public/private DNS answers fail closed. All private/special answers are rejected before any transport connection.
+- DNS rebinding: resolver called once, transport receives the validated IP, hostname retained only for SNI/Host.
+- Redirects not followed; timeout/TLS/body-cap mapping; proxy env variables ignored; exact health contract required.
+- Worker lease expiry/crash recovery, retry/dead-letter, cancellation for inactive incidents, signed probe events and a real `iw_worker` staging insert with counter and next-job scheduling.
+- Correlator regression: `probe_status: error` does not produce `EXTERNAL_REACHABILITY_LOSS`.
 
 ### Phase 3D host-agent coverage
 
@@ -299,11 +371,12 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 
 - **Staging database:** Supabase Postgres 17.11.
 - **Migration ledger:** `iw_schema_migrations`.
-- **Applied migrations:** `0001_phase2_schema` through `0017_phase3c_system_transition_visibility`.
+- **Applied migrations:** `0001_phase2_schema` through `0019_phase3e_worker_counter_select`.
 - **Roles:** `iw_api` and `iw_worker` are login roles with `NOSUPERUSER`, `NOBYPASSRLS`, `NOCREATEDB`, `NOCREATEROLE`.
 - **Schema decision:** `public.iw_uid()` security-definer wrapper remains approved and in use.
 - **Platform key:** `iw-platform-staging-1` registered in `platform_signing_keys`; private key only in ignored `.env`.
-- **Phase 3C schema:** no table or column changes; only grants/RLS policies.
+- **Platform probe key:** **not provisioned**: no `IW_PLATFORM_PROBE_KEY_ID`/private key in `.env` and no `platform_probe` row in staging. `npm run db:provision-probe-key` is the operator prerequisite for a live worker.
+- **Phase 3E schema:** no table or column changes; migrations `0018`–`0019` add grants/RLS only.
 
 ## Design reference and approval status
 
@@ -311,36 +384,43 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - **Design references:** NOT COLLECTED/APPROVED.
 - **Mockups:** NOT CREATED.
 - **Operator approval:** NOT GRANTED.
-- Phase 3C and Phase 3D did not change frontend styling or visual behaviour.
+- Phase 3C, Phase 3D and Phase 3E did not change frontend styling or visual behaviour.
 
 ## Documentation/footer status
 
-- `docs/HOST_AGENT.md` rewritten with Phase 3D CLI, configuration, permissions, spool/quota, collectors, retry and limitations.
-- `docs/CONFIGURATION.md` updated: host-agent configuration is file/CLI-based, not web/API environment variables.
-- `docs/TROUBLESHOOTING.md` updated with host-agent status, spool, 4xx and presence-replay guidance.
-- `docs/API_REFERENCE.md` updated to show the host agent consumes the existing contracts without adding API routes.
-- `README.md` updated with Phase 3D status, host-agent build/run entry points and test counts.
-- `.env.example` no longer suggests host credentials/private keys belong in the web/API environment file.
+- `docs/HOST_AGENT.md` documents the Phase 3D CLI, configuration, permissions, spool/quota, collectors, retry and limitations.
+- `docs/RENTER_SDK.md` rewritten with Phase 3E enrollment, endpoint, queue, state, deadline and error behavior.
+- `docs/PROBE_WORKER.md` added with Render deployment, key provisioning, SSRF/DNS-rebinding controls, result mapping and database access.
+- `docs/CONFIGURATION.md` updated for renter SDK options and probe-worker variables/provisioning.
+- `docs/API_REFERENCE.md` updated to show both witnesses consume existing contracts; no new public API route.
+- `docs/DEPLOYMENT.md`, `docs/OPERATIONS.md` and `docs/PRIVACY_SECURITY.md` updated for the worker.
+- `README.md` updated with Phase 3E status, commands and test counts.
+- `.env.example` includes conservative probe-worker defaults and key-provisioning guidance.
 - `/docs` route and footer Documentation/GitHub links remain unchanged and reachable from Phase 2.
 - `/privacy` and `/terms` remain clearly labelled placeholders; no legal copy is approved.
 
 ## Known risks and operator actions
 
-1. **Phase 3D accepted:** host-agent enrollment, spool, presence/evidence loops, collectors and upload were accepted by the operator on 2026-10-31. The explicit `--incident <uuid>` flag is accepted as an MVP implementation detail.
-2. **No agent session discovery:** the API has no agent-scoped route that lists active incidents. The operator must pass `--incident <uuid>` to `iw-agent run`. Phase 4 must integrate this value into the provider UI; do not hide the manual step or claim automatic session detection.
-3. **No live host acceptance:** no disposable DNS-verified host with a public HTTPS endpoint was available. Enrollment/upload was verified against a local HTTP mock of the documented contracts. Real `nvidia-smi`/`upsc` execution and real staging enrollment remain unverified.
-4. **No release packaging:** there is no signed binary, installer or systemd unit. The agent is built from the repository and run as a foreground process under the operator's supervisor.
-5. **Single GPU:** `nvidia-smi -i 0` only. Multi-GPU summarisation and per-device events require a later approved change.
-6. **Enrollment certificate trust:** the agent validates certificate shape, source key, public key and host scope, but does not verify the platform certificate signature against a locally pinned platform public key. It relies on the configured HTTPS API and TLS. A pinned platform key or certificate bundle should be added before release.
-7. **Halted uploader recovery:** non-retryable 4xx responses retain the spool and stop evidence collection until the operator fixes the cause and restarts. There is no in-process reset command.
-8. **Platform-key rotation:** source certificates are verified against the current configured platform key. A future rotation must preserve old certificate verification or re-enroll source keys; this is not yet exercised.
-9. **Manual end clamp:** `endedAt` is clamped to the latest accepted observation to keep the capture window consistent. `captureEndsAt` remains the bounded scheduled end due the Phase 2 minimum-2-minute constraint.
-10. **Demo cap:** demo sessions are labelled and capped at `LOW` even when their events are real; this is conservative and matches the permanent simulation-label requirement.
-11. **API not deployed:** no Render API deployment or new Vercel deployment for Phase 3C/3D. Local staging verification only.
-12. **Event rejection auditing:** rejected events are not inserted into `audit_events`; the API returns safe error codes and does not log payloads/signatures. Revisit in Phase 9 if DB-level security audit of rejects is required.
-13. **Development advisories:** 20 moderate development-only npm advisories remain; `npm audit --omit=dev` is clean.
-14. **Fastify deprecation warning:** `requestIdLogLabel` is deprecated in Fastify 5 and will be removed in Fastify 6. Existing Phase 2 configuration; non-blocking.
-15. **No Phase 4 UI integration:** the web pages do not yet display events, assessments or bundle downloads, and cannot yet launch an agent with the active incident ID.
+1. **Phase 3E pending acceptance:** renter SDK and probe worker are implemented/tested but not operator-accepted. Do not start Phase 3F.
+2. **No live probe deployment/key:** the current `.env` has no platform-probe key ID/private key and staging has no `platform_probe` witness row. Run `npm run db:provision-probe-key` with operator-provided secrets before starting the Render worker.
+3. **No live renter integration:** the SDK has not been used against a live staging invitation. Its end-to-end tests use a local mock API. The enrollment API does not return the provider endpoint hostname, so the integrator must supply `endpointHostname` from the invitation context; Phase 4 must surface it.
+4. **No real public probe:** SSRF/DNS-rebinding behavior is proven with injected resolvers/transports and private-address unit tests, not against a live provider endpoint. The worker is not deployed to Render.
+5. **Probe key provisioning sensitivity:** `db:provision-probe-key` is an operator-only script that reads both the probe private key and the API root signing key to create the certificate. It runs offline/one-time; the worker runtime never receives the root key. Do not expose it as a service endpoint.
+6. **No worker metrics endpoint:** structured logs/counters only; no Prometheus/readiness endpoint. Render restart/log monitoring is required.
+7. **No agent session discovery:** the API has no agent-scoped route that lists active incidents. The operator must pass `--incident <uuid>` to `iw-agent run`. Phase 4 must integrate this value into the provider UI; do not hide the manual step or claim automatic session detection.
+8. **No live host acceptance:** no disposable DNS-verified host with a public HTTPS endpoint was available. Enrollment/upload was verified against a local HTTP mock. Real `nvidia-smi`/`upsc` execution and real staging enrollment remain unverified.
+9. **No release packaging:** there is no signed host-agent/worker binary, installer or systemd unit. Both are built and run from the repository under the operator's supervisor.
+10. **Single GPU:** `nvidia-smi -i 0` only. Multi-GPU summarisation and per-device events require a later approved change.
+11. **Enrollment certificate trust:** the host agent and renter SDK validate certificate shape, source key, public key and scope, but do not verify the platform certificate signature against a locally pinned platform public key. They rely on the configured HTTPS API and TLS. A pinned platform key or certificate bundle should be added before release.
+12. **Halted uploader recovery:** non-retryable 4xx responses retain the host spool and stop evidence collection until the operator fixes the cause and restarts. There is no in-process reset command.
+13. **Platform-key rotation:** source certificates are verified against the current configured platform key. A future rotation must preserve old certificate verification or re-enroll source keys; this is not yet exercised.
+14. **Manual end clamp:** `endedAt` is clamped to the latest accepted observation to keep the capture window consistent. `captureEndsAt` remains the bounded scheduled end due the Phase 2 minimum-2-minute constraint.
+15. **Demo cap:** demo sessions are labelled and capped at `LOW` even when their events are real; this is conservative and matches the permanent simulation-label requirement.
+16. **API not deployed:** no Render API/worker deployment or new Vercel deployment for Phase 3C/3D/3E. Local/staging verification only.
+17. **Event rejection auditing:** rejected events are not inserted into `audit_events`; the API returns safe error codes and does not log payloads/signatures. Revisit in Phase 9 if DB-level security audit of rejects is required.
+18. **Development advisories:** 20 moderate development-only npm advisories remain; `npm audit --omit=dev` is clean.
+19. **Fastify deprecation warning:** `requestIdLogLabel` is deprecated in Fastify 5 and will be removed in Fastify 6. Existing Phase 2 configuration; non-blocking.
+20. **No Phase 4 UI integration:** the web pages do not yet display events, assessments or bundle downloads, and cannot yet launch an agent or renter with the active incident metadata.
 
 ## Things not to change
 
@@ -355,5 +435,5 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 
 ## Exact next task
 
-**Phase 3E only — renter SDK and platform probe worker — in progress under explicit operator
-authorization.** Do not start Phase 3F.
+**Phase 3F only — CLI verifier and integration demo harness — awaiting explicit operator
+authorization.** Do not begin until authorized.

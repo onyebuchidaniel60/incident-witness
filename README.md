@@ -13,12 +13,18 @@ and closed. The API accepts canonical Ed25519-signed host and renter events, enf
 windows and atomic evidence budgets, runs the pure `@incident-witness/correlator` rule engine, seals
 an immutable bundle in one transaction, and serves the exact bundle to its owner.
 
-Phase 3D adds the Linux x86_64 host agent in `packages/host-agent`: interactive enrollment with a
-local Ed25519 key, owner-only key/credential storage, a 50 MiB SQLite spool with durable event and
-presence sequences, signed operational-presence heartbeats, evidence heartbeats, fixed-argument
-`nvidia-smi`/`upsc` collectors, and bounded retry/backoff. It is implemented and locally tested;
-operator acceptance of the Phase 3D checkpoint is pending. The renter SDK, probe worker and CLI
-verifier remain Phase 3E–3F.
+Phase 3D adds the accepted Linux x86_64 host agent in `packages/host-agent`: interactive enrollment
+with a local Ed25519 key, owner-only key/credential storage, a 50 MiB SQLite spool with durable event
+and presence sequences, signed operational-presence heartbeats, evidence heartbeats, fixed-argument
+`nvidia-smi`/`upsc` collectors, and bounded retry/backoff.
+
+Phase 3E adds the renter SDK in `packages/renter-sdk` and the separate secure platform probe worker
+in `apps/probe-worker`. The SDK redeems a one-use invitation, signs 30-second heartbeats and
+60-second/state-change endpoint observations into a bounded 5 MiB queue. The worker leases
+`probe_jobs`, resolves and pins the provider IP, enforces SSRF/DNS-rebinding controls, performs the
+fixed HTTPS health check, signs `platform_probe_result` events and appends them as the restricted
+`iw_worker` role. Phase 3E is implemented and locally/integration tested; operator acceptance is
+pending. The CLI verifier remains Phase 3F.
 
 Phase 3B host/incident domain APIs are accepted and closed. The API supports owner-scoped host CRUD,
 DNS TXT endpoint verification with public-IP/SSRF checks, host enrollment and signed operational
@@ -73,11 +79,13 @@ npm run test:integration --workspace @incident-witness/api
 npm run test:e2e
 ```
 
-`npm test` runs the protocol, correlator, ADR-001 database, host-agent and API unit suites. The
-Phase 3B API integration suite is run explicitly with
+`npm test` runs the protocol, correlator, ADR-001 database, host-agent, renter SDK, probe worker and
+API unit suites. The Phase 3B API integration suite is run explicitly with
 `npm run test:integration --workspace @incident-witness/api` because it requires staging
-credentials and must never be run against production. `npm run test:e2e` runs the Playwright
-public-route, auth-redirect, navigation and footer checks at desktop and mobile viewport sizes.
+credentials and must never be run against production. The probe-worker database/RLS integration test
+runs explicitly with `npm run test:integration --workspace @incident-witness/probe-worker`.
+`npm run test:e2e` runs the Playwright public-route, auth-redirect, navigation and footer checks at
+desktop and mobile viewport sizes.
 
 The database migration runner uses `DATABASE_URL_MIGRATOR`. The API and probe worker use the
 restricted `DATABASE_URL_IW_API` and `DATABASE_URL_IW_WORKER` roles. See `docs/CONFIGURATION.md`
@@ -85,10 +93,24 @@ and the accepted ADR for the role/GUC design.
 
 Local Phase 3C verification on 2026-10-31 passed lint, typecheck, build, 20 protocol tests,
 12 correlator tests, 14 ADR-001 database tests, 17 API unit tests, 57 API integration tests and
-36 Playwright checks. Phase 3D local verification adds 49 host-agent tests (spool persistence and
-quota, durable sequence recovery, presence anti-replay, safe fixed-command collectors, retry/backoff,
-enrollment file permissions and a local mock-API enrollment/upload workflow). Actual results and any
-remaining blockers are recorded in `AI_HANDOFF.md`.
+36 Playwright checks. Phase 3D added 49 host-agent tests. Phase 3E adds 14 renter-SDK tests,
+20 probe-worker unit tests, one probe-worker database/RLS integration test and one correlator
+regression check for probe-service errors. Actual results and remaining blockers are recorded in
+`AI_HANDOFF.md`.
+
+### Renter SDK and probe worker
+
+```bash
+npm run build --workspace @incident-witness/renter-sdk
+npm run build --workspace @incident-witness/probe-worker
+npm run test --workspace @incident-witness/renter-sdk
+npm run test --workspace @incident-witness/probe-worker
+npm run test:integration --workspace @incident-witness/probe-worker
+```
+
+See [`docs/RENTER_SDK.md`](./docs/RENTER_SDK.md) and
+[`docs/PROBE_WORKER.md`](./docs/PROBE_WORKER.md). The probe key must be provisioned before a live
+worker can start.
 
 ### Host agent
 
@@ -108,7 +130,9 @@ configuration permissions, spool/quota behaviour, fixed collectors and limitatio
 1. Provision the restricted roles from the configured URLs with `npm run db:provision-roles`.
 2. Apply the versioned migrations with `npm run db:migrate`.
 3. Register the platform public key with `npm run db:provision-platform-key`.
-4. Confirm migration status with `npm run db:migrate:status`.
+4. Provision the platform-probe source key with `npm run db:provision-probe-key` before starting the
+   probe worker.
+5. Confirm migration status with `npm run db:migrate:status`.
 
 Migrations are in `packages/db/migrations/`. The migration ledger is `iw_schema_migrations`.
 Supabase's `auth` schema is owned by `supabase_admin`; because the staging migrator cannot grant

@@ -45,6 +45,8 @@ Ed25519/JCS prove that signed bytes verify against a public key. They do not est
 - Fixed local telemetry commands with no shell invocation.
 - Host-agent private key and device credential stored only on the provider host in a `0700` directory with `0600` files; the private key is never transmitted.
 - Host-agent evidence spool capped at 50 MiB locally; operational-presence heartbeats are separate and never written to the evidence spool or bundle.
+- Renter SDK state, when a secure directory is explicitly configured, is `0700`/`0600` and contains the incident-scoped key, credential and bounded queue; without a state directory, state is memory-only.
+- Platform probe events contain result categories, latency and an IP class, never the raw target hostname or IP address. The worker does not log raw hostnames, IP addresses or private keys.
 - Pino redaction, secret scanning and limited DB roles.
 - Separate Preview and Production services/secrets.
 

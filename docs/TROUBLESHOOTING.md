@@ -17,7 +17,12 @@ This guide describes current user-facing error categories. Host-agent commands a
 | UPS telemetry unavailable | NUT not installed/configured or UPS unreachable | Dashboard should show unavailable; do not interpret as stable power |
 | Agent spool is full | API unavailable for an extended period or local disk quota reached | Restore connectivity/check disk; the agent drops oldest non-critical observations first and reports degraded/spool-full state. Evidence from the dropped period is missing; do not delete the spool manually unless the user accepts evidence loss |
 | Renter invitation expired | 15-minute TTL passed or invitation already redeemed | Provider issues a new invitation |
+| Renter SDK cannot join | Invitation invalid, endpoint hostname missing, API URL wrong or state directory already enrolled | Check the safe code; supply `endpointHostname` from the invitation context; do not reuse the invitation token |
+| Renter SDK queue full | API offline for an extended period or 5 MiB local cap reached | Restore connectivity; inspect `droppedEvents`; dropped observations are missing evidence, not normal operation |
 | Renter observations absent | SDK not joined, runtime stopped or API unavailable | Check renter SDK status and invitation; absence is a gap, not evidence of normal workload |
+| Probe worker cannot start | Missing/revoked platform-probe key, wrong DB role or configuration | Run `npm run db:provision-probe-key` with operator secrets; verify `IW_PLATFORM_PROBE_KEY_ID` matches the registered `witness_keys` row |
+| Probe worker SSRF rejection | Target resolved to a private/reserved/metadata address or mixed public/private answers | Do not bypass; re-verify the provider endpoint. This is a policy/infrastructure error, not proof of host outage |
+| Probe worker has no real observations | Worker not deployed, key missing, no active collecting job or probe-service error | Check worker logs, job ages and key status; probe-service failure is not a host outage |
 | Probe is missing | Worker unavailable, DNS/TLS failure, lease backlog or target not reachable | Check platform worker health; service failure is not classified as host outage |
 | Session cannot be created | Host inactive, old active session, max-three account limit or no fresh heartbeat | Resolve host state or finalize existing session |
 | Seal fails | No accepted events, platform signing key unavailable, invalid event or DB transaction failure | Keep session awaiting finalization; retry only after cause fixed; do not mark sealed manually |

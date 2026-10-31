@@ -7,6 +7,7 @@ This is the source folder for the public `/docs` experience and developer/operat
 - [Provider user guide](./USER_GUIDE.md)
 - [Host agent operator guide](./HOST_AGENT.md)
 - [Renter SDK integration guide](./RENTER_SDK.md)
+- [Platform probe worker guide](./PROBE_WORKER.md)
 - [Protocol v1 design](./PROTOCOL.md)
 - [API reference index](./API_REFERENCE.md)
 

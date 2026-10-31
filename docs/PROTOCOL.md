@@ -109,6 +109,7 @@ Supported v1 outputs: `POWER_RELATED`, `EXTERNAL_REACHABILITY_LOSS`, `HOST_OR_WO
 - Probe/host adjacency: 30 seconds between a platform-probe failure and a signed host heartbeat/agent-health observation.
 - `POWER_RELATED` requires a host UPS `on_battery`/`low_battery` transition, a prior host heartbeat, no host heartbeat in the following power window, and a renter or probe reachability failure near the transition.
 - `EXTERNAL_REACHABILITY_LOSS` requires a platform-probe failure and a host heartbeat/agent-health observation within 30 seconds; renter endpoint failures may corroborate. UPS online alone is not sufficient.
+- A `platform_probe_result` with `probe_status: error` represents a probe infrastructure/policy failure (for example an unsafe DNS answer) and is excluded from causal rules; it is not evidence that the provider host is down.
 - `HOST_OR_WORKLOAD_EXIT` requires an explicit host-agent `stopped` or renter-client `stopped` signal plus a supporting probe/client observation in the correlation window.
 - `HIGH` requires three decisive source categories, `MEDIUM` two with at least one external to the host, `LOW` one or a simulated decisive signal, and `INSUFFICIENT` zero usable observations. The correlator is pure and input-order independent.
 - `event_sha256` is SHA-256 over the canonical event body without `signature`; `manifest_sha256` is SHA-256 over the canonical manifest. The platform signature covers the canonical manifest.

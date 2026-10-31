@@ -34,10 +34,12 @@ If no deployment provider access is available, report the exact missing permissi
 ## Render API and worker
 
 - API is an HTTPS Web Service, configured to listen on assigned `PORT`. Configure the host liveness check to use public `/health/live` only. `/health/ready` is protected and must be called only through a private/authenticated check mechanism supported by the host; never expose `IW_HEALTHCHECK_TOKEN` as a public health-check URL parameter.
-- Worker is a Background Worker with no public inbound listener.
+- Worker is a Background Worker with no public inbound listener, started with `npm run start --workspace @incident-witness/probe-worker`.
 - API and worker have separate DB roles and environment variables; worker has only required probe/signing access.
-- Set health/readiness checks, logs, resource bounds, restart behaviour and alerts.
-- Worker maximum probe concurrency remains bounded by configuration validation.
+- Provision the platform-probe source key once with `npm run db:provision-probe-key` before starting the worker. The worker runtime receives `IW_PLATFORM_PROBE_PRIVATE_KEY` and `DATABASE_URL_IW_WORKER`; it never receives `IW_PLATFORM_SIGNING_PRIVATE_KEY` or provider JWTs.
+- Set health/readiness checks, logs, resource bounds, restart behaviour and alerts. The worker has no inbound health endpoint in this phase; use process/restart logs and database job ages.
+- Worker maximum probe concurrency remains bounded by configuration validation (1–10).
+- Worker environment should not define HTTP(S) proxy variables for outbound probes; the custom client deliberately ignores proxy environment configuration.
 
 ## Supabase
 

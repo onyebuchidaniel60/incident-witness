@@ -56,12 +56,25 @@ The command reads the private key and key ID from the environment, writes only t
 | Variable | Required | Purpose |
 |---|---|---|
 | `DATABASE_URL_IW_WORKER` | yes | Restricted worker DB role |
-| `IW_PLATFORM_PROBE_PRIVATE_KEY` | yes | Separate worker-only Ed25519 key for platform-probe observations; never available to API or web |
-| `IW_PLATFORM_PROBE_KEY_ID` | yes | Registered platform-probe source key ID |
+| `IW_PLATFORM_PROBE_PRIVATE_KEY` | yes | Separate worker-only Ed25519 PKCS8 DER key for platform-probe observations; never available to API or web |
+| `IW_PLATFORM_PROBE_KEY_ID` | yes | Registered platform-probe `witness_keys.id` UUID |
+| `IW_PROBE_POLL_INTERVAL_MS` | optional | Default 1000; validated range 500–5000 |
 | `IW_PROBE_INTERVAL_SECONDS` | optional | Default 15; validated range 10–60 |
 | `IW_PROBE_TIMEOUT_MS` | optional | Default 3000; hard maximum 5000 |
-| `IW_PROBE_CONCURRENCY` | optional | Default 10; hard maximum 20 |
+| `IW_PROBE_CONCURRENCY` | optional | Default 5; hard maximum 10 |
+| `IW_PROBE_MAX_ATTEMPTS` | optional | Default 5; validated range 1–10 |
 | `IW_LOG_LEVEL` | optional | Structured worker log level |
+
+The probe key must be registered before the worker starts:
+
+```bash
+npm run db:provision-probe-key
+```
+
+This operator-only provisioning step reads the probe private key and the API root signing key to
+create the platform-signed source certificate, stores only public key/certificate metadata in
+`witness_keys`, and prints only public values. The worker runtime itself receives only the probe
+private key and `iw_worker` database URL. See `PROBE_WORKER.md`.
 
 ## Host agent local configuration
 
@@ -79,6 +92,23 @@ directory (default `~/.config/incident-witness/`, mode `0700`; files `0600`):
 Run with `iw-agent run --incident <uuid>`; operational presence runs without an incident, but
 evidence collectors require the active incident ID. See `HOST_AGENT.md`. Do not put any of these
 values in the web/API `.env` file.
+
+## Renter SDK configuration
+
+The renter SDK is configured by its typed `RenterClient.enroll` options, not by web/API environment
+variables:
+
+| Option | Purpose |
+|---|---|
+| `apiBaseUrl` | Witness API origin; HTTPS except localhost development |
+| `invitationToken` | One-time invitation token; never logged or persisted |
+| `endpointHostname` | Provider's verified public hostname from the invitation context |
+| `workloadRef` | Optional opaque reference, max 100 characters |
+| `stateDir` | Optional explicit secure directory for restart survival |
+
+With `stateDir`, the SDK creates a `0700` directory and `0600` state file containing the
+incident-scoped private key, ingestion credential, sequence and 5 MiB queue. Without it, state is
+in-memory only. See `RENTER_SDK.md`.
 
 ## Migration/CI variables
 

@@ -1,6 +1,6 @@
 # API Reference Index
 
-**Status:** Phase 3C API-side event ingestion, deterministic correlation and bundle sealing implemented and tested against staging. Phase 3D Linux host agent implemented and locally tested; renter SDK, probe worker and CLI verifier remain later phases.
+**Status:** Phase 3C API-side event ingestion, deterministic correlation and bundle sealing implemented and tested against staging. Phase 3D Linux host agent accepted. Phase 3E renter SDK and platform probe worker implemented and locally/integration tested; CLI verifier remains Phase 3F.
 
 Base path: `/v1`. Common response/error shape and detailed request validation are defined in `ARCHITECTURE.md`, section 10.
 
@@ -70,12 +70,14 @@ Event ingestion requires `Content-Type: application/vnd.incident-witness.event+j
 
 ## Not implemented yet
 
-- Renter SDK, platform probe worker and CLI verifier (Phase 3E–3F).
+- CLI verifier (Phase 3F).
 - Web UI integration for hosts, incidents, timelines and bundle download (Phase 4).
 - Account deletion and production retention/deletion policy.
 
-The Phase 3D Linux host agent (`packages/host-agent`) consumes these contracts; see
-`HOST_AGENT.md`. It does not add API routes.
+The Phase 3D host agent (`packages/host-agent`) and Phase 3E renter SDK (`packages/renter-sdk`)
+consume these contracts; see `HOST_AGENT.md` and `RENTER_SDK.md`. The separate platform probe worker
+(`apps/probe-worker`) reads/leases `probe_jobs`, signs `platform_probe_result` observations and
+appends them directly as `iw_worker`; it adds no public API route. See `PROBE_WORKER.md`.
 
 ## Error codes used by Phase 3C
 

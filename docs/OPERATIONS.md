@@ -1,6 +1,7 @@
-# Operations Runbook (Planned)
+# Operations Runbook
 
-**Status:** Operational design; production services are not deployed.
+**Status:** Operational design; production services are not deployed. Phase 3E worker is implemented
+but not deployed.
 
 ## Service components
 
@@ -26,6 +27,7 @@
 - Probe timeout/TLS/DNS/HTTP result classes.
 - Retry/dead job count.
 - Platform key availability.
+- Current implementation logs batch counts and safe outcome codes; there is no metrics endpoint yet.
 
 A probe-service outage must not be interpreted as a provider host outage. Mark missing probe observations as service gaps.
 
