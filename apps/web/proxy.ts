@@ -1,6 +1,11 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import {
+  E2E_SESSION_COOKIE,
+  e2eServerAuthEnabled,
+  e2eSessionToken,
+} from "@/lib/e2e-auth";
 import { getSupabasePublicEnvironment } from "@/lib/supabase/env";
 
 const protectedPathPrefixes = ["/dashboard", "/hosts", "/incidents", "/settings"];
@@ -12,8 +17,16 @@ function isProtectedPath(pathname: string): boolean {
 }
 
 export async function proxy(request: NextRequest) {
-  const { url, publishableKey } = getSupabasePublicEnvironment();
   let response = NextResponse.next({ request });
+
+  if (
+    e2eServerAuthEnabled() &&
+    request.cookies.get(E2E_SESSION_COOKIE)?.value === e2eSessionToken()
+  ) {
+    return response;
+  }
+
+  const { url, publishableKey } = getSupabasePublicEnvironment();
 
   const supabase = createServerClient(url, publishableKey, {
     cookies: {

@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { E2eSignInButton } from "@/components/e2e-sign-in-button";
 import { LoginForm } from "@/components/login-form";
 import { PageIntro } from "@/components/page-intro";
 
@@ -20,13 +21,17 @@ export default function LoginPage() {
         <LoginForm />
       </div>
 
+      <div className="max-w-md">
+        <E2eSignInButton />
+      </div>
+
       <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
-        <p className="font-semibold">Phase 2 authentication foundation</p>
+        <p className="font-semibold">Email one-time code</p>
         <p className="mt-1">
-          The login form is connected to Supabase Auth. The Supabase email template must include
-          the one-time code for this flow, and the deployment origin must be allow-listed in
-          Supabase Auth settings. Until those dashboard settings are confirmed, email delivery may
-          fail even though the application is configured.
+          The login form is connected to Supabase Auth. The Supabase email template must include the
+          one-time code for this flow, and the deployment origin must be allow-listed in Supabase
+          Auth settings. Until those dashboard settings are confirmed, email delivery may fail even
+          though the application is configured.
         </p>
       </div>
 
