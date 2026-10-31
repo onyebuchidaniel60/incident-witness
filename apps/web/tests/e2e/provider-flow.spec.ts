@@ -152,6 +152,18 @@ test("provider lifecycle: host proof, session, renter, seal and download", async
     },
     privateKey: host.privateKey,
   });
+  await sendSignedEvent({
+    path: "/v1/agent/events",
+    credential: host.credential,
+    incidentId,
+    sourceKeyId: host.sourceKeyId,
+    sourceType: "host_agent",
+    eventType: "gpu_telemetry",
+    sequence: 3,
+    observedAt: at(1_300),
+    payload: { collection_status: "unavailable" },
+    privateKey: host.privateKey,
+  });
 
   await page.getByRole("button", { name: "Create renter invitation" }).click();
   const invitationToken = (await page.getByTestId("invitation-token").textContent())?.trim();
@@ -196,6 +208,8 @@ test("provider lifecycle: host proof, session, renter, seal and download", async
   await page.waitForTimeout(Math.max(0, captureStart + 2_000 - Date.now()));
   await page.reload();
   await expect(page.getByText("host_power_state", { exact: true })).toBeVisible();
+  await expect(page.getByText("gpu_telemetry", { exact: true })).toBeVisible();
+  await expect(page.getByText("UNAVAILABLE", { exact: true })).toBeVisible();
   await expect(page.getByText("renter_endpoint_result", { exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "End capture" }).click();
@@ -221,4 +235,13 @@ test("provider lifecycle: host proof, session, renter, seal and download", async
   expect(bundleResponse.headers.get("content-type")).toContain(
     "application/vnd.incident-witness.bundle+json",
   );
+
+  await page.route(`**/v1/incidents/${incidentId}`, (route) => void route.abort());
+  await expect(page.getByText("Showing stale data")).toBeVisible({ timeout: 12_000 });
+  await expect(
+    page.getByText("Source status below may be out of date", { exact: false }),
+  ).toBeVisible();
+  await page.unroute(`**/v1/incidents/${incidentId}`);
+  await page.getByRole("button", { name: "Retry refresh" }).click();
+  await expect(page.getByText("Showing stale data")).toHaveCount(0, { timeout: 10_000 });
 });

@@ -9,6 +9,7 @@ export type ApiResource<T> = {
   error: Error | null;
   loading: boolean;
   refreshing: boolean;
+  lastUpdatedAt: Date | null;
   reload: () => void;
 };
 
@@ -20,6 +21,7 @@ export function useApiResource<T>(
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState(path !== null);
   const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<Date | null>(null);
   const [version, setVersion] = useState(0);
   const hasData = useRef(false);
 
@@ -42,6 +44,7 @@ export function useApiResource<T>(
         if (active) {
           hasData.current = true;
           setData(result);
+          setLastUpdatedAt(new Date());
         }
       } catch (cause) {
         if (active) {
@@ -68,5 +71,5 @@ export function useApiResource<T>(
     return () => clearInterval(timer);
   }, [options.pollMs, reload]);
 
-  return { data, error, loading, refreshing, reload };
+  return { data, error, loading, refreshing, lastUpdatedAt, reload };
 }

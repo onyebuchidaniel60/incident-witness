@@ -88,6 +88,8 @@ export type TimelineEvent = {
   sequence: number;
   observedAt: string;
   receivedAt: string;
+  payload: Record<string, unknown>;
+  simulationMode: boolean;
 };
 
 export type IncidentDetail = IncidentSummary & {

@@ -15,7 +15,10 @@ function at(seconds: number): string {
 
 let eventCounter = 0;
 
-function makeEvent(overrides: Partial<CorrelatorEvent> & Pick<CorrelatorEvent, "event_type" | "source_type" | "payload">): CorrelatorEvent {
+function makeEvent(
+  overrides: Partial<CorrelatorEvent> &
+    Pick<CorrelatorEvent, "event_type" | "source_type" | "payload">,
+): CorrelatorEvent {
   eventCounter += 1;
   return {
     event_id: `00000000-0000-4000-8000-${String(eventCounter).padStart(12, "0")}`,
@@ -167,16 +170,15 @@ describe("deterministic correlator", () => {
     );
     expect(result.assessmentCode).toBe("POWER_RELATED");
     expect(result.evidenceGrade).toBe("HIGH");
-    expect(result.matchedSources).toEqual([
-      "host_agent",
-      "platform_probe",
-      "renter_client",
-    ]);
+    expect(result.matchedSources).toEqual(["host_agent", "platform_probe", "renter_client"]);
     expect(result.explanation).toContain("consistent with a power-related interruption");
   });
 
   it("returns POWER_RELATED/MEDIUM when only one external category supports the pattern", () => {
-    const result = correlate([hostHeartbeat(0), powerTransition(10), renterFailure(20)], RULE_VERSION);
+    const result = correlate(
+      [hostHeartbeat(0), powerTransition(10), renterFailure(20)],
+      RULE_VERSION,
+    );
     expect(result.assessmentCode).toBe("POWER_RELATED");
     expect(result.evidenceGrade).toBe("MEDIUM");
     expect(result.missingSources).toContain("platform_probe");
@@ -200,10 +202,7 @@ describe("deterministic correlator", () => {
     expect(partial.assessmentCode).toBe("EXTERNAL_REACHABILITY_LOSS");
     expect(partial.evidenceGrade).toBe("MEDIUM");
 
-    const full = correlate(
-      [hostHeartbeat(20), probeFailure(10), renterFailure(30)],
-      RULE_VERSION,
-    );
+    const full = correlate([hostHeartbeat(20), probeFailure(10), renterFailure(30)], RULE_VERSION);
     expect(full.assessmentCode).toBe("EXTERNAL_REACHABILITY_LOSS");
     expect(full.evidenceGrade).toBe("HIGH");
     expect(full.explanation).toContain("does not identify the precise upstream network cause");
@@ -211,6 +210,26 @@ describe("deterministic correlator", () => {
 
   it("does not classify a probe infrastructure/policy error as external reachability loss", () => {
     const result = correlate([hostHeartbeat(20), probeError(10)], RULE_VERSION);
+    expect(result.assessmentCode).toBe("UNKNOWN");
+  });
+
+  it("returns UNKNOWN when a later host heartbeat contradicts a power transition", () => {
+    const result = correlate(
+      [hostHeartbeat(0), powerTransition(10), hostHeartbeat(20), renterFailure(30)],
+      RULE_VERSION,
+    );
+    expect(result.assessmentCode).toBe("UNKNOWN");
+    expect(result.explanation).toContain("insufficient");
+  });
+
+  it("does not treat unavailable UPS telemetry as a power transition", () => {
+    const unavailable = makeEvent({
+      event_type: "host_power_state",
+      source_type: "host_agent",
+      observed_at: at(10),
+      payload: { ups_alias: "ups0", state: "unavailable" },
+    });
+    const result = correlate([hostHeartbeat(0), unavailable], RULE_VERSION);
     expect(result.assessmentCode).toBe("UNKNOWN");
   });
 
@@ -226,10 +245,7 @@ describe("deterministic correlator", () => {
   });
 
   it("detects HOST_OR_WORKLOAD_EXIT only with supporting observations", () => {
-    const result = correlate(
-      [hostExit(10), renterFailure(20), probeFailure(30)],
-      RULE_VERSION,
-    );
+    const result = correlate([hostExit(10), renterFailure(20), probeFailure(30)], RULE_VERSION);
     expect(result.assessmentCode).toBe("HOST_OR_WORKLOAD_EXIT");
     expect(result.evidenceGrade).toBe("HIGH");
     expect(result.explanation).toContain("intent is not inferred");

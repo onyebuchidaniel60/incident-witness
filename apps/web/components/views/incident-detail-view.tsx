@@ -69,6 +69,37 @@ function probeSummary(events: TimelineEvent[]): { count: number; last: string | 
   };
 }
 
+function observationState(
+  event: TimelineEvent,
+): { label: string; tone: "neutral" | "success" | "warning" | "danger" } | null {
+  if (event.eventType === "host_power_state") {
+    const state = event.payload.state;
+    if (state === "unavailable") return { label: "UNAVAILABLE", tone: "danger" };
+    if (state === "unknown") return { label: "UNKNOWN", tone: "warning" };
+    if (typeof state === "string") {
+      return { label: `UPS ${state.replaceAll("_", " ").toUpperCase()}`, tone: "neutral" };
+    }
+    return { label: "NOT REPORTED", tone: "warning" };
+  }
+  if (event.eventType === "gpu_telemetry") {
+    const status = event.payload.collection_status;
+    if (status === "unavailable") return { label: "UNAVAILABLE", tone: "danger" };
+    if (status === "partial") return { label: "PARTIAL", tone: "warning" };
+    if (status === "available") return { label: "AVAILABLE", tone: "success" };
+    return { label: "NOT REPORTED", tone: "warning" };
+  }
+  if (event.eventType === "platform_probe_result") {
+    const status = event.payload.probe_status;
+    if (typeof status === "string") {
+      return {
+        label: status.toUpperCase(),
+        tone: status === "completed" ? "success" : status === "error" ? "warning" : "danger",
+      };
+    }
+  }
+  return null;
+}
+
 export function IncidentDetailView({ incidentId }: { incidentId: string }) {
   const incident = useApiResource<IncidentDetail>(`/v1/incidents/${incidentId}`, {
     pollMs: 5000,
@@ -142,7 +173,7 @@ export function IncidentDetailView({ incidentId }: { incidentId: string }) {
   }
 
   if (incident.loading) return <LoadingState label="Loading evidence session…" />;
-  if (incident.error) {
+  if (incident.error && !incident.data) {
     const notFound = incident.error instanceof ApiError && incident.error.status === 404;
     return (
       <div className="space-y-4">
@@ -201,6 +232,22 @@ export function IncidentDetailView({ incidentId }: { incidentId: string }) {
         </InlineNotice>
       ) : null}
 
+      {incident.data && incident.error ? (
+        <InlineNotice tone="warning" title="Showing stale data">
+          <p role="alert">
+            The latest refresh failed: {incident.error.message}. Source status below may be out of
+            date and must not be treated as current.
+          </p>
+          <button
+            type="button"
+            onClick={incident.reload}
+            className="mt-2 rounded-md border border-amber-400 bg-white px-3 py-1.5 font-medium text-amber-950 hover:bg-amber-100"
+          >
+            Retry refresh
+          </button>
+        </InlineNotice>
+      ) : null}
+
       <section
         aria-labelledby="session-metadata"
         className="rounded-lg border border-slate-200 bg-white p-5"
@@ -256,7 +303,8 @@ export function IncidentDetailView({ incidentId }: { incidentId: string }) {
           Source health
         </h2>
         <p className="text-sm text-slate-600">
-          Last refreshed {formatTimestamp(new Date().toISOString())} · polling every 5 seconds.
+          Last successful refresh: {formatTimestamp(incident.lastUpdatedAt?.toISOString() ?? null)}{" "}
+          · polling every 5 seconds.
         </p>
         <div className="grid gap-3 md:grid-cols-3">
           {sourceCard(
@@ -466,6 +514,9 @@ export function IncidentDetailView({ incidentId }: { incidentId: string }) {
                     Event
                   </th>
                   <th scope="col" className="px-4 py-3 font-semibold">
+                    Observation
+                  </th>
+                  <th scope="col" className="px-4 py-3 font-semibold">
                     Sequence
                   </th>
                 </tr>
@@ -481,6 +532,16 @@ export function IncidentDetailView({ incidentId }: { incidentId: string }) {
                     </td>
                     <td className="px-4 py-3 font-mono text-xs text-slate-700">
                       {event.eventType}
+                    </td>
+                    <td className="px-4 py-3 text-slate-700">
+                      {(() => {
+                        const observation = observationState(event);
+                        return observation ? (
+                          <StatusPill label={observation.label} tone={observation.tone} />
+                        ) : (
+                          "—"
+                        );
+                      })()}
                     </td>
                     <td className="px-4 py-3 text-slate-700">{event.sequence}</td>
                   </tr>
