@@ -118,7 +118,7 @@ Local Phase 3C verification on 2026-10-31 passed lint, typecheck, build, 20 prot
 regression check for probe-service errors. Phase 3F added 11 CLI verifier tests and two staging demo
 harness tests. Phase 4 adds four API test-seam guard tests and a full-stack Playwright provider flow
 plus local-verifier checks. Phase 5 adds platform-probe sealing, sequence-rollback, readiness, worker
-effective-end and telemetry/stale UI coverage. Final results: 162 unit tests, 60 API integration
+effective-end and telemetry/stale UI coverage. Final results: 164 unit tests, 60 API integration
 tests, 2 probe-worker integration tests, 42 Playwright checks (41 passed, one intentional mobile
 provider-flow skip) and a clean demo harness. Actual results and remaining blockers are recorded in
 `AI_HANDOFF.md`.

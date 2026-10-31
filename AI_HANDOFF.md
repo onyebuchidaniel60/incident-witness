@@ -81,6 +81,7 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
   - `ac38325` — `fix(worker): stop observations after effective capture end`
   - `1393793` — `fix(web): surface stale data and unavailable telemetry`
   - `ebdcd32` — `fix(api): register sequence rollback error code`
+  - `77a2c92` — `fix(api): return latest timeline events`
 - **Phase 3E commits:**
   - `d810d5c` — `feat(db): add phase 3e worker probe access`
   - `0d5a9ea` — `feat(sdk): add renter client`
@@ -405,7 +406,7 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
   demo feature flag is enabled.
 - `/incidents/[incidentId]` polls the API every five seconds and displays status, source health,
   renter invitation with one-use/expiry warning and copy controls, host/renter/probe observations,
-  lifecycle actions, assessment wording and a deterministic first-50-event timeline.
+  lifecycle actions, assessment wording and a deterministic latest-50-event timeline.
 - End and seal actions require explicit confirmation; seal errors (active probe lease, no evidence,
   wrong state) are shown safely. Sealed bundles download with the API filename; cancelled sessions
   show no bundle.
@@ -439,7 +440,7 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
   invitation/enrollment → synthetic events → end → seal → download → API bundle response.
 - Browser verifier: valid bundle passes all checks; one-byte tampered bundle fails manifest digest and
   platform signature; no API request is made during verification.
-- Unit suite: 162 tests pass (20 protocol, 11 CLI verifier, 13 correlator, 14 ADR-001, 49 host-agent,
+- Unit suite: 164 tests pass (20 protocol, 11 CLI verifier, 15 correlator, 14 ADR-001, 49 host-agent,
   14 renter SDK, 20 probe-worker, 21 API including four E2E runtime guard tests).
 - `npm run lint`, `npm run typecheck` and `npm run build` pass across the monorepo.
 - E2E uses test-only `IW_E2E_*`/`NEXT_PUBLIC_IW_E2E_*` seams: a static test JWT, a file-backed DNS
@@ -487,7 +488,11 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 7. **P1 — API readiness was pinned to an old migration.** `/health/ready` expected
    `0019_phase3e_worker_counter_select`; after Phase 5 migrations it would return 503 even with a
    correct schema. Fixed to expect `0022` and added an integration readiness test.
-8. **P2 — Worker retry/dead transitions do not check lease ownership.** A stale worker can mutate job
+8. **P1 — The timeline returned the oldest 50 events.** Source-health probe status and the UI could
+   become stale once an incident exceeded 50 events, because the API returned the first page of the
+   oldest events. Fixed to return the latest 50 in ascending deterministic order and label the UI
+   accordingly.
+9. **P2 — Worker retry/dead transitions do not check lease ownership.** A stale worker can mutate job
    bookkeeping after lease expiry; deterministic event IDs still prevent duplicate evidence. Recorded
    as a remaining P2; retry semantics were not changed in this pass.
 
@@ -512,7 +517,7 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 
 - `npm run test:integration --workspace @incident-witness/api` — **PASS**: 60/60.
 - `npm run test:integration --workspace @incident-witness/probe-worker` — **PASS**: 2/2.
-- `npm test` — **PASS**: 162/162 unit tests.
+- `npm test` — **PASS**: 164/164 unit tests.
 - `npm run test:e2e` — **PASS**: 42 Playwright checks, 41 passed and one intentional mobile
   provider-flow skip. The desktop journey covers host/DNS/enrollment, demo incident, renter
   invitation, synthetic events including `gpu_telemetry` unavailable, end/seal/download, stale
@@ -563,7 +568,7 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - `npm run lint` — **PASS** across protocol, CLI verifier, demo harness, host-agent, renter SDK, correlator, db, probe worker, API and web.
 - `npm run typecheck` — **PASS** across protocol, CLI verifier, demo harness, host-agent, renter SDK, correlator, db, probe worker, API and web.
 - `npm run build` — **PASS**: protocol ESM/CJS/declarations, CLI verifier, host-agent CLI, renter SDK, correlator, DB, probe worker, Fastify API and Next.js 16.4.3.
-- `npm test` — **PASS**: 20/20 protocol, 11/11 CLI verifier, 13/13 correlator, 14/14 ADR-001 staging, 49/49 host-agent, 14/14 renter SDK, 20/20 probe worker and 21/21 API unit tests (162 total).
+- `npm test` — **PASS**: 20/20 protocol, 11/11 CLI verifier, 15/15 correlator, 14/14 ADR-001 staging, 49/49 host-agent, 14/14 renter SDK, 20/20 probe worker and 21/21 API unit tests (164 total).
 - `npm run test:demo` — **PASS**: 2/2 staging demo-harness integration tests.
 - `npm run demo` — **PASS**: sealed a `POWER_RELATED`/`LOW` fully simulated bundle; `iw-verify` exit 0 for the original and exit 1 after a one-byte tamper.
 - `npm test --workspace @incident-witness/cli-verifier` — **PASS**: 11/11.
@@ -610,7 +615,7 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - Host list/create/detail, DNS challenge and verification, enrollment code, source-key revocation and
   host archival load real API data and show empty/error/not-found/action states.
 - Incident list/create/detail, renter invitation, source health, five-second polling, deterministic
-  first-50-event timeline, end/seal/download and UNKNOWN assessment rendering.
+  latest-50-event timeline, end/seal/download and UNKNOWN assessment rendering.
 - Local browser verifier uses the protocol browser export, reports check-by-check PASS/FAIL, rejects
   tampered bundles and makes no API request with the bundle.
 - Playwright provider flow is full-stack against a local test-mode API and the staging database, with

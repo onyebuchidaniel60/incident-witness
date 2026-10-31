@@ -24,7 +24,7 @@ Base path: `/v1`. Common response/error shape and detailed request validation ar
 | GET | `/v1/incidents` | JWT + owner | List owned sessions with status/host filters |
 | GET | `/v1/incidents/:incidentId` | JWT + owner | Read session metadata, sources, timeline summary and sealed assessment |
 
-The incident-detail timeline returns the first 50 accepted events with `eventId`, `sourceKeyId`, `sourceType`, `eventType`, `sequence`, `observedAt`, `receivedAt`, the owner-visible bounded `payload` and `simulationMode`. Payloads support UI availability states such as UPS/GPU `unavailable` and do not expose any other incident or provider data.
+The incident-detail timeline returns the latest 50 accepted events with `eventId`, `sourceKeyId`, `sourceType`, `eventType`, `sequence`, `observedAt`, `receivedAt`, the owner-visible bounded `payload` and `simulationMode`. Payloads support UI availability states such as UPS/GPU `unavailable` and do not expose any other incident or provider data.
 | POST | `/v1/incidents/:incidentId/end` | JWT + owner | `collecting → awaiting_finalize`; cancel future probe jobs |
 | POST | `/v1/incidents/:incidentId/seal` | JWT + owner | Seal an immutable evidence bundle |
 | GET | `/v1/incidents/:incidentId/bundle` | JWT + owner | Download the exact sealed JSON bundle |
