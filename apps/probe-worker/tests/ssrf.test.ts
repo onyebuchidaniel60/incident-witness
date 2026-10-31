@@ -144,7 +144,7 @@ describe("probe DNS validation", () => {
     expect(calls).toHaveLength(0);
   });
 
-  it("maps a target NXDOMAIN to a probe result and an infrastructure DNS failure to a gap", async () => {
+  it("maps target NXDOMAIN to a failed result and infrastructure DNS failure to an error result", async () => {
     const target = {
       hostId: "33333333-3333-4333-8333-333333333333",
       hostname: "gpu.example.com",
