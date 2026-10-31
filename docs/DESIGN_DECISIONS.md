@@ -1,167 +1,169 @@
 # UI Design Decisions and Operator Approval Record
 
-**Status:** Phase 6 mockups created and presented on 2026-10-31. The design direction is approved; the mockups themselves are **awaiting explicit operator approval**. No final visual implementation is authorized.
+**Status:** Revision 0.2 reference-driven mockups are presented for operator approval. The previous hybrid mockups were rejected. No final visual implementation is authorized, and no styling or UI code has been applied to `apps/web`.
 
-## Phase 6 scope and stop condition
+## History
 
-Phase 6 covers reference collection, structural mockups and operator review only. No final CSS, Tailwind classes, component restyling or UI implementation may be written in `apps/web` until the operator explicitly approves the complete mockup direction. Phase 7 is not authorized.
-
-## Operator-approved design direction
-
-On 2026-10-31 the operator selected a named hybrid:
-
-| Surface | Direction | Theme | Routes |
+| Date | Version | Direction | Result |
 |---|---|---|---|
-| Public-facing pages | **B — Clean / modern SaaS** | Light-first | `/`, `/login`, `/verify`, `/docs`, `/privacy`, `/terms` |
-| Authenticated workspace | **A — Technical / data-dense** | Dark-first | `/dashboard`, `/hosts`, `/incidents`, `/settings` |
+| 2026-10-31 | 0.1 | Hybrid: light public pages + dark workspace | **Rejected by operator** |
+| 2026-10-31 | 0.2 | Operator-supplied dark emerald command-center references | Presented; approval pending |
 
-**Tone:** objective, technical, sober and precise. Avoid playful, cartoonish and overly futuristic or cyberpunk aesthetics.
+Revision 0.2 supersedes the 0.1 tokens, layouts and mockup files. The old hybrid mockups were deleted from `docs/mockups/`.
 
-**Typography:** clean sans-serif for interface text (Inter); monospace for hashes, UUIDs, timestamps, signatures, IPs, event types, sequence numbers and other technical metadata.
+## Operator-supplied references
 
-**Wordmark:** text-based `Incident Witness`, with a restrained accent bar. No complex illustration or logo symbol is required for the MVP.
+The operator uploaded two references to `docs/design-references/`:
 
-**Theme toggle:** not designed in Phase 6. The approved defaults are light public pages and a dark workspace. A later toggle is permitted but requires a separate decision.
+- `incident-reference 1.webp`
+- `incident-reference 2.webp`
 
-## Reference register
+Only the visual language is used. No reference image, avatar, logo, screenshot, product copy or brand asset is embedded in the mockups.
 
-These are visual-language references named in the approved candidate directions. No screenshots, assets, code, logos or brand treatments were copied. Their inclusion is not an integration, partnership or endorsement claim.
+## Reference analysis
 
-| ID | Reference | Selected by | Attributes studied | Product-specific adaptation / not copied |
-|---|---|---|---|---|
-| REF-01 | Datadog dashboards | Operator-approved Direction A | Dense operational hierarchy, compact status language, source-health scanning | No metric charts, alert colour scheme, product copy or branding copied |
-| REF-02 | Vercel deployment / observability views | Operator-approved Direction A | Dark restrained surfaces, compact navigation, monospace identifiers | No Vercel branding, layout or component assets copied |
-| REF-03 | Linear | Operator-approved Direction B | Public typographic hierarchy, calm spacing, clear navigation and restrained accents | No marketing composition, illustrations or product copy copied |
-| REF-04 | Stripe Dashboard | Operator-approved Direction B | Form clarity, result hierarchy, whitespace and validation treatment | No payment flows, product patterns or brand assets copied |
-| REF-05 | Operator written direction, 2026-10-31 | Operator | Hybrid mapping, light/dark defaults, tone, colour semantics, typography and status rules | Direct product direction; no external asset |
+### Reference 1 — emerald ambient command center
 
-## What was borrowed and what was changed
+- A floating application window sits over a near-black field with a strong green ambient glow in the upper-left and a soft dark vignette.
+- The window has a large corner radius and a thin luminous border, with deep shadow and a slight glass/translucency effect.
+- Three-pane anatomy: a narrow icon-only rail, a report/list pane and a wide detail pane.
+- The icon rail uses a green outlined hash-style mark, muted line icons and a bright green active tile.
+- The list pane has a large heading, compact metadata chips, a search field and a vivid emerald primary action.
+- List cards are dark charcoal with rounded corners. The selected card has a green outline and a subtle glow.
+- The detail pane uses a very large white display heading, uppercase metadata labels, inline chips, avatar stacks and a large code block.
+- Status language: blue “In progress” chip, red critical severity bars, yellow intermediate severity, green primary actions.
+- Technical content is monospace and visually secondary to the display heading.
 
-### Borrowed from Direction B for public pages
+### Reference 2 — neutral dark workspace
 
-- Light surfaces, crisp typography and generous whitespace.
-- A calm navigation hierarchy with a restrained blue trust accent.
-- Strong form, file-selection and verification-result hierarchy.
-- Soft elevation and clear separation between explanation and action.
-- Public pages prioritise comprehension and trust over raw density.
+- Same three-pane anatomy and icon rail, but on a flatter near-black background without the strong green ambient gradient.
+- Panel surfaces are neutral charcoal rather than green-tinted.
+- The list pane is narrower and the detail pane wider; the selected card remains green-outlined.
+- Metadata is organised in icon + uppercase label + value rows.
+- Code and attachments use large rounded dark blocks; inline code is highlighted in green.
+- Confirms that the core layout is the icon rail + list + detail pattern, with green as the interactive accent.
 
-### Borrowed from Direction A for the workspace
+### Colour palette observed
 
-- Dark, near-black surfaces with compact persistent navigation.
-- Dense tables, source tiles, timelines and source-health rails.
-- Monospace metadata for IDs, timestamps, sequences, digests and signatures.
-- Small, scannable status pills with text labels.
-- Repeated operational use is prioritised over decorative whitespace.
+These are approximate values informed by the references, not sampled brand tokens:
 
-### Intentional deviations from the references
+| Role | Approximate value |
+|---|---|
+| Ambient background | `#0A0C0B` to `#111412` |
+| App surface | `#171A18` / `#1E211F` |
+| Raised card | `#252927` / `#2D322F` |
+| Border | translucent warm white, about 8–15% |
+| Primary emerald | `#2BD58F` / `#67E9B4` |
+| Deep emerald action | `#19966B` / `#16845E` |
+| Live blue | `#6F9BFF` / `#A9C1FF` |
+| Critical red | `#FF6868` |
+| Warning amber | `#E6B955` |
+| Primary text | `#F1F7F3` |
+| Secondary text | `#9BA69F` |
 
-1. **Evidence before marketing.** The public home page includes an explicit limitations panel and avoids claims of root cause, outage adjudication or automatic marketplace action.
-2. **`UNKNOWN` is not a health state.** Unknown, unavailable, stale and insufficient-evidence states use neutral gray or amber treatments, never green.
-3. **Assessment grades are informational.** Assessment outcomes use a blue or neutral treatment rather than health green, so a grade is not confused with operational health.
-4. **Missing data is visible.** Host, GPU, UPS, renter and probe gaps are shown as explicit `UNAVAILABLE`, `STALE` or `GAP` states. They are never converted into a normal or healthy result.
-5. **Platform probe label.** The probe is always described as platform-operated, not an independent third party.
-6. **Timeline density.** The incident timeline keeps source label, observed time and event type visible at mobile widths; it stacks vertically rather than becoming a horizontal-only table.
-7. **No decorative telemetry.** The mockups do not invent charts, probability scores or AI diagnosis panels.
-8. **Text wordmark.** The logo is a text wordmark with a small accent bar, not an illustrated mark.
+### Typography and shape
 
-## Proposed mockup tokens
+- Geometric/grotesk sans-serif for display and interface text; heavy display weights, sentence case.
+- Small uppercase labels with wide letter spacing for metadata categories.
+- Monospace for code, IDs, timestamps, signatures and technical values.
+- Large radii: approximately 24 px window, 16 px panels, 13 px cards, 9–10 px controls and chips.
+- Soft layered shadows, thin translucent borders and a green selected-state glow.
+- Dense information, but generous internal card padding and line height.
 
-These are prototype tokens for review, not implemented application tokens.
+## Translation into Incident Witness
 
-### Public palette
+### Global
 
-| Token | Value | Use |
-|---|---|---|
-| Page background | `#F6F7F9` | Public page canvas |
-| Surface | `#FFFFFF` | Cards, header, footer |
-| Ink | `#101318` | Primary text |
-| Muted | `#5D6573` | Secondary text |
-| Border | `#E2E5EB` | Dividers and card borders |
-| Accent | `#2457D6` | Primary actions, links, focus |
-| Trust violet | `#5A4BCF` | Restrained secondary accent |
-| Success | `#16794A` | Verified / complete |
-| Warning | `#8D5D00` | Caution / on battery |
-| Danger | `#C22A2A` | Failed / tampered |
-| Unknown | `#596273` | Unknown / unavailable |
+- Use a dark emerald command-center theme for all public and authenticated screens, matching the references.
+- Keep the green ambient glow on the public landing page and the verifier; use a calmer dark field inside the workspace app window.
+- Use Inter/Inter Display for interface and display text, with a monospace stack for technical data.
+- Use emerald for primary actions and active/selected states, blue for live/collecting states, red for critical failures, amber for warnings and gaps, and gray for unknown/unavailable.
+- Preserve the reference’s rounded, layered glass panels and thin luminous borders.
 
-### Workspace palette
+### Public home
 
-| Token | Value | Use |
-|---|---|---|
-| Page background | `#08090B` | Workspace canvas |
-| Surface | `#0F1013` | Cards and panels |
-| Surface 2 | `#14161A` | Nested tiles and table headers |
-| Ink | `#F1F2F4` | Primary text |
-| Muted | `#9BA0AB` | Secondary text |
-| Border | `#24262C` | Dividers and card borders |
-| Accent | `#8AA4FF` | Links, focus and selected state |
-| Healthy / online | `#57D06B` | Text-labelled healthy status only |
-| Warning / degraded | `#E0B341` | Text-labelled warning status |
-| Critical / offline | `#FF8177` | Text-labelled critical status |
-| Unknown / unavailable | `#9BA0AB` | Explicit unknown or gap state |
+- Dark landing page with a green ambient glow and a framed three-pane product preview.
+- The preview shows a selected incident, source health and a compact evidence snippet, directly echoing the reference’s list/detail composition.
+- Sections below use dark cards for the three source categories, offline verification and evidence limitations.
 
-### Typography
+### Dashboard
 
-- **Interface:** Inter with system sans-serif fallbacks.
-- **Technical metadata:** `ui-monospace`, SFMono-Regular, Cascadia Code, Roboto Mono, Menlo, Consolas, DejaVu Sans Mono.
-- **Public display:** approximately 38–58 px, tight tracking, high contrast.
-- **Workspace headings:** approximately 24–30 px.
-- **Workspace metadata:** approximately 8.5–11 px monospace, used only for secondary technical data.
-- **Body:** 12–16 px depending on surface; public copy is larger than workspace metadata.
+- Three-pane app window: icon rail, session list, workspace detail.
+- Selected session card uses the reference’s green outline and glow.
+- Detail area contains stat tiles, the active capture, source health, host table and recent sealed records.
+- Technical metadata remains monospace at a readable size.
 
-### Shape and motion
+### Incident timeline
 
-- Radii: 4 px technical chips, 6 px controls, 9–13 px cards, 18 px hero container.
-- Spacing: 4 px base unit; public sections use generous 52–76 px rhythm; workspace panels use 10–26 px density.
-- Motion: colour and border transitions only, approximately 120 ms. Reduced-motion preference removes animation.
-- Focus: visible 2 px accent outline with offset on all interactive controls.
+- Three-pane app window with a session list and a wide incident detail pane.
+- Large incident title and uppercase metadata rows mirror the reference detail screen.
+- Host, renter and platform-probe observations use text-labelled source chips.
+- Typed payloads use compact code-like blocks; the UPS payload is shown as a three-field technical detail.
+- Host gaps are amber dashed treatments; unavailable GPU telemetry is a neutral gray chip, never green.
+- Assessment remains pending until sealing, with deterministic rule wording and no probability score.
+
+### Local verifier
+
+- Centered glass verifier window split into “select” and “result” panes.
+- Emerald success result, red tampered result and amber unknown-key result.
+- Local-only processing notice and the signature-limitation statement remain prominent.
+
+### Mobile
+
+- No mobile reference was supplied. The plan adapts the desktop three-pane layout to a top bar with a menu, then stacked cards.
+- The icon rail and list pane collapse; the detail content becomes the primary scroll.
+- Timelines stack vertically with source and time labels retained.
+- No horizontal scrolling, no hidden technical metadata and no low-contrast mono text.
+
+## Technical legibility adaptation
+
+The references use low-contrast muted labels and small UI text. The mockups deliberately raise contrast and minimum sizes for evidence work:
+
+- IDs, timestamps, event types, sequence numbers, hashes and platform keys use a high-contrast mono style.
+- Timeline summaries are 10–11 px on desktop and 9.5–10 px on mobile, with 1.5–1.6 line height.
+- Small uppercase labels are used for categories, not essential values.
+- Status is always text-labelled. Colour is secondary.
+- Missing, stale and unavailable states are not converted into green or “healthy” treatments.
+
+## Intentional deviations from the references
+
+1. **No copied avatars or photos.** Source identities use mono initials in restrained gradient circles.
+2. **No report-management copy or sample content.** The product retains its own incident-evidence language.
+3. **More legible technical text.** The reference’s very small muted labels are increased in contrast for evidence inspection.
+4. **No decorative metric charts.** Stat tiles and evidence cards replace generic dashboard charts.
+5. **Mobile is a documented adaptation.** The reference only shows a desktop three-pane window.
+6. **Evidence gaps are explicit.** The reference’s severity bars are adapted into source/status chips and gap notices rather than implying a single severity score.
+
+## Operator confirmation requested
+
+The following translations involve judgment because the references do not show these cases:
+
+1. **Mobile navigation:** top bar + menu + stacked cards, with the icon rail and list pane removed. Confirm or request a drawer/bottom-nav alternative.
+2. **Public home:** dark landing page with the same emerald glow and a framed app preview. The references show only the app, not a marketing page.
+3. **Source colours:** Host = emerald, Renter = blue, Platform probe = cyan. Confirm or request different source colour assignments.
+4. **Theme:** all screens are dark-first; no light theme is included in this revision.
+5. **Avatars:** mono initials replace photographic avatars. Confirm this is acceptable.
+
+The mockups are otherwise presented as the translation of the references. Any of the above can be revised before approval.
 
 ## Mockup register
 
-| Screen / state | Desktop | Mobile | Revision | Review status |
+| Screen | Desktop | Mobile | Revision | Status |
 |---|---|---|---|---|
-| Public home | [`mockups/home-desktop.html`](./mockups/home-desktop.html) | [`mockups/home-mobile.html`](./mockups/home-mobile.html) | 0.1 | Presented; pending operator feedback |
-| Dashboard | [`mockups/dashboard-desktop.html`](./mockups/dashboard-desktop.html) | [`mockups/dashboard-mobile.html`](./mockups/dashboard-mobile.html) | 0.1 | Presented; pending operator feedback |
-| Host setup / enrollment | [`mockups/host-setup-desktop.html`](./mockups/host-setup-desktop.html) | [`mockups/host-setup-mobile.html`](./mockups/host-setup-mobile.html) | 0.1 | Presented; pending operator feedback |
-| Incident timeline | [`mockups/incident-desktop.html`](./mockups/incident-desktop.html) | [`mockups/incident-mobile.html`](./mockups/incident-mobile.html) | 0.1 | Presented; pending operator feedback |
-| Sealed assessment / bundle | [`mockups/incident-sealed-desktop.html`](./mockups/incident-sealed-desktop.html) | [`mockups/incident-sealed-mobile.html`](./mockups/incident-sealed-mobile.html) | 0.1 | Presented; pending operator feedback |
-| Local verifier | [`mockups/verify-desktop.html`](./mockups/verify-desktop.html) | [`mockups/verify-mobile.html`](./mockups/verify-mobile.html) | 0.1 | Presented; pending operator feedback |
-| State treatments | [`mockups/states.html`](./mockups/states.html) | Responsive single-column view | 0.1 | Presented; pending operator feedback |
-| Mockup index | [`mockups/index.html`](./mockups/index.html) | Responsive | 0.1 | Presented; pending operator feedback |
-
-## State coverage in the mockups
-
-- Public verifier: no file, parsing failure, unsupported version, oversized file, valid, tampered and unknown platform key.
-- Workspace: loading, empty hosts, API error/retry, stale polling, permission-safe host not found, form validation, blocked seal action, empty timeline.
-- Incident: collecting, host gap, GPU telemetry unavailable, renter and probe failure and recovery, pending assessment, sealed assessment and preserved evidence gap.
-- Host: DNS verified, enrollment pending, no source keys, readiness checklist and archive danger zone.
-- Every status includes a text label. Colour is secondary.
-- Empty, error and restricted states provide a retry, a safe next step or a not-found explanation without revealing another account's resource.
-
-## Accessibility and verification notes
-
-- Each page has one `h1`, semantic landmarks, a skip link and a logical heading order.
-- File selection uses a labelled input; icon-only mobile navigation uses an accessible summary label.
-- Status text is present independently of colour.
-- Reduced-motion preference is honoured.
-- Static audit across the mockup set: no duplicate IDs, no unnamed buttons, no unlabelled inputs, no dead `href="#"` links, no console errors and no horizontal overflow at 1440 px desktop or 430 px mobile viewports.
-- Visual inspection was performed at 1440 px and 430 px widths.
-
-## Operator feedback
-
-No mockup feedback has been received yet. The operator has approved the **direction**, not the mockups.
-
-| Date | Version | Feedback | Resolution |
-|---|---|---|---|
-| 2026-10-31 | 0.1 | Awaiting review of the complete mockup set | Pending |
+| Public home `/` | [`mockups/home-desktop.html`](./mockups/home-desktop.html) | [`mockups/home-mobile.html`](./mockups/home-mobile.html) | 0.2 | Presented; approval pending |
+| Dashboard `/dashboard` | [`mockups/dashboard-desktop.html`](./mockups/dashboard-desktop.html) | [`mockups/dashboard-mobile.html`](./mockups/dashboard-mobile.html) | 0.2 | Presented; approval pending |
+| Incident timeline `/incidents/[incidentId]` | [`mockups/incident-desktop.html`](./mockups/incident-desktop.html) | [`mockups/incident-mobile.html`](./mockups/incident-mobile.html) | 0.2 | Presented; approval pending |
+| Local verifier `/verify` | [`mockups/verify-desktop.html`](./mockups/verify-desktop.html) | [`mockups/verify-mobile.html`](./mockups/verify-mobile.html) | 0.2 | Presented; approval pending |
+| Mockup index | [`mockups/index.html`](./mockups/index.html) | Responsive | 0.2 | Presented; approval pending |
 
 ## Explicit approval record
 
-- **Mockup version presented:** 0.1, 2026-10-31.
+- **Mockup version presented:** 0.2, 2026-10-31.
+- **Reference assets:** operator-supplied WebP images in `docs/design-references/`.
+- **Design reference approval:** accepted as the visual direction; the translation above is pending confirmation where noted.
+- **Desktop/mobile review:** NOT COMPLETED.
 - **Operator approval message/date:** NOT GRANTED.
-- **Approved reference IDs/assets:** Hybrid direction B + A; no external assets.
-- **Approved desktop/mobile review:** NOT COMPLETED.
 - **Final visual implementation:** NOT AUTHORIZED.
 - **Conditions/comments:** Pending operator review.
 
-**Hard stop:** no final UI styling, brand tokens, component restyling or animation implementation until the operator explicitly approves the complete mockup direction. Approval of a prototype is not approval to change business rules, APIs, data models, security or architecture.
+**Hard stop:** no final UI styling, brand tokens, component restyling or animation implementation until the operator explicitly approves this reference-driven mockup direction. Approval of a mockup is not approval to change business rules, APIs, data models, security or architecture.

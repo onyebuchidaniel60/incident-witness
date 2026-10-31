@@ -6,228 +6,243 @@
     <title>Incident Witness — Mobile verifier mockup</title>
     <link rel="stylesheet" href="assets/mockup.css" />
   </head>
-  <body class="theme-public mobile-page">
+  <body>
     <p class="device-label">Mobile · 390 px · local verifier</p>
-    <div class="device">
-      <div class="prototype-bar">
-        <strong>Static mockup</strong> · Phase 6 · illustrative data
-      </div>
-
-      <header class="m-header">
-        <a class="wordmark" href="home-mobile.html">Incident Witness</a>
-        <details class="m-menu">
-          <summary aria-label="Open navigation">
-            <span class="m-menu__glyph" aria-hidden="true"></span>
-          </summary>
-          <nav class="m-menu__panel" aria-label="Mobile navigation">
-            <a href="home-mobile.html">Home</a>
-            <a href="home-mobile.html#m-sources">Sources</a>
-            <a href="verify-mobile.html" aria-current="page">Verify</a>
-            <a href="dashboard-mobile.html">Open workspace</a>
-          </nav>
-        </details>
-      </header>
-
-      <main class="m-content" id="main">
-        <div class="m-hero">
-          <span class="local-badge">Local only · no upload</span>
-          <h1 style="font-size: 31px; margin-top: 12px">
-            Verify an evidence bundle on your device.
-          </h1>
-          <p>
-            Select a sealed JSON bundle. Digests and signatures are checked in
-            the browser. The file is never uploaded.
-          </p>
+    <div class="mobile-stage" style="padding-top: 0">
+      <div class="mobile-frame">
+        <div class="prototype-bar">
+          <strong>Static mockup</strong> · reference-driven · illustrative data
         </div>
 
-        <section class="m-card" aria-labelledby="m-select-title">
-          <div class="m-card__head">
-            <div>
-              <h2 id="m-select-title">1 · Select a bundle</h2>
-              <p class="m-session-meta">sealed JSON · max 10 MiB</p>
-            </div>
-          </div>
-          <div class="m-dropzone">
-            <span class="m-dropzone__glyph" aria-hidden="true">JSON</span>
-            <h2>Choose a sealed bundle</h2>
-            <p>Use the file picker for an explicit, keyboard-accessible flow.</p>
-            <label
-              class="btn btn--primary btn--block"
-              for="m-bundle-file"
-              style="margin-top: 12px"
-              >Choose JSON bundle</label
+        <header class="m-topbar">
+          <a class="brand" href="home-mobile.html">
+            <span class="brand-mark" aria-hidden="true"
+              ><span class="icon icon-hash"></span
+            ></span>
+            Incident Witness
+          </a>
+          <details class="m-menu">
+            <summary aria-label="Open navigation">
+              <span class="icon icon-menu"></span>
+            </summary>
+            <nav class="m-menu__panel" aria-label="Mobile navigation">
+              <a href="home-mobile.html"
+                ><span class="icon icon-grid"></span>Home</a
+              >
+              <a href="dashboard-mobile.html"
+                ><span class="icon icon-activity"></span>Workspace</a
+              >
+              <a href="verify-mobile.html" aria-current="page"
+                ><span class="icon icon-shield"></span>Verify</a
+              >
+            </nav>
+          </details>
+        </header>
+
+        <main class="m-content" id="main">
+          <div class="m-hero">
+            <span class="chip chip--ok"
+              ><span class="dot dot--green"></span>Local only · no upload</span
             >
-            <input
-              class="sr-only"
-              id="m-bundle-file"
-              type="file"
-              accept="application/json,.json"
-            />
-            <p class="micro faint" style="margin-top: 9px">
-              Prototype control — selection is not wired in this static mockup.
-            </p>
-          </div>
-
-          <div class="file-row" style="margin-top: 10px">
-            <span class="file-glyph" aria-hidden="true">JSON</span>
-            <div class="file-row__meta">
-              <strong>iw-8f2a-sealed.bundle.json</strong>
-              <span>2.1 MiB · selected locally</span>
-            </div>
-          </div>
-
-          <div class="privacy-note" style="margin-top: 10px">
-            <span class="status status--ok">Local</span>
+            <h1 style="font-size: 31px; margin-top: 11px">
+              Verify an evidence bundle on your device.
+            </h1>
             <p>
-              <strong>No upload.</strong> The bundle is read with the browser
-              File API and is not sent to the API.
+              Select a sealed JSON bundle. Digests and signatures are checked in
+              the browser. The file is never uploaded.
             </p>
           </div>
 
-          <button
-            class="btn btn--primary btn--block"
-            type="button"
-            style="margin-top: 11px"
-          >
-            Verify bundle
-          </button>
-        </section>
+          <section class="m-card" aria-labelledby="m-select">
+            <div class="m-card__head">
+              <div>
+                <h2 id="m-select">1 · Select a bundle</h2>
+                <p>Sealed JSON · max 10 MiB</p>
+              </div>
+            </div>
+            <div class="m-dropzone">
+              <span class="m-dropzone__glyph" aria-hidden="true"
+                ><span class="icon icon-file"></span
+              ></span>
+              <h2>Choose a sealed bundle</h2>
+              <p>Use the file picker for an explicit, keyboard-accessible flow.</p>
+              <label
+                class="btn btn--primary btn--block"
+                for="m-bundle-file"
+                style="margin-top: 11px"
+                >Choose JSON bundle</label
+              >
+              <input
+                class="sr-only"
+                id="m-bundle-file"
+                type="file"
+                accept="application/json,.json"
+              />
+              <p class="micro faint" style="margin-top: 8px">
+                Prototype control — selection is not wired.
+              </p>
+            </div>
 
-        <section class="m-card" style="margin-top: 10px" aria-labelledby="m-result-title">
-          <div class="m-card__head">
-            <div>
-              <h2 id="m-result-title">2 · Read the result</h2>
-              <p class="m-session-meta">check-by-check report</p>
+            <div class="file-row" style="margin-top: 9px">
+              <span class="file-glyph" aria-hidden="true"
+                ><span class="icon icon-file"></span
+              ></span>
+              <div class="file-row__meta">
+                <strong>iw-8f2a-sealed.bundle.json</strong>
+                <span>2.1 MiB · selected locally</span>
+              </div>
             </div>
-            <span class="status status--ok">Verified</span>
-          </div>
 
-          <div class="m-result">
-            <div class="m-result__top">
-              <span class="m-result__mark" aria-hidden="true">✓</span>
-              <h3>Bundle verified</h3>
+            <div class="privacy-note">
+              <span class="chip chip--ok">Local</span>
+              <p>
+                <strong>No upload.</strong> The bundle is read with the browser
+                File API and is not sent to the API.
+              </p>
             </div>
-            <p>7 required checks passed · 0 failed · 0 skipped</p>
-          </div>
 
-          <div style="margin-top: 9px">
-            <div class="m-check">
-              <span>Bundle and protocol versions</span><span>PASS</span>
-            </div>
-            <div class="m-check">
-              <span>Canonical manifest SHA-256</span><span>PASS</span>
-            </div>
-            <div class="m-check">
-              <span>Platform signature</span><span>PASS</span>
-            </div>
-            <div class="m-check">
-              <span>Source certificates · 3</span><span>PASS</span>
-            </div>
-            <div class="m-check">
-              <span>Event signatures · 128/128</span><span>PASS</span>
-            </div>
-            <div class="m-check">
-              <span>Order and sequence</span><span>PASS</span>
-            </div>
-            <div class="m-check">
-              <span>Capture window and labels</span><span>PASS</span>
-            </div>
-          </div>
+            <button
+              class="btn btn--primary btn--block"
+              type="button"
+              style="margin-top: 10px"
+            >
+              Verify bundle
+            </button>
+          </section>
 
-          <div class="verify-meta" style="margin-top: 9px">
-            <div>
-              <dt>Assessment</dt>
-              <dd>POWER_RELATED</dd>
+          <section class="m-card" aria-labelledby="m-result">
+            <div class="m-card__head">
+              <div>
+                <h2 id="m-result">2 · Read the result</h2>
+                <p>Check-by-check report</p>
+              </div>
+              <span class="chip chip--ok">Verified</span>
             </div>
-            <div>
-              <dt>Grade</dt>
-              <dd>MEDIUM</dd>
-            </div>
-            <div>
-              <dt>Platform key</dt>
-              <dd>iw-platform-staging-1</dd>
-            </div>
-            <div>
-              <dt>Sealed</dt>
-              <dd>14:32:04 UTC</dd>
-            </div>
-          </div>
 
-          <p class="micro faint" style="margin-top: 10px; line-height: 1.55">
-            Signature verification confirms integrity and provenance from a key.
-            It does not prove sensor truth or root cause.
+            <div class="m-result">
+              <div class="m-result__top">
+                <span class="m-result__mark" aria-hidden="true"
+                  ><span class="icon icon-check"></span
+                ></span>
+                <h3>Bundle verified</h3>
+              </div>
+              <p>7 required checks passed · 0 failed · 0 skipped</p>
+            </div>
+
+            <div style="margin-top: 9px">
+              <div class="m-check">
+                <span>Bundle and protocol versions</span><span>PASS</span>
+              </div>
+              <div class="m-check">
+                <span>Canonical manifest SHA-256</span><span>PASS</span>
+              </div>
+              <div class="m-check">
+                <span>Platform signature</span><span>PASS</span>
+              </div>
+              <div class="m-check">
+                <span>Source certificates · 3</span><span>PASS</span>
+              </div>
+              <div class="m-check">
+                <span>Event signatures · 128/128</span><span>PASS</span>
+              </div>
+              <div class="m-check">
+                <span>Order and sequence</span><span>PASS</span>
+              </div>
+              <div class="m-check">
+                <span>Capture window and labels</span><span>PASS</span>
+              </div>
+            </div>
+
+            <div class="verify-meta" style="margin-top: 9px">
+              <div>
+                <dt>Assessment</dt>
+                <dd>POWER_RELATED</dd>
+              </div>
+              <div>
+                <dt>Grade</dt>
+                <dd>MEDIUM</dd>
+              </div>
+              <div>
+                <dt>Platform key</dt>
+                <dd>iw-platform-staging-1</dd>
+              </div>
+              <div>
+                <dt>Sealed</dt>
+                <dd>14:32:04 UTC</dd>
+              </div>
+            </div>
+
+            <p class="micro faint" style="margin-top: 10px; line-height: 1.55">
+              Signature verification confirms integrity and provenance from a
+              key. It does not prove sensor truth or root cause.
+            </p>
+          </section>
+
+          <section class="m-card" aria-labelledby="m-states">
+            <div class="m-card__head">
+              <h2 id="m-states">Result states</h2>
+              <span class="chip chip--plain">3</span>
+            </div>
+            <div class="m-result m-result--fail">
+              <div class="m-result__top">
+                <span class="m-result__mark" aria-hidden="true"
+                  ><span class="icon icon-x"></span
+                ></span>
+                <h3>Tampered or inconsistent</h3>
+              </div>
+              <p>
+                Manifest digest and platform signature failed. Do not rely on
+                this bundle.
+              </p>
+            </div>
+            <div class="m-result m-result--warn">
+              <div class="m-result__top">
+                <span class="m-result__mark" aria-hidden="true"
+                  ><span class="icon icon-alert"></span
+                ></span>
+                <h3>Unknown platform key</h3>
+              </div>
+              <p>
+                Signature check skipped. The bundle may be valid, but this trust
+                set cannot confirm it.
+              </p>
+            </div>
+            <div class="m-result">
+              <div class="m-result__top">
+                <span class="m-result__mark" aria-hidden="true"
+                  ><span class="icon icon-check"></span
+                ></span>
+                <h3>Verified</h3>
+              </div>
+              <p>All required checks passed. No file was uploaded.</p>
+            </div>
+          </section>
+
+          <p class="limitation-strip" style="width: 100%; margin-top: 10px">
+            <strong>Limitation:</strong> a valid signature verifies integrity and
+            provenance from a key. It does not prove sensor truth, evidence
+            completeness or cause. Missing observations remain gaps.
           </p>
-        </section>
+        </main>
 
-        <section class="m-section" aria-labelledby="m-states-title">
-          <p class="eyebrow"><span class="eyebrow__dot"></span>Result states</p>
-          <h2 id="m-states-title" style="font-size: 22px">
-            Pass, tampered and unknown key.
-          </h2>
-          <div class="m-stack" style="margin-top: 12px">
-            <article class="m-card">
-              <div class="m-result">
-                <div class="m-result__top">
-                  <span class="m-result__mark" aria-hidden="true">✓</span>
-                  <h3>Verified</h3>
-                </div>
-                <p>All required checks passed.</p>
-              </div>
-              <p class="micro muted" style="margin-top: 8px">
-                Manifest, signatures, certificates and ordering are consistent
-                with the pinned key set.
-              </p>
-            </article>
-
-            <article class="m-card">
-              <div class="m-result m-result--fail">
-                <div class="m-result__top">
-                  <span class="m-result__mark" aria-hidden="true">×</span>
-                  <h3>Tampered or inconsistent</h3>
-                </div>
-                <p>Manifest digest and platform signature failed.</p>
-              </div>
-              <p class="micro muted" style="margin-top: 8px">
-                Do not rely on this bundle. The failed checks identify what no
-                longer matches.
-              </p>
-            </article>
-
-            <article class="m-card">
-              <div class="m-result m-result--unknown">
-                <div class="m-result__top">
-                  <span class="m-result__mark" aria-hidden="true">!</span>
-                  <h3>Unknown platform key</h3>
-                </div>
-                <p>Signature check skipped. Bundle may be valid, but this trust
-                  set cannot confirm it.</p>
-              </div>
-              <p class="micro muted" style="margin-top: 8px">
-                An unknown key is never silently treated as a pass.
-              </p>
-            </article>
+        <footer class="m-footer">
+          <a class="brand" href="home-mobile.html">
+            <span class="brand-mark" aria-hidden="true"
+              ><span class="icon icon-hash"></span
+            ></span>
+            Incident Witness
+          </a>
+          <p>Portable, signature-verifiable incident evidence.</p>
+          <div class="m-footer__links">
+            <a href="index.html">Mockups</a>
+            <a href="../DESIGN_DECISIONS.md">Design record</a>
+            <a href="https://github.com/onyebuchidaniel60/incident-witness"
+              >GitHub</a
+            >
           </div>
-        </section>
-
-        <div class="limitation-strip" style="margin-top: 4px">
-          <strong>Limitation:</strong> a valid signature verifies integrity and
-          provenance from a key. It does not prove sensor truth, evidence
-          completeness or cause. Missing observations remain gaps.
-        </div>
-      </main>
-
-      <footer class="m-footer">
-        <a class="wordmark" href="home-mobile.html">Incident Witness</a>
-        <p>Portable, signature-verifiable incident evidence.</p>
-        <div class="m-footer__links">
-          <a href="home-mobile.html">Home</a>
-          <a href="../DESIGN_DECISIONS.md">Design record</a>
-          <a href="https://github.com/onyebuchidaniel60/incident-witness"
-            >GitHub</a
-          >
-        </div>
-        <p>© 2026 Incident Witness · Static Phase 6 mockup.</p>
-      </footer>
+          <p>© 2026 Incident Witness · Static mockup.</p>
+        </footer>
+      </div>
     </div>
   </body>
 </html>

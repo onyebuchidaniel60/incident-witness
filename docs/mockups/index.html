@@ -3,60 +3,79 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Incident Witness — Phase 6 mockups</title>
+    <title>Incident Witness — Reference-driven mockups</title>
     <link rel="stylesheet" href="assets/mockup.css" />
   </head>
-  <body class="theme-public">
+  <body>
     <div class="prototype-bar">
-      <strong>Static design mockup</strong> · Phase 6 · illustrative data · not
-      production UI
+      <strong>Static design mockup</strong> · Phase 6 revision · reference-driven
+      · illustrative data
     </div>
 
-    <header class="pub-header">
-      <div class="container pub-nav">
-        <a class="wordmark" href="index.html">Incident Witness</a>
-        <nav class="pub-nav__links" aria-label="Primary">
+    <header class="public-stage" style="padding-bottom: 0">
+      <div class="topbar">
+        <a class="brand" href="index.html">
+          <span class="brand-mark" aria-hidden="true"
+            ><span class="icon icon-hash"></span
+          ></span>
+          Incident Witness
+        </a>
+        <nav class="topbar__nav" aria-label="Primary">
           <a href="home-desktop.html">Home</a>
-          <a href="verify-desktop.html">Verify</a>
+          <a href="dashboard-desktop.html">Dashboard</a>
+          <a href="incident-desktop.html">Incident</a>
+          <a href="verify-desktop.html">Verifier</a>
         </nav>
-        <div class="pub-nav__actions">
-          <a class="btn btn--secondary btn--sm" href="../DESIGN_DECISIONS.md"
-            >Design record</a
-          >
+        <div class="topbar__actions">
+          <span class="chip chip--ok">Revision 0.2</span>
         </div>
       </div>
     </header>
 
     <main>
-      <section class="container index-hero">
-        <p class="eyebrow"><span class="eyebrow__dot"></span>Phase 6 review</p>
-        <h1>Structural mockups for operator review.</h1>
-        <p>
-          A named hybrid: light-first public pages with a clean, modern SaaS
-          hierarchy, and a dark-first authenticated workspace built for dense
-          evidence work. These are standalone HTML/CSS prototypes under
-          <span class="mono">docs/mockups/</span>. Nothing here is connected to
-          the application.
+      <section class="index-hero">
+        <p class="eyebrow">
+          <span class="eyebrow__dot"></span>Operator references applied
         </p>
-        <div class="index-meta">
-          <span class="status status--accent">Hybrid B + A</span>
-          <span class="status status--ok">Public: light-first</span>
-          <span class="status status--plain">Workspace: dark-first</span>
-          <span class="status status--plain">Inter + monospace</span>
+        <h1>Dark emerald command center.</h1>
+        <p>
+          The rejected hybrid set has been replaced with a reference-driven
+          visual language: a floating glass workspace, narrow icon rail,
+          list/detail panes, emerald actions, blue live states and dense but
+          airy technical data. Every screen is a standalone HTML/CSS prototype.
+        </p>
+        <div class="index-tags">
+          <span class="chip chip--ok">Emerald accent</span>
+          <span class="chip chip--live">Blue live state</span>
+          <span class="chip chip--danger">Red critical</span>
+          <span class="chip chip--warn">Amber gap</span>
+          <span class="chip">Rounded glass panels</span>
+          <span class="chip">Mono metadata</span>
         </div>
       </section>
 
-      <section class="container index-grid" aria-label="Mockup inventory">
+      <div class="reference-strip">
+        <span>References:</span>
+        <a href="../design-references/incident-reference%201.webp"
+          >incident-reference 1.webp</a
+        >
+        <a href="../design-references/incident-reference%202.webp"
+          >incident-reference 2.webp</a
+        >
+        <span>· visual language only; no reference imagery is used in the UI.</span>
+      </div>
+
+      <section class="index-grid" aria-label="Screen inventory">
         <article class="index-card">
           <div class="index-card__top">
-            <span class="mono-label">01 · Public</span>
-            <span class="source source--host">Light</span>
+            <span class="label">01 · Public</span>
+            <span class="chip chip--ok">Dark</span>
           </div>
           <h2>Public home page</h2>
           <p>
-            Problem statement, three source categories, verification flow,
-            explicit limitations and footer. The hero includes a compact
-            evidence preview.
+            Dark landing page with emerald ambient glow, a framed three-pane
+            product preview, three observation sources, offline verification and
+            explicit limitations.
           </p>
           <div class="index-card__links">
             <a class="btn btn--primary btn--sm" href="home-desktop.html"
@@ -70,14 +89,13 @@
 
         <article class="index-card">
           <div class="index-card__top">
-            <span class="mono-label">02 · Workspace</span>
-            <span class="source source--probe">Dark</span>
+            <span class="label">02 · Workspace</span>
+            <span class="chip chip--live">Command center</span>
           </div>
           <h2>Authenticated dashboard</h2>
           <p>
-            Sidebar navigation, active-session summary, host health, source
-            availability, recent sealed records and an explicit stale-source
-            notice.
+            Icon rail, session list pane and dense workspace overview with
+            active capture, source health, host table and recent sealed records.
           </p>
           <div class="index-card__links">
             <a class="btn btn--primary btn--sm" href="dashboard-desktop.html"
@@ -91,35 +109,14 @@
 
         <article class="index-card">
           <div class="index-card__top">
-            <span class="mono-label">03 · Workspace</span>
-            <span class="source source--probe">Dark</span>
-          </div>
-          <h2>Host setup and enrollment</h2>
-          <p>
-            DNS endpoint proof, one-time enrollment code, source-key status,
-            readiness checklist and the honest manual incident-ID requirement
-            for the host agent.
-          </p>
-          <div class="index-card__links">
-            <a class="btn btn--primary btn--sm" href="host-setup-desktop.html"
-              >Desktop</a
-            >
-            <a class="btn btn--secondary btn--sm" href="host-setup-mobile.html"
-              >Mobile</a
-            >
-          </div>
-        </article>
-
-        <article class="index-card">
-          <div class="index-card__top">
-            <span class="mono-label">04 · Workspace</span>
-            <span class="source source--probe">Dark</span>
+            <span class="label">03 · Workspace</span>
+            <span class="chip chip--live">Selected record</span>
           </div>
           <h2>Incident timeline</h2>
           <p>
-            Collecting state with three distinct sources, explicit gaps and
-            unavailable telemetry, source health, deterministic assessment
-            pending at seal, and lifecycle actions.
+            Three-pane incident view based on the reference’s report list and
+            detail pane. Host, renter and platform probe observations are
+            visually distinct, with explicit gaps and unavailable telemetry.
           </p>
           <div class="index-card__links">
             <a class="btn btn--primary btn--sm" href="incident-desktop.html"
@@ -133,38 +130,14 @@
 
         <article class="index-card">
           <div class="index-card__top">
-            <span class="mono-label">04b · Sealed state</span>
-            <span class="source source--probe">Dark</span>
-          </div>
-          <h2>Sealed assessment and bundle</h2>
-          <p>
-            Additional state for the incident screen: completed capture,
-            deterministic assessment, evidence gaps, bundle metadata and local
-            verification entry point.
-          </p>
-          <div class="index-card__links">
-            <a
-              class="btn btn--primary btn--sm"
-              href="incident-sealed-desktop.html"
-              >Desktop</a
-            >
-            <a
-              class="btn btn--secondary btn--sm"
-              href="incident-sealed-mobile.html"
-              >Mobile</a
-            >
-          </div>
-        </article>
-
-        <article class="index-card">
-          <div class="index-card__top">
-            <span class="mono-label">05 · Public</span>
-            <span class="source source--host">Light</span>
+            <span class="label">04 · Public</span>
+            <span class="chip chip--ok">Local only</span>
           </div>
           <h2>Local verifier</h2>
           <p>
-            Local-only upload, check-by-check result, bundle assessment and a
-            state gallery for pass, tampered and unknown-platform-key outcomes.
+            Glass verifier window with local file selection, check-by-check
+            result, assessment metadata and explicit pass, tampered and
+            unknown-key outcomes.
           </p>
           <div class="index-card__links">
             <a class="btn btn--primary btn--sm" href="verify-desktop.html"
@@ -177,65 +150,45 @@
         </article>
       </section>
 
-      <section class="container" style="padding-bottom: 28px">
-        <article class="index-card" style="min-height: auto">
-          <div class="index-card__top">
-            <span class="mono-label">06 · State coverage</span>
-            <span class="status status--plain">Both themes</span>
-          </div>
-          <h2>Loading, empty, error and restricted states</h2>
-          <p>
-            Static treatments for verifier failures, stale polling, empty
-            resources, blocked actions, form validation and permission-safe
-            not-found responses.
-          </p>
-          <div class="index-card__links">
-            <a class="btn btn--primary btn--sm" href="states.html"
-              >Review state treatments</a
-            >
-          </div>
-        </article>
-      </section>
-
-      <section class="container index-notes" aria-label="Design notes">
+      <section class="index-meta" aria-label="Translation notes">
         <div class="index-note">
-          <h3>Borrowed from Direction B</h3>
+          <h3>Borrowed from the references</h3>
           <ul>
-            <li>Light surfaces, crisp type and generous public whitespace.</li>
-            <li>Calm navigation, direct calls to action and soft elevation.</li>
-            <li>Strong form and verification-result hierarchy.</li>
+            <li>Floating glass app window with a soft luminous edge.</li>
+            <li>Narrow icon rail, list pane and wide detail pane.</li>
+            <li>Emerald primary actions and selected-card glow.</li>
+            <li>Blue live chips, red critical and amber warning states.</li>
+            <li>Large display headings with compact uppercase metadata.</li>
           </ul>
         </div>
         <div class="index-note">
-          <h3>Borrowed from Direction A</h3>
+          <h3>Adapted for evidence</h3>
           <ul>
-            <li>Dark, compact workspace shell with persistent navigation.</li>
-            <li>Monospace metadata for IDs, timestamps, sequences and digests.</li>
-            <li>Dense tables, source tiles and a timeline-led incident view.</li>
+            <li>Higher-contrast mono text for hashes, IDs and timestamps.</li>
+            <li>Timeline rows retain source, time, sequence and payload detail.</li>
+            <li>Green is not used to imply that missing data is healthy.</li>
+            <li>Mobile stacks the panes and never requires horizontal scrolling.</li>
           </ul>
         </div>
         <div class="index-note">
-          <h3>Product-specific constraints</h3>
+          <h3>Review status</h3>
           <ul>
-            <li>Status always includes text; colour is secondary.</li>
-            <li>Unknown and unavailable states are neutral gray, not red.</li>
-            <li>Platform probe is always labelled platform-operated.</li>
-            <li>No confidence scores, claims of cause or decorative dashboards.</li>
+            <li>Previous hybrid mockups: rejected by operator.</li>
+            <li>Reference-driven set: presented for approval.</li>
+            <li>No code or styling applied to <span class="mono">apps/web</span>.</li>
+            <li>Approval message needed before Phase 7.</li>
           </ul>
         </div>
       </section>
     </main>
 
-    <footer class="pub-footer">
-      <div class="container">
-        <div class="pub-footer__bottom">
-          <p>
-            Static Phase 6 mockups. Illustrative hostnames, IDs and telemetry
-            only. No final visual implementation has been applied to
-            <span class="mono">apps/web</span>.
-          </p>
-          <a href="../DESIGN_DECISIONS.md">Design decisions</a>
-        </div>
+    <footer class="public-footer">
+      <div class="public-footer__bottom">
+        <p>
+          Incident Witness · Phase 6 reference-driven mockups · illustrative
+          hostnames, IDs and telemetry only.
+        </p>
+        <p class="mono">STATIC MOCKUP · NOT PRODUCTION</p>
       </div>
     </footer>
   </body>

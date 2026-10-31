@@ -5,30 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Incident Witness collects signed observations from a GPU host, renter workload and platform-operated probe, then seals a portable evidence bundle for offline verification."
+      content="Incident Witness collects signed observations from a GPU host, renter workload client and platform-operated probe, then seals a portable evidence bundle for offline verification."
     />
-    <title>Incident Witness — Signed incident evidence for GPU compute</title>
+    <title>Incident Witness — Signed incident evidence</title>
     <link rel="stylesheet" href="assets/mockup.css" />
   </head>
-  <body class="theme-public">
+  <body>
     <div class="prototype-bar">
-      <strong>Static design mockup</strong> · Phase 6 · illustrative data · not
-      production UI
+      <strong>Static design mockup</strong> · Phase 6 revision · illustrative data
     </div>
     <a class="skip-link" href="#main">Skip to content</a>
 
-    <header class="pub-header">
-      <div class="container pub-nav">
-        <a class="wordmark" href="home-desktop.html">Incident Witness</a>
-        <nav class="pub-nav__links" aria-label="Primary">
+    <header class="public-stage" style="padding-bottom: 0">
+      <div class="topbar">
+        <a class="brand" href="home-desktop.html">
+          <span class="brand-mark" aria-hidden="true"
+            ><span class="icon icon-hash"></span
+          ></span>
+          Incident Witness
+        </a>
+        <nav class="topbar__nav" aria-label="Primary">
           <a href="#sources">Sources</a>
           <a href="#verification">Verification</a>
-          <a href="../DESIGN_DECISIONS.md">Protocol</a>
+          <a href="#limits">Limits</a>
           <a href="verify-desktop.html">Verify</a>
         </nav>
-        <div class="pub-nav__actions">
-          <a class="btn btn--ghost" href="home-desktop.html#login">Sign in</a>
-          <a class="btn btn--primary" href="dashboard-desktop.html"
+        <div class="topbar__actions">
+          <a class="btn btn--ghost btn--sm" href="dashboard-desktop.html"
+            >Sign in</a
+          >
+          <a class="btn btn--primary btn--sm" href="dashboard-desktop.html"
             >Open workspace</a
           >
         </div>
@@ -37,103 +43,140 @@
 
     <main id="main">
       <section class="hero">
-        <div class="container hero__grid">
-          <div>
-            <p class="eyebrow">
-              <span class="eyebrow__dot"></span>Incident evidence for
-              decentralized compute
-            </p>
-            <h1>A signed record of what happened when a GPU host went down.</h1>
-            <p class="hero__lede">
-              Incident Witness collects bounded observations from the provider's
-              host, the renter's workload client and a separately operated
-              platform probe. It correlates them into a portable bundle that can
-              be verified offline.
-            </p>
-            <div class="hero__actions">
-              <a class="btn btn--primary btn--lg" href="dashboard-desktop.html"
-                >Sign in to create a session</a
-              >
-              <a class="btn btn--secondary btn--lg" href="verify-desktop.html"
-                >Verify a bundle</a
-              >
-            </div>
-            <p class="hero__note">
-              No root-cause claims. No automatic marketplace action. Evidence
-              you can inspect, source by source.
-            </p>
+        <div>
+          <p class="eyebrow">
+            <span class="eyebrow__dot"></span>Incident evidence for GPU compute
+          </p>
+          <h1>A signed record of what happened when a GPU host went down.</h1>
+          <p class="hero__lede">
+            Incident Witness collects bounded observations from the provider's
+            host, the renter's workload client and a separately operated
+            platform probe. It correlates them into a portable bundle you can
+            verify offline.
+          </p>
+          <div class="hero__actions">
+            <a class="btn btn--primary btn--lg" href="dashboard-desktop.html"
+              >Open provider workspace</a
+            >
+            <a class="btn btn--secondary btn--lg" href="verify-desktop.html"
+              >Verify a bundle</a
+            >
           </div>
-
-          <div class="evidence-preview" aria-label="Illustrative incident preview">
-            <div class="evidence-preview__head">
-              <span class="mono-label">Incident · IW-8F2A</span>
-              <span class="status status--warn">Collecting</span>
+          <p class="hero__note">
+            No root-cause claims. No automatic marketplace action. Evidence you
+            can inspect, source by source.
+          </p>
+          <div class="hero__stats">
+            <div class="hero__stat">
+              <strong>3</strong><span>source categories</span>
             </div>
-            <h2>Power interruption · db-01</h2>
-            <p class="evidence-preview__sub">
-              <span class="mono">14:02–14:32 UTC</span> · 24 min remaining ·
-              3 sources
-            </p>
+            <div class="hero__stat">
+              <strong>Ed25519</strong><span>signed observations</span>
+            </div>
+            <div class="hero__stat">
+              <strong>Offline</strong><span>bundle verification</span>
+            </div>
+          </div>
+        </div>
 
-            <div class="preview-events">
-              <div class="preview-event">
-                <time datetime="2026-10-31T14:07:30Z">14:07:30</time>
-                <div>
-                  <span class="source source--host">Host</span>
-                  <p>
-                    UPS state
-                    <span class="mono">on_battery</span>, charge 98%
-                  </p>
-                </div>
-                <span class="status status--warn">Warning</span>
+        <div class="preview-frame" aria-label="Illustrative incident workspace">
+          <div class="preview-frame__bar">
+            <span class="preview-frame__dot"></span>
+            <span class="preview-frame__dot"></span>
+            <span class="preview-frame__dot"></span>
+            <span class="preview-frame__title">INCIDENT WITNESS / PROVIDER</span>
+          </div>
+          <div class="preview-shell">
+            <div class="preview-rail">
+              <span class="brand-mark" aria-hidden="true"
+                ><span class="icon icon-hash"></span
+              ></span>
+              <span class="preview-rail__icon is-active"
+                ><span class="icon icon-grid"></span
+              ></span>
+              <span class="preview-rail__icon"
+                ><span class="icon icon-server"></span
+              ></span>
+              <span class="preview-rail__icon"
+                ><span class="icon icon-activity"></span
+              ></span>
+              <span class="preview-rail__icon"
+                ><span class="icon icon-shield"></span
+              ></span>
+            </div>
+            <div class="preview-list">
+              <p class="preview-list__title">Sessions</p>
+              <div class="preview-list__item is-selected">
+                <p class="preview-list__time">14:07:30 · live</p>
+                <p>Power interruption · db-01</p>
               </div>
-              <div class="preview-event">
-                <time datetime="2026-10-31T14:07:36Z">14:07:36</time>
-                <div>
-                  <span class="source source--renter">Renter</span>
-                  <p>
-                    Endpoint result
-                    <span class="mono">unreachable</span> · timeout
-                  </p>
-                </div>
-                <span class="status status--danger">Failed</span>
+              <div class="preview-list__item">
+                <p class="preview-list__time">13:48:00 · sealed</p>
+                <p>Reachability loss · db-04</p>
               </div>
-              <div class="preview-event">
-                <time datetime="2026-10-31T14:07:42Z">14:07:42</time>
-                <div>
-                  <span class="source source--probe">Platform probe</span>
-                  <p>
-                    Fixed HTTPS check
-                    <span class="mono">connection_timeout</span>
-                  </p>
-                </div>
-                <span class="status status--danger">Failed</span>
-              </div>
-              <div class="preview-event">
-                <time datetime="2026-10-31T14:12:00Z">14:12:00</time>
-                <div>
-                  <span class="source source--host">Host</span>
-                  <p>
-                    GPU telemetry
-                    <span class="mono">UNAVAILABLE</span> — no
-                    <span class="mono">nvidia-smi</span> response
-                  </p>
-                </div>
-                <span class="status">Unknown</span>
+              <div class="preview-list__item">
+                <p class="preview-list__time">11:21:00 · unknown</p>
+                <p>Workload exit · db-02</p>
               </div>
             </div>
-
-            <div class="evidence-preview__foot">
-              <span><i class="dot dot--warn"></i> Host: gap</span>
-              <span><i class="dot dot--ok"></i> Renter: online</span>
-              <span><i class="dot dot--ok"></i> Platform probe: online</span>
+            <div class="preview-detail">
+              <span class="chip chip--live"
+                ><span class="dot dot--blue"></span>Collecting</span
+              >
+              <p class="preview-detail__title">Power interruption on db-01</p>
+              <div class="preview-detail__meta">
+                <span class="chip chip--plain"
+                  ><span class="icon icon-clock"></span>14:02–14:32 UTC</span
+                >
+                <span class="chip chip--plain">IW-8F2A</span>
+              </div>
+              <div class="preview-source-row">
+                <div>
+                  <strong>Host agent</strong><span>STALE · 6m</span>
+                </div>
+                <div>
+                  <strong>Renter client</strong><span>ONLINE</span>
+                </div>
+                <div>
+                  <strong>Platform probe</strong><span>ONLINE</span>
+                </div>
+              </div>
+              <div style="margin-top: 11px">
+                <div class="preview-event">
+                  <time>14:07:30</time>
+                  <p>
+                    Host · UPS <span class="mono">on_battery</span>, 98%
+                  </p>
+                </div>
+                <div class="preview-event">
+                  <time>14:07:36</time>
+                  <p>
+                    Renter · endpoint <span class="mono">unreachable</span>
+                  </p>
+                </div>
+                <div class="preview-event">
+                  <time>14:07:42</time>
+                  <p>
+                    Probe · <span class="mono">connection_timeout</span>
+                  </p>
+                </div>
+                <div class="preview-event">
+                  <time>14:12:00</time>
+                  <p>
+                    Host · GPU <span class="mono">UNAVAILABLE</span>
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <div class="protocol-strip">
-        <div class="container protocol-strip__inner">
+      <div class="section section--line" style="padding-block: 0">
+        <div
+          class="row row--between wrap"
+          style="padding: 15px 0; font-family: var(--font-mono); font-size: 9px; color: var(--faint); letter-spacing: 0.04em; text-transform: uppercase"
+        >
           <span>Ed25519 signatures</span>
           <span>RFC 8785 canonical JSON</span>
           <span>SHA-256 digests</span>
@@ -142,86 +185,73 @@
       </div>
 
       <section class="section" id="sources">
-        <div class="container">
-          <div class="section__head">
-            <p class="eyebrow"><span class="eyebrow__dot"></span>Three sources</p>
-            <h2>Separate observations. One correlatable record.</h2>
+        <div class="section__head">
+          <p class="eyebrow"><span class="eyebrow__dot"></span>Three sources</p>
+          <h2>Separate observations. One correlatable record.</h2>
+          <p>
+            Each source has its own key, scope and view of the incident. None of
+            them is treated as a complete account on its own.
+          </p>
+        </div>
+
+        <div class="source-card-grid">
+          <article class="source-feature">
+            <span class="source-feature__icon"
+              ><span class="icon icon-server"></span
+            ></span>
+            <h3>Provider host</h3>
             <p>
-              Each source has its own key, its own scope and its own view of the
-              incident. None of them is treated as a complete account on its
-              own.
+              An unprivileged Linux agent records host heartbeats, GPU telemetry
+              availability, UPS transitions and agent status with fixed
+              collectors.
             </p>
-          </div>
+            <ul>
+              <li>Bounded, typed event payloads</li>
+              <li>Durable local spool and retry</li>
+              <li>No remote shell or arbitrary commands</li>
+            </ul>
+            <p class="source-feature__foot">HOST-SIGNED · ED25519</p>
+          </article>
 
-          <div class="source-grid">
-            <article class="source-card">
-              <div class="source-card__top">
-                <span class="source source--host">Host agent</span>
-                <span class="mono-label">Provider</span>
-              </div>
-              <h3>Provider host</h3>
-              <p>
-                An unprivileged Linux agent records host heartbeats, GPU
-                telemetry availability, UPS state transitions and agent status
-                using fixed collectors.
-              </p>
-              <ul class="source-card__list">
-                <li>Bounded, typed event payloads</li>
-                <li>Durable local spool with retry</li>
-                <li>No remote shell or arbitrary commands</li>
-              </ul>
-              <p class="source-card__foot">
-                HOST-SIGNED · ED25519 · INCIDENT-SCOPED
-              </p>
-            </article>
+          <article class="source-feature">
+            <span class="source-feature__icon"
+              ><span class="icon icon-activity"></span
+            ></span>
+            <h3>Renter workload client</h3>
+            <p>
+              An incident-scoped SDK runs in the renter's workload and records
+              workload heartbeats plus endpoint reachability results.
+            </p>
+            <ul>
+              <li>One-use invitation enrollment</li>
+              <li>Incident-scoped signing key</li>
+              <li>Explicit unreachable and gap states</li>
+            </ul>
+            <p class="source-feature__foot">RENTER-SIGNED · SCOPED KEY</p>
+          </article>
 
-            <article class="source-card">
-              <div class="source-card__top">
-                <span class="source source--renter">Renter client</span>
-                <span class="mono-label">Renter</span>
-              </div>
-              <h3>Workload client</h3>
-              <p>
-                An incident-scoped TypeScript SDK runs in the renter's workload
-                and records workload heartbeats plus endpoint reachability
-                results.
-              </p>
-              <ul class="source-card__list">
-                <li>One-use invitation enrollment</li>
-                <li>Incident-scoped signing key</li>
-                <li>Explicit unreachable and gap states</li>
-              </ul>
-              <p class="source-card__foot">
-                RENTER-SIGNED · INCIDENT-SCOPED
-              </p>
-            </article>
-
-            <article class="source-card">
-              <div class="source-card__top">
-                <span class="source source--probe">Platform probe</span>
-                <span class="mono-label">Platform</span>
-              </div>
-              <h3>Platform-operated probe</h3>
-              <p>
-                A separate background worker checks the provider's verified
-                public endpoint using a fixed HTTPS GET. It is operated by the
-                platform, not an independent third party.
-              </p>
-              <ul class="source-card__list">
-                <li>DNS-verified public hostname only</li>
-                <li>Pinned address, no redirects or proxies</li>
-                <li>Bounded result categories and latency</li>
-              </ul>
-              <p class="source-card__foot">
-                PLATFORM-OPERATED · NOT INDEPENDENT
-              </p>
-            </article>
-          </div>
+          <article class="source-feature">
+            <span class="source-feature__icon"
+              ><span class="icon icon-shield"></span
+            ></span>
+            <h3>Platform-operated probe</h3>
+            <p>
+              A separate worker checks the verified public endpoint with a fixed
+              HTTPS GET. It is platform-operated, not an independent third
+              party.
+            </p>
+            <ul>
+              <li>DNS-verified public hostname only</li>
+              <li>Pinned address, no redirects or proxies</li>
+              <li>Bounded result categories and latency</li>
+            </ul>
+            <p class="source-feature__foot">PLATFORM-OPERATED · NOT INDEPENDENT</p>
+          </article>
         </div>
       </section>
 
-      <section class="section section--tinted" id="verification">
-        <div class="container split">
+      <section class="section section--line" id="verification">
+        <div class="split">
           <div>
             <p class="eyebrow">
               <span class="eyebrow__dot"></span>Offline verification
@@ -229,47 +259,55 @@
             <h2>Check the bundle without trusting the server.</h2>
             <p>
               A sealed bundle contains the manifest, source certificates and
-              signed observations. The local verifier recomputes the digests and
+              signed observations. The local verifier recomputes digests and
               checks every signature in the browser.
             </p>
-            <ul class="bullet-list">
+            <ul class="check-list">
               <li>
-                <span class="check-mark check-mark--ok" aria-hidden="true">✓</span>
+                <span class="check-icon" aria-hidden="true"
+                  ><span class="icon icon-check"></span
+                ></span>
                 Canonical manifest digest and platform signature
               </li>
               <li>
-                <span class="check-mark check-mark--ok" aria-hidden="true">✓</span>
+                <span class="check-icon" aria-hidden="true"
+                  ><span class="icon icon-check"></span
+                ></span>
                 Source certificates, key scope and event signatures
               </li>
               <li>
-                <span class="check-mark check-mark--ok" aria-hidden="true">✓</span>
-                Deterministic event order, sequence and capture-window bounds
+                <span class="check-icon" aria-hidden="true"
+                  ><span class="icon icon-check"></span
+                ></span>
+                Deterministic order, sequence and capture-window bounds
               </li>
               <li>
-                <span class="check-mark check-mark--ok" aria-hidden="true">✓</span>
+                <span class="check-icon" aria-hidden="true"
+                  ><span class="icon icon-check"></span
+                ></span>
                 Explicit simulation labels and evidence gaps
               </li>
             </ul>
           </div>
 
-          <div class="verify-preview" aria-label="Illustrative verification result">
-            <div class="verify-preview__head">
-              <span class="mono-label">Local verifier</span>
-              <span class="local-badge">Runs in browser</span>
+          <div class="verify-preview">
+            <div class="row row--between">
+              <span class="label">Local verifier</span>
+              <span class="chip chip--ok">Runs in browser</span>
             </div>
-            <div class="verify-preview__file" style="margin-top: 14px">
-              <span class="file-glyph" aria-hidden="true">JSON</span>
-              <div>
-                <strong class="mono" style="font-size: 10.5px"
-                  >iw-8f2a-sealed.bundle.json</strong
-                >
-                <p class="micro faint" style="margin-top: 2px">
-                  2.1 MiB · selected locally
-                </p>
+            <div class="file-row" style="margin-top: 12px">
+              <span class="file-glyph" aria-hidden="true"
+                ><span class="icon icon-file"></span
+              ></span>
+              <div class="file-row__meta">
+                <strong>iw-8f2a-sealed.bundle.json</strong>
+                <span>2.1 MiB · selected locally</span>
               </div>
             </div>
-            <div class="verify-preview__result">
-              <span class="result-banner__mark" aria-hidden="true">✓</span>
+            <div class="result-banner">
+              <span class="result-banner__mark" aria-hidden="true"
+                ><span class="icon icon-check"></span
+              ></span>
               <div>
                 <h3>Bundle verified</h3>
                 <p>All required checks passed. No file was uploaded.</p>
@@ -292,7 +330,7 @@
                 <span>Deterministic order</span><span>PASS</span>
               </div>
             </div>
-            <p class="micro faint" style="margin-top: 12px; line-height: 1.55">
+            <p class="micro faint" style="margin-top: 10px; line-height: 1.55">
               Signature verification confirms integrity and provenance from a
               key. It does not prove sensor truth or root cause.
             </p>
@@ -300,84 +338,67 @@
         </div>
       </section>
 
-      <section class="section">
-        <div class="container">
-          <div class="limits-panel">
-            <p class="eyebrow">
-              <span class="eyebrow__dot"></span>What the evidence can and cannot do
-            </p>
-            <h2 style="margin-top: 12px; font-size: 28px; letter-spacing: -0.035em">
-              Useful for reconstructing a timeline. Not an outage verdict.
-            </h2>
-            <div class="limits-panel__grid">
-              <div>
-                <h3>It can help support</h3>
-                <p>
-                  A source-attributed sequence of observations, a deterministic
-                  evidence pattern and tamper detection against the sealed
-                  bundle.
-                </p>
-              </div>
-              <div>
-                <h3>It cannot establish</h3>
-                <p>
-                  Sensor truth, physical root cause, fault or intent, or whether
-                  a marketplace should excuse downtime or change a reliability
-                  score.
-                </p>
-              </div>
+      <section class="section section--line" id="limits">
+        <div class="limits-panel">
+          <p class="eyebrow">
+            <span class="eyebrow__dot"></span>What the evidence can and cannot do
+          </p>
+          <h2>Useful for reconstructing a timeline. Not an outage verdict.</h2>
+          <div class="limits-grid">
+            <div>
+              <h3>It can help support</h3>
+              <p>
+                A source-attributed sequence of observations, a deterministic
+                evidence pattern and tamper detection against the sealed bundle.
+              </p>
             </div>
-            <p class="limits-panel__note">
-              The platform probe is a platform-operated source, not an
-              independent third party. Missing UPS, GPU, renter or probe
-              observations are represented as gaps or unavailable data — never
-              as normal.
-            </p>
+            <div>
+              <h3>It cannot establish</h3>
+              <p>
+                Sensor truth, physical root cause, fault or intent, or whether a
+                marketplace should excuse downtime or change a reliability
+                score.
+              </p>
+            </div>
           </div>
+          <p class="limits-note">
+            The platform probe is platform-operated, not an independent third
+            party. Missing UPS, GPU, renter or probe observations are represented
+            as gaps or unavailable data — never as normal.
+          </p>
         </div>
       </section>
     </main>
 
-    <footer class="pub-footer" id="login">
-      <div class="container">
-        <div class="pub-footer__top">
-          <div class="pub-footer__brand">
-            <a class="wordmark" href="home-desktop.html">Incident Witness</a>
-            <p>
-              Portable, signature-verifiable incident evidence for
-              decentralized GPU compute. Built for bounded observations and
-              offline review.
-            </p>
-          </div>
-          <div class="pub-footer__col">
-            <h3>Product</h3>
-            <a href="home-desktop.html#sources">Observation sources</a>
-            <a href="home-desktop.html#verification">Verification</a>
-            <a href="verify-desktop.html">Local verifier</a>
-          </div>
-          <div class="pub-footer__col">
-            <h3>Documentation</h3>
-            <a href="../DESIGN_DECISIONS.md">Design decisions</a>
-            <a href="index.html">Phase 6 mockups</a>
-            <a href="https://github.com/onyebuchidaniel60/incident-witness"
-              >GitHub repository</a
-            >
-          </div>
-          <div class="pub-footer__col">
-            <h3>Account</h3>
-            <a href="dashboard-desktop.html">Sign in</a>
-            <a href="home-desktop.html#login">Provider workspace</a>
-            <a href="verify-desktop.html">Verify a bundle</a>
-          </div>
-        </div>
-        <div class="pub-footer__bottom">
+    <footer class="public-footer">
+      <div class="public-footer__top">
+        <div>
+          <a class="brand" href="home-desktop.html">
+            <span class="brand-mark" aria-hidden="true"
+              ><span class="icon icon-hash"></span
+            ></span>
+            Incident Witness
+          </a>
           <p>
-            © 2026 Incident Witness · Evidence records are signed observations,
-            not proof of cause. This page is a static Phase 6 mockup using
-            illustrative data.
+            Portable, signature-verifiable incident evidence for decentralized
+            GPU compute.
           </p>
-          <p class="mono">STATIC MOCKUP · NOT PRODUCTION</p>
         </div>
+        <div class="public-footer__links">
+          <a href="index.html">Mockup index</a>
+          <a href="verify-desktop.html">Local verifier</a>
+          <a href="../DESIGN_DECISIONS.md">Design record</a>
+          <a href="https://github.com/onyebuchidaniel60/incident-witness"
+            >GitHub</a
+          >
+        </div>
+      </div>
+      <div class="public-footer__bottom">
+        <p>
+          © 2026 Incident Witness · Evidence records are signed observations, not
+          proof of cause.
+        </p>
+        <p class="mono">STATIC MOCKUP · NOT PRODUCTION</p>
       </div>
     </footer>
   </body>

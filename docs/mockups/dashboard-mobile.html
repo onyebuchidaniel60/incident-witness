@@ -6,191 +6,197 @@
     <title>Incident Witness — Mobile dashboard mockup</title>
     <link rel="stylesheet" href="assets/mockup.css" />
   </head>
-  <body class="theme-workspace mobile-page">
+  <body>
     <p class="device-label">Mobile · 390 px · dashboard</p>
-    <div class="device">
-      <div class="prototype-bar">
-        <strong>Static mockup</strong> · Phase 6 · illustrative data
+    <div class="mobile-stage" style="padding-top: 0">
+      <div class="mobile-frame">
+        <div class="prototype-bar">
+          <strong>Static mockup</strong> · reference-driven · illustrative data
+        </div>
+
+        <header class="m-topbar">
+          <a class="brand" href="dashboard-mobile.html">
+            <span class="brand-mark" aria-hidden="true"
+              ><span class="icon icon-hash"></span
+            ></span>
+            Incident Witness
+          </a>
+          <details class="m-menu">
+            <summary aria-label="Open workspace navigation">
+              <span class="icon icon-menu"></span>
+            </summary>
+            <nav class="m-menu__panel" aria-label="Workspace navigation">
+              <a href="dashboard-mobile.html" aria-current="page"
+                ><span class="icon icon-grid"></span>Dashboard</a
+              >
+              <a href="incident-mobile.html"
+                ><span class="icon icon-activity"></span>Sessions</a
+              >
+              <a href="incident-mobile.html"
+                ><span class="icon icon-server"></span>Hosts</a
+              >
+              <a href="verify-mobile.html"
+                ><span class="icon icon-shield"></span>Verify</a
+              >
+            </nav>
+          </details>
+        </header>
+
+        <main class="m-content" id="main">
+          <div class="row row--between wrap" style="align-items: flex-start">
+            <div>
+              <p class="eyebrow"><span class="eyebrow__dot"></span>Provider workspace</p>
+              <h1 class="m-title" style="margin-top: 7px">Dashboard</h1>
+              <p class="m-sub">Staging data · one active capture</p>
+            </div>
+            <span class="chip chip--live"
+              ><span class="dot dot--blue"></span>1 live</span
+            >
+          </div>
+
+          <div class="m-stat-grid">
+            <div class="m-stat">
+              <span>Active sessions</span><strong>1</strong>
+            </div>
+            <div class="m-stat">
+              <span>Hosts online</span><strong>2<span class="faint">/3</span></strong>
+            </div>
+            <div class="m-stat">
+              <span>Sealed records</span><strong>12</strong>
+            </div>
+            <div class="m-stat">
+              <span>Open gaps</span><strong>1</strong>
+            </div>
+          </div>
+
+          <div class="notice notice--warn" style="margin-top: 10px">
+            <span class="icon icon-alert"></span>
+            <span>
+              <strong>Host source is stale.</strong> No signed heartbeat since
+              14:07:31. The gap is not normalized.
+            </span>
+          </div>
+
+          <section class="m-card" style="margin-top: 10px" aria-labelledby="m-active">
+            <div class="m-card__head">
+              <div>
+                <p class="label">IW-8F2A · DB-01</p>
+                <h2 class="m-title" id="m-active" style="font-size: 17px; margin-top: 4px">
+                  Power interruption
+                </h2>
+                <p class="m-sub" style="font-size: 9px">
+                  14:02–14:32 UTC · 18 min left
+                </p>
+              </div>
+              <span class="chip chip--live"
+                ><span class="dot dot--blue"></span>Collecting</span
+              >
+            </div>
+
+            <div class="m-source-list">
+              <div class="m-source">
+                <span class="m-source__name"
+                  ><span class="dot dot--yellow"></span>Host agent</span
+                >
+                <span class="chip chip--warn">Gap</span>
+              </div>
+              <div class="m-source">
+                <span class="m-source__name"
+                  ><span class="dot dot--green"></span>Renter client</span
+                >
+                <span class="chip chip--ok">Online</span>
+              </div>
+              <div class="m-source">
+                <span class="m-source__name"
+                  ><span class="dot dot--green"></span>Platform probe</span
+                >
+                <span class="chip chip--ok">Online</span>
+              </div>
+            </div>
+
+            <div class="session-progress" style="margin-top: 11px">
+              <div class="session-progress__labels">
+                <span>Capture window</span><span class="mono">40%</span>
+              </div>
+              <div class="meter"><span style="width: 40%"></span></div>
+            </div>
+
+            <div class="m-actions" style="margin-top: 11px">
+              <a class="btn btn--primary btn--block" href="incident-mobile.html"
+                >Open timeline</a
+              >
+              <a class="btn btn--secondary btn--block" href="incident-mobile.html"
+                >Copy renter invitation</a
+              >
+            </div>
+          </section>
+
+          <section class="m-card" aria-labelledby="m-hosts">
+            <div class="m-card__head">
+              <h2 id="m-hosts">Hosts</h2>
+              <span class="chip chip--plain">3</span>
+            </div>
+            <div class="m-list">
+              <div class="m-row">
+                <div>
+                  <p class="m-row__title">db-01</p>
+                  <p class="m-row__meta">gpu-01.example.net · host gap</p>
+                </div>
+                <span class="chip chip--ok">Online</span>
+              </div>
+              <div class="m-row">
+                <div>
+                  <p class="m-row__title">db-02</p>
+                  <p class="m-row__meta">gpu-02.example.net · GPU unavailable</p>
+                </div>
+                <span class="chip chip--ok">Online</span>
+              </div>
+              <div class="m-row">
+                <div>
+                  <p class="m-row__title">db-03</p>
+                  <p class="m-row__meta">gpu-03.example.net · no observation</p>
+                </div>
+                <span class="chip chip--plain">Unknown</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="m-card" aria-labelledby="m-recent">
+            <div class="m-card__head">
+              <h2 id="m-recent">Recent sealed records</h2>
+              <span class="chip chip--plain">12</span>
+            </div>
+            <div class="m-list">
+              <div class="m-row">
+                <div>
+                  <p class="m-row__title">Power interruption · db-01</p>
+                  <p class="m-row__meta">POWER_RELATED · MEDIUM</p>
+                </div>
+                <span class="chip chip--plain">Medium</span>
+              </div>
+              <div class="m-row">
+                <div>
+                  <p class="m-row__title">Reachability loss · db-04</p>
+                  <p class="m-row__meta">UNKNOWN · INSUFFICIENT</p>
+                </div>
+                <span class="chip chip--plain">Unknown</span>
+              </div>
+              <div class="m-row">
+                <div>
+                  <p class="m-row__title">Workload exit · db-02</p>
+                  <p class="m-row__meta">SIMULATED · LOW</p>
+                </div>
+                <span class="chip chip--warn">Demo</span>
+              </div>
+            </div>
+          </section>
+
+          <p class="micro faint" style="margin-top: 11px; line-height: 1.55">
+            Illustrative staging data. Operational presence is separate from
+            incident evidence.
+          </p>
+        </main>
       </div>
-
-      <header class="m-header">
-        <a class="wordmark" href="dashboard-mobile.html">Incident Witness</a>
-        <details class="m-menu">
-          <summary aria-label="Open workspace navigation">
-            <span class="m-menu__glyph" aria-hidden="true"></span>
-          </summary>
-          <nav class="m-menu__panel" aria-label="Workspace navigation">
-            <a href="dashboard-mobile.html" aria-current="page">Dashboard</a>
-            <a href="host-setup-mobile.html">Hosts</a>
-            <a href="incident-mobile.html">Sessions</a>
-            <a href="verify-mobile.html">Verify</a>
-            <a href="../DESIGN_DECISIONS.md">Documentation</a>
-          </nav>
-        </details>
-      </header>
-
-      <main class="m-content" id="main">
-        <div class="m-page-head">
-          <div class="row row--between" style="align-items: flex-start">
-            <div>
-              <h1>Dashboard</h1>
-              <p>Staging data · one active capture</p>
-            </div>
-            <span class="status status--warn">1 active</span>
-          </div>
-        </div>
-
-        <div class="m-stat-grid">
-          <div class="m-stat">
-            <span>Active sessions</span>
-            <strong>1</strong>
-          </div>
-          <div class="m-stat">
-            <span>Hosts online</span>
-            <strong>2<span class="faint">/3</span></strong>
-          </div>
-          <div class="m-stat">
-            <span>Sealed records</span>
-            <strong>12</strong>
-          </div>
-          <div class="m-stat">
-            <span>Open gaps</span>
-            <strong>1</strong>
-          </div>
-        </div>
-
-        <div class="notice notice--warn" style="margin-bottom: 10px">
-          <span class="notice__mark" aria-hidden="true">!</span>
-          <span>
-            <strong>GPU telemetry unavailable</strong> on db-02. Missing data
-            remains a gap, not a normal result.
-          </span>
-        </div>
-
-        <section class="m-card" aria-labelledby="m-active-title">
-          <div class="m-card__head">
-            <div>
-              <span class="mono-label">IW-8F2A · db-01</span>
-              <h2 class="m-session-title" id="m-active-title">
-                Power interruption
-              </h2>
-              <p class="m-session-meta">14:02–14:32 UTC · 18 min left</p>
-            </div>
-            <span class="status status--warn">Collecting</span>
-          </div>
-
-          <div class="m-source-strip">
-            <div class="m-source-line">
-              <span class="m-source-line__name">
-                <span class="dot dot--warn"></span>Host agent
-              </span>
-              <span class="status status--warn">Gap</span>
-            </div>
-            <div class="m-source-line">
-              <span class="m-source-line__name">
-                <span class="dot dot--ok"></span>Renter client
-              </span>
-              <span class="status status--ok">Online</span>
-            </div>
-            <div class="m-source-line">
-              <span class="m-source-line__name">
-                <span class="dot dot--ok"></span>Platform probe
-              </span>
-              <span class="status status--ok">Online</span>
-            </div>
-          </div>
-
-          <div class="session-progress" style="margin-top: 12px">
-            <div class="session-progress__labels">
-              <span>Capture window</span><span>40%</span>
-            </div>
-            <div class="meter"><span style="width: 40%"></span></div>
-          </div>
-
-          <div class="m-actions" style="margin-top: 12px">
-            <a class="btn btn--primary btn--block" href="incident-mobile.html"
-              >Open timeline</a
-            >
-            <a
-              class="btn btn--secondary btn--block"
-              href="incident-mobile.html"
-              >Copy renter invitation</a
-            >
-          </div>
-        </section>
-
-        <section class="m-card" style="margin-top: 10px" aria-labelledby="m-hosts-title">
-          <div class="m-card__head">
-            <h2 id="m-hosts-title">Hosts</h2>
-            <a href="host-setup-mobile.html">View all</a>
-          </div>
-          <div class="m-data-list">
-            <div class="m-data-row">
-              <div class="m-data-row__top">
-                <div>
-                  <p class="m-data-row__title">db-01</p>
-                  <p class="m-data-row__meta">gpu-01.example.net</p>
-                </div>
-                <span class="status status--ok">Online</span>
-              </div>
-              <p class="m-data-row__meta">host gap · last 14:07:29</p>
-            </div>
-            <div class="m-data-row">
-              <div class="m-data-row__top">
-                <div>
-                  <p class="m-data-row__title">db-02</p>
-                  <p class="m-data-row__meta">gpu-02.example.net</p>
-                </div>
-                <span class="status status--ok">Online</span>
-              </div>
-              <p class="m-data-row__meta">GPU unavailable · last 14:13:42</p>
-            </div>
-            <div class="m-data-row">
-              <div class="m-data-row__top">
-                <div>
-                  <p class="m-data-row__title">db-03</p>
-                  <p class="m-data-row__meta">gpu-03.example.net</p>
-                </div>
-                <span class="status">Unknown</span>
-              </div>
-              <p class="m-data-row__meta">no observation</p>
-            </div>
-          </div>
-        </section>
-
-        <section class="m-card" style="margin-top: 10px" aria-labelledby="m-recent-title">
-          <div class="m-card__head">
-            <h2 id="m-recent-title">Recent sealed records</h2>
-            <a href="incident-sealed-mobile.html">View</a>
-          </div>
-          <div class="m-record">
-            <div>
-              <p class="m-record__title">Power interruption · db-01</p>
-              <p class="m-record__meta">POWER_RELATED · MEDIUM</p>
-            </div>
-            <span class="status status--accent">Medium</span>
-          </div>
-          <div class="m-record">
-            <div>
-              <p class="m-record__title">Reachability loss · db-04</p>
-              <p class="m-record__meta">UNKNOWN · INSUFFICIENT</p>
-            </div>
-            <span class="status">Unknown</span>
-          </div>
-          <div class="m-record">
-            <div>
-              <p class="m-record__title">Workload exit · db-02</p>
-              <p class="m-record__meta">SIMULATED · LOW</p>
-            </div>
-            <span class="status status--warn">Demo</span>
-          </div>
-        </section>
-
-        <p class="micro faint" style="margin-top: 12px">
-          Illustrative staging data. UNKNOWN is a valid outcome when evidence is
-          insufficient.
-        </p>
-      </main>
     </div>
   </body>
 </html>

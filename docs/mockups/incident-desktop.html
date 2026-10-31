@@ -6,128 +6,237 @@
     <title>Incident Witness — Incident timeline mockup</title>
     <link rel="stylesheet" href="assets/mockup.css" />
   </head>
-  <body class="theme-workspace">
+  <body>
     <div class="prototype-bar">
-      <strong>Static design mockup</strong> · Phase 6 · illustrative data · not
-      production UI
+      <strong>Static design mockup</strong> · Phase 6 revision · illustrative data
     </div>
 
-    <div class="ws-shell">
-      <aside class="ws-sidebar" aria-label="Workspace sidebar">
-        <div class="ws-brand">
-          <a class="wordmark" href="dashboard-desktop.html">Incident Witness</a>
-          <span class="ws-kicker">Provider workspace</span>
-        </div>
-        <nav class="ws-nav" aria-label="Workspace">
-          <span class="ws-nav__label">Workspace</span>
-          <a href="dashboard-desktop.html">
-            Dashboard <span class="ws-nav__count">1</span>
+    <div class="app-stage">
+      <div class="app-frame">
+        <aside class="rail" aria-label="Workspace navigation">
+          <a class="brand-mark" href="dashboard-desktop.html" aria-label="Incident Witness dashboard">
+            <span class="icon icon-hash"></span>
           </a>
-          <a href="host-setup-desktop.html">Hosts</a>
-          <a href="incident-desktop.html" aria-current="page">Sessions</a>
-          <a href="verify-desktop.html">Verify</a>
-        </nav>
-        <nav class="ws-nav" aria-label="Resources">
-          <span class="ws-nav__label">Resources</span>
-          <a href="../DESIGN_DECISIONS.md">Documentation</a>
-          <a href="../DESIGN_DECISIONS.md">Settings</a>
-        </nav>
-        <div class="ws-sidebar__foot">
-          <span class="env-badge">Staging</span>
-          <div class="ws-user">
-            <span class="avatar" aria-hidden="true">OP</span>
-            <div class="ws-user__meta">
-              <strong>Operator</strong>
-              <span>operator@example.net</span>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      <div class="ws-main">
-        <header class="ws-topbar">
-          <nav class="breadcrumb" aria-label="Breadcrumb">
-            <a href="dashboard-desktop.html">Workspace</a>
-            <span class="breadcrumb__sep" aria-hidden="true">/</span>
-            <a href="dashboard-desktop.html">Sessions</a>
-            <span class="breadcrumb__sep" aria-hidden="true">/</span>
-            <span aria-current="page" class="mono">IW-8F2A</span>
+          <nav class="rail-nav" aria-label="Primary workspace">
+            <a class="rail-link" href="dashboard-desktop.html" aria-label="Dashboard">
+              <span class="icon icon-grid"></span>
+            </a>
+            <a class="rail-link" href="incident-desktop.html" aria-current="page" aria-label="Sessions">
+              <span class="icon icon-activity"></span>
+            </a>
+            <a class="rail-link" href="incident-desktop.html" aria-label="Hosts">
+              <span class="icon icon-server"></span>
+            </a>
+            <a class="rail-link" href="verify-desktop.html" aria-label="Verification">
+              <span class="icon icon-shield"></span>
+            </a>
           </nav>
-          <div class="ws-topbar__right">
-            <span class="ws-clock">Last refreshed 14:14:08 UTC</span>
-            <a class="btn btn--secondary btn--sm" href="dashboard-desktop.html"
-              >All sessions</a
+          <div class="rail-bottom">
+            <a class="rail-link" href="../DESIGN_DECISIONS.md" aria-label="Settings">
+              <span class="icon icon-settings"></span>
+            </a>
+            <span class="avatar" aria-label="Operator account">OP</span>
+          </div>
+        </aside>
+
+        <aside class="list-pane" aria-label="Session list">
+          <div class="pane-head">
+            <div>
+              <h2 style="font-size: 22px; letter-spacing: -0.04em">Sessions</h2>
+              <p>16 total · 1 collecting</p>
+            </div>
+            <span class="chip chip--live"
+              ><span class="dot dot--blue"></span>Live</span
             >
           </div>
-        </header>
 
-        <main class="ws-content" id="main">
-          <section class="incident-head" aria-labelledby="incident-title">
-            <div class="incident-head__top">
-              <div>
-                <div class="host-title">
-                  <span class="mono-label">IW-8F2A</span>
-                  <span class="status status--warn">Collecting</span>
-                  <span class="status status--plain">Live session</span>
-                </div>
-                <h1 id="incident-title">Power interruption on db-01</h1>
-                <div class="incident-head__meta">
-                  <span><i class="dot"></i>host_01J8F2A · db-01</span>
-                  <span><i class="dot"></i>created 14:01:52 UTC</span>
-                  <span><i class="dot"></i>rule version iw-rules-v1 at seal</span>
-                </div>
-              </div>
-              <div class="page-actions">
-                <button class="btn btn--secondary btn--sm" type="button">
-                  Copy renter invite
-                </button>
-                <button class="btn btn--danger btn--sm" type="button">
-                  End session
-                </button>
-                <button class="btn btn--primary btn--sm" type="button" disabled>
-                  Seal bundle
-                </button>
-              </div>
+          <div class="search-row">
+            <div class="search-box">
+              <span class="icon icon-search" aria-hidden="true"></span>
+              <input type="search" placeholder="Search sessions" aria-label="Search sessions" />
             </div>
+            <button class="btn btn--primary btn--sm" type="button">
+              <span class="icon icon-plus"></span>New
+            </button>
+          </div>
 
-            <div class="incident-head__body">
-              <div class="capture-window">
-                <span>Capture window</span>
-                <span class="mono">14:02:00 → 14:32:00 UTC</span>
-                <span>·</span>
-                <span class="mono">18 min remaining</span>
+          <div class="list-cards">
+            <a class="list-card is-selected" href="incident-desktop.html" aria-current="page">
+              <div class="list-card__meta">
+                <span class="icon icon-clock"></span>Live · 14:02–14:32 UTC
               </div>
-              <p class="micro faint">
-                Seal becomes available when capture ends or the provider ends
-                the session.
-              </p>
-            </div>
-          </section>
+              <h3>Power interruption on db-01</h3>
+              <div class="list-card__foot">
+                <div class="avatar-stack">
+                  <span class="avatar">HA</span>
+                  <span class="avatar avatar--blue">RC</span>
+                  <span class="avatar avatar--violet">PP</span>
+                </div>
+                <div class="list-card__ids">
+                  <span class="icon icon-hash"></span>IW-8F2A
+                </div>
+                <span class="severity severity--critical" aria-label="Critical severity">
+                  <i></i><i></i><i></i>
+                </span>
+              </div>
+            </a>
 
-          <div class="notice notice--warn" role="status" style="margin-bottom: 12px">
-            <span class="notice__mark" aria-hidden="true">!</span>
+            <a class="list-card" href="incident-desktop.html">
+              <div class="list-card__meta">
+                <span class="icon icon-clock"></span>Sealed · 13:48 UTC
+              </div>
+              <h3>Reachability loss on db-04</h3>
+              <div class="list-card__foot">
+                <div class="avatar-stack">
+                  <span class="avatar">HA</span>
+                  <span class="avatar avatar--violet">PP</span>
+                </div>
+                <div class="list-card__ids">
+                  <span class="icon icon-hash"></span>IW-7C1D
+                </div>
+                <span class="severity severity--medium" aria-label="Insufficient evidence">
+                  <i></i><i></i><i></i>
+                </span>
+              </div>
+            </a>
+
+            <a class="list-card" href="incident-desktop.html">
+              <div class="list-card__meta">
+                <span class="icon icon-clock"></span>Demo · 11:21 UTC
+              </div>
+              <h3>Workload exit on db-02</h3>
+              <div class="list-card__foot">
+                <div class="avatar-stack">
+                  <span class="avatar">HA</span>
+                  <span class="avatar avatar--blue">RC</span>
+                </div>
+                <div class="list-card__ids">
+                  <span class="icon icon-hash"></span>IW-6B9E
+                </div>
+                <span class="severity severity--high" aria-label="Simulation capped at low">
+                  <i></i><i></i><i></i>
+                </span>
+              </div>
+            </a>
+
+            <a class="list-card" href="incident-desktop.html">
+              <div class="list-card__meta">
+                <span class="icon icon-clock"></span>Sealed · 30 Oct 18:05 UTC
+              </div>
+              <h3>Power event on db-03</h3>
+              <div class="list-card__foot">
+                <div class="avatar-stack">
+                  <span class="avatar">HA</span>
+                  <span class="avatar avatar--blue">RC</span>
+                  <span class="avatar avatar--violet">PP</span>
+                </div>
+                <div class="list-card__ids">
+                  <span class="icon icon-hash"></span>IW-5A2F
+                </div>
+                <span class="severity severity--medium" aria-label="Medium grade">
+                  <i></i><i></i><i></i>
+                </span>
+              </div>
+            </a>
+          </div>
+
+          <div style="margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border)">
+            <div class="row row--between">
+              <span class="label">Staging workspace</span>
+              <span class="chip chip--plain">v0.2</span>
+            </div>
+          </div>
+        </aside>
+
+        <main class="detail-pane" id="main">
+          <div class="detail-topbar">
+            <nav class="breadcrumb" aria-label="Breadcrumb">
+              <a href="dashboard-desktop.html">Workspace</a>
+              <span class="breadcrumb__sep">/</span>
+              <a href="incident-desktop.html">Sessions</a>
+              <span class="breadcrumb__sep">/</span>
+              <span class="mono">IW-8F2A</span>
+            </nav>
+            <div class="detail-actions">
+              <button class="btn btn--secondary btn--sm" type="button">
+                <span class="icon icon-copy"></span>Copy invite
+              </button>
+              <button class="btn btn--danger btn--sm" type="button">End session</button>
+              <button class="btn btn--primary btn--sm" type="button" disabled>
+                Seal bundle
+              </button>
+            </div>
+          </div>
+
+          <div class="row wrap">
+            <span class="chip chip--live"><span class="dot dot--blue"></span>Collecting</span>
+            <span class="chip chip--plain">Live session</span>
+            <span class="chip chip--plain"><span class="icon icon-clock"></span>18 min remaining</span>
+          </div>
+          <h1 class="detail-title">Power interruption on db-01</h1>
+          <p class="detail-sub">
+            Bounded capture · 14:02:00–14:32:00 UTC · db-01
+          </p>
+          <div class="meta-line">
+            <span><span class="icon icon-hash"></span>IW-8F2A</span>
+            <span><span class="icon icon-server"></span>host_01J8F2A</span>
+            <span><span class="icon icon-shield"></span>iw-rules-v1 at seal</span>
+            <span><span class="icon icon-clock"></span>created 14:01:52 UTC</span>
+          </div>
+
+          <div class="notice notice--warn" style="margin-top: 14px" role="status">
+            <span class="icon icon-alert"></span>
             <span>
               <strong>Host observations are stale.</strong> No signed host
               heartbeat since <span class="mono">14:07:31 UTC</span>. The gap is
-              preserved; it is not treated as a normal host state.
+              preserved in the evidence, not treated as a normal host state.
             </span>
           </div>
 
-          <div class="incident-grid">
-            <section class="card timeline-card" aria-labelledby="timeline-title">
-              <div class="card__head">
+          <div class="source-grid">
+            <div class="source-card">
+              <div class="source-card__top">
+                <span class="source-card__name"
+                  ><span class="dot dot--yellow"></span>Host agent</span
+                >
+                <span class="chip chip--warn">Stale</span>
+              </div>
+              <p class="source-card__meta">last 14:07:31 · seq 0044</p>
+              <p class="source-card__note">No heartbeat for 6m 37s · key active</p>
+            </div>
+            <div class="source-card">
+              <div class="source-card__top">
+                <span class="source-card__name"
+                  ><span class="dot dot--blue"></span>Renter client</span
+                >
+                <span class="chip chip--live">Online</span>
+              </div>
+              <p class="source-card__meta">last 14:13:56 · seq 0027</p>
+              <p class="source-card__note">Endpoint reachable · incident-scoped key</p>
+            </div>
+            <div class="source-card">
+              <div class="source-card__top">
+                <span class="source-card__name"
+                  ><span class="dot dot--green"></span>Platform probe</span
+                >
+                <span class="chip chip--ok">Online</span>
+              </div>
+              <p class="source-card__meta">last 14:14:00 · seq 0121</p>
+              <p class="source-card__note">Platform-operated, not independent</p>
+            </div>
+          </div>
+
+          <div class="incident-layout">
+            <section class="panel timeline-card" aria-labelledby="timeline-title">
+              <div class="panel__head">
                 <div>
                   <h2 id="timeline-title">Evidence timeline</h2>
-                  <p class="card__sub">
-                    128 accepted events · deterministic order · latest 50
-                  </p>
+                  <p class="panel__sub">128 accepted events · latest 50 · deterministic order</p>
                 </div>
-                <div class="timeline-tools">
-                  <div class="legend" aria-label="Source legend">
-                    <span class="legend-host"><i></i>Host agent</span>
-                    <span class="legend-renter"><i></i>Renter client</span>
-                    <span class="legend-probe"><i></i>Platform probe</span>
-                  </div>
+                <div class="row wrap" style="gap: 5px">
+                  <span class="chip chip--ok"><span class="dot dot--green"></span>Host</span>
+                  <span class="chip chip--live"><span class="dot dot--blue"></span>Renter</span>
+                  <span class="chip chip--plain"><span class="dot dot--cyan"></span>Probe</span>
                 </div>
               </div>
 
@@ -138,17 +247,15 @@
                   <time datetime="2026-10-31T14:02:04Z">14:02:04</time>
                   <div class="event__main">
                     <div class="event__top">
-                      <span class="source source--host">Host agent</span>
+                      <span class="chip chip--ok">Host</span>
                       <span class="event__type">host_agent_status</span>
-                      <span class="status status--ok">Started</span>
+                      <span class="chip chip--plain">Started</span>
                     </div>
                     <p class="event__summary">
-                      Agent started · <span class="mono">agent 0.4.1</span> ·
-                      <span class="mono">Linux 6.8.0 x86_64</span>
+                      Agent <span class="mono">0.4.1</span> started on
+                      <span class="mono">Linux 6.8.0 x86_64</span>.
                     </p>
-                    <p class="event__meta">
-                      source key hk_01J8F2A · observed 14:02:04.218 UTC
-                    </p>
+                    <p class="event__meta">source key hk_01J8F2A · observed 14:02:04.218</p>
                   </div>
                   <span class="event__seq">seq 0041</span>
                 </article>
@@ -157,18 +264,16 @@
                   <time datetime="2026-10-31T14:02:06Z">14:02:06</time>
                   <div class="event__main">
                     <div class="event__top">
-                      <span class="source source--probe">Platform probe</span>
+                      <span class="chip chip--plain"><span class="dot dot--cyan"></span>Probe</span>
                       <span class="event__type">platform_probe_result</span>
-                      <span class="status status--ok">Reachable</span>
+                      <span class="chip chip--ok">Reachable</span>
                     </div>
                     <p class="event__summary">
                       Fixed HTTPS GET · <span class="mono">200</span> ·
                       <span class="mono">84 ms</span> · IP class
-                      <span class="mono">public</span>
+                      <span class="mono">public</span>.
                     </p>
-                    <p class="event__meta">
-                      platform-operated source · observed 14:02:06.902 UTC
-                    </p>
+                    <p class="event__meta">platform-operated source · observed 14:02:06.902</p>
                   </div>
                   <span class="event__seq">seq 0118</span>
                 </article>
@@ -177,17 +282,15 @@
                   <time datetime="2026-10-31T14:02:09Z">14:02:09</time>
                   <div class="event__main">
                     <div class="event__top">
-                      <span class="source source--renter">Renter client</span>
+                      <span class="chip chip--live">Renter</span>
                       <span class="event__type">renter_heartbeat</span>
-                      <span class="status status--ok">Started</span>
+                      <span class="chip chip--plain">Started</span>
                     </div>
                     <p class="event__summary">
-                      Workload client enrolled · incident-scoped key · endpoint
-                      check active
+                      Workload client enrolled with an incident-scoped key;
+                      endpoint check active.
                     </p>
-                    <p class="event__meta">
-                      source key rk_01J8F2B · observed 14:02:09.114 UTC
-                    </p>
+                    <p class="event__meta">source key rk_01J8F2B · observed 14:02:09.114</p>
                   </div>
                   <span class="event__seq">seq 0022</span>
                 </article>
@@ -196,18 +299,16 @@
                   <time datetime="2026-10-31T14:06:00Z">14:06:00</time>
                   <div class="event__main">
                     <div class="event__top">
-                      <span class="source source--host">Host agent</span>
+                      <span class="chip chip--ok">Host</span>
                       <span class="event__type">gpu_telemetry</span>
-                      <span class="status">Unavailable</span>
+                      <span class="chip chip--plain">Unavailable</span>
                     </div>
                     <p class="event__summary">
                       GPU telemetry <span class="mono">UNAVAILABLE</span> ·
                       <span class="mono">nvidia-smi</span> returned no data for
                       device 0. No values were fabricated.
                     </p>
-                    <p class="event__meta">
-                      collection_status unavailable · observed 14:06:00.441 UTC
-                    </p>
+                    <p class="event__meta">collection_status unavailable · observed 14:06:00.441</p>
                   </div>
                   <span class="event__seq">seq 0042</span>
                 </article>
@@ -216,16 +317,16 @@
                   <time datetime="2026-10-31T14:07:30Z">14:07:30</time>
                   <div class="event__main">
                     <div class="event__top">
-                      <span class="source source--host">Host agent</span>
+                      <span class="chip chip--ok">Host</span>
                       <span class="event__type">ups_state</span>
-                      <span class="status status--warn">On battery</span>
+                      <span class="chip chip--warn">On battery</span>
                     </div>
                     <p class="event__summary">
                       UPS transitioned to <span class="mono">on_battery</span> ·
                       charge <span class="mono">98%</span> · runtime
-                      <span class="mono">742 s</span>
+                      <span class="mono">742 s</span>.
                     </p>
-                    <div class="event-detail" aria-label="Event payload detail">
+                    <div class="event-payload" aria-label="Event payload detail">
                       <div>
                         <dt>state</dt>
                         <dd>on_battery</dd>
@@ -239,9 +340,7 @@
                         <dd>742</dd>
                       </div>
                     </div>
-                    <p class="event__meta">
-                      source key hk_01J8F2A · observed 14:07:30.006 UTC
-                    </p>
+                    <p class="event__meta">source key hk_01J8F2A · observed 14:07:30.006</p>
                   </div>
                   <span class="event__seq">seq 0043</span>
                 </article>
@@ -250,24 +349,22 @@
                   <time datetime="2026-10-31T14:07:31Z">14:07:31</time>
                   <div class="event__main">
                     <div class="event__top">
-                      <span class="source source--host">Host agent</span>
+                      <span class="chip chip--ok">Host</span>
                       <span class="event__type">host_heartbeat</span>
-                      <span class="status">Last observation</span>
+                      <span class="chip chip--plain">Last observation</span>
                     </div>
-                    <p class="event__summary">
-                      Last accepted host heartbeat before the gap.
-                    </p>
-                    <p class="event__meta">
-                      source key hk_01J8F2A · observed 14:07:31.092 UTC
-                    </p>
+                    <p class="event__summary">Last accepted host heartbeat before the gap.</p>
+                    <p class="event__meta">source key hk_01J8F2A · observed 14:07:31.092</p>
                   </div>
                   <span class="event__seq">seq 0044</span>
                 </article>
 
                 <div class="event event--gap" role="note">
                   <div class="event__top">
-                    <span class="gap-label">Evidence gap</span>
-                    <span class="status">Host unavailable</span>
+                    <span class="gap-label"
+                      ><span class="icon icon-alert"></span>Evidence gap</span
+                    >
+                    <span class="chip chip--warn">Host unavailable</span>
                   </div>
                   <p class="event__summary">
                     No signed host observation from
@@ -281,17 +378,15 @@
                   <time datetime="2026-10-31T14:07:36Z">14:07:36</time>
                   <div class="event__main">
                     <div class="event__top">
-                      <span class="source source--renter">Renter client</span>
+                      <span class="chip chip--live">Renter</span>
                       <span class="event__type">renter_endpoint_result</span>
-                      <span class="status status--danger">Unreachable</span>
+                      <span class="chip chip--danger">Unreachable</span>
                     </div>
                     <p class="event__summary">
                       Endpoint check <span class="mono">unreachable</span> ·
-                      timeout after <span class="mono">3000 ms</span>
+                      timeout after <span class="mono">3000 ms</span>.
                     </p>
-                    <p class="event__meta">
-                      source key rk_01J8F2B · observed 14:07:36.771 UTC
-                    </p>
+                    <p class="event__meta">source key rk_01J8F2B · observed 14:07:36.771</p>
                   </div>
                   <span class="event__seq">seq 0025</span>
                 </article>
@@ -300,18 +395,17 @@
                   <time datetime="2026-10-31T14:07:42Z">14:07:42</time>
                   <div class="event__main">
                     <div class="event__top">
-                      <span class="source source--probe">Platform probe</span>
+                      <span class="chip chip--plain"><span class="dot dot--cyan"></span>Probe</span>
                       <span class="event__type">platform_probe_result</span>
-                      <span class="status status--danger">Unreachable</span>
+                      <span class="chip chip--danger">Unreachable</span>
                     </div>
                     <p class="event__summary">
-                      Fixed HTTPS GET · <span class="mono">connection_timeout</span>
-                      · <span class="mono">3000 ms</span> · IP class
-                      <span class="mono">public</span>
+                      Fixed HTTPS GET ·
+                      <span class="mono">connection_timeout</span> ·
+                      <span class="mono">3000 ms</span> · IP class
+                      <span class="mono">public</span>.
                     </p>
-                    <p class="event__meta">
-                      platform-operated source · observed 14:07:42.330 UTC
-                    </p>
+                    <p class="event__meta">platform-operated source · observed 14:07:42.330</p>
                   </div>
                   <span class="event__seq">seq 0120</span>
                 </article>
@@ -320,17 +414,15 @@
                   <time datetime="2026-10-31T14:09:18Z">14:09:18</time>
                   <div class="event__main">
                     <div class="event__top">
-                      <span class="source source--renter">Renter client</span>
+                      <span class="chip chip--live">Renter</span>
                       <span class="event__type">renter_heartbeat</span>
-                      <span class="status status--ok">Online</span>
+                      <span class="chip chip--ok">Online</span>
                     </div>
                     <p class="event__summary">
-                      Workload heartbeat resumed. The renter client remained
-                      reachable while the host source was silent.
+                      Workload heartbeat resumed while the host source stayed
+                      silent.
                     </p>
-                    <p class="event__meta">
-                      source key rk_01J8F2B · observed 14:09:18.205 UTC
-                    </p>
+                    <p class="event__meta">source key rk_01J8F2B · observed 14:09:18.205</p>
                   </div>
                   <span class="event__seq">seq 0026</span>
                 </article>
@@ -339,18 +431,16 @@
                   <time datetime="2026-10-31T14:13:56Z">14:13:56</time>
                   <div class="event__main">
                     <div class="event__top">
-                      <span class="source source--renter">Renter client</span>
+                      <span class="chip chip--live">Renter</span>
                       <span class="event__type">renter_endpoint_result</span>
-                      <span class="status status--ok">Reachable</span>
+                      <span class="chip chip--ok">Reachable</span>
                     </div>
                     <p class="event__summary">
-                      Endpoint check recovered · <span class="mono">200</span> ·
-                      <span class="mono">118 ms</span>. Does not establish why the
-                      host stopped reporting.
+                      Endpoint recovered · <span class="mono">200</span> ·
+                      <span class="mono">118 ms</span>. Does not establish why
+                      the host stopped reporting.
                     </p>
-                    <p class="event__meta">
-                      source key rk_01J8F2B · observed 14:13:56.844 UTC
-                    </p>
+                    <p class="event__meta">source key rk_01J8F2B · observed 14:13:56.844</p>
                   </div>
                   <span class="event__seq">seq 0027</span>
                 </article>
@@ -359,18 +449,16 @@
                   <time datetime="2026-10-31T14:14:00Z">14:14:00</time>
                   <div class="event__main">
                     <div class="event__top">
-                      <span class="source source--probe">Platform probe</span>
+                      <span class="chip chip--plain"><span class="dot dot--cyan"></span>Probe</span>
                       <span class="event__type">platform_probe_result</span>
-                      <span class="status status--ok">Reachable</span>
+                      <span class="chip chip--ok">Reachable</span>
                     </div>
                     <p class="event__summary">
                       Fixed HTTPS GET · <span class="mono">200</span> ·
                       <span class="mono">91 ms</span> · IP class
-                      <span class="mono">public</span>
+                      <span class="mono">public</span>.
                     </p>
-                    <p class="event__meta">
-                      platform-operated source · observed 14:14:00.014 UTC
-                    </p>
+                    <p class="event__meta">platform-operated source · observed 14:14:00.014</p>
                   </div>
                   <span class="event__seq">seq 0121</span>
                 </article>
@@ -378,101 +466,43 @@
 
               <div class="timeline-foot">
                 <span>Showing latest 50 of 128 accepted events</span>
-                <span class="mono">order: observed_at → source → key → sequence</span>
+                <span class="mono">observed_at → source → key → sequence</span>
               </div>
             </section>
 
             <aside class="rail-stack" aria-label="Incident detail rail">
-              <section class="card rail-card" aria-labelledby="source-health-title">
-                <div class="card__head">
-                  <div>
-                    <h2 id="source-health-title">Source health</h2>
-                    <p class="card__sub">Last observation by source</p>
-                  </div>
-                  <span class="status status--plain">3 sources</span>
-                </div>
-                <div class="card__body">
-                  <div class="health-detail">
-                    <div class="health-detail__top">
-                      <span class="health-detail__name">
-                        <span class="dot dot--warn"></span>Host agent
-                      </span>
-                      <span class="status status--warn">Stale</span>
-                    </div>
-                    <p class="health-detail__meta">
-                      last 14:07:31 · seq 0044
-                    </p>
-                    <p class="health-detail__note">
-                      No observation for 6m 37s. Key hk_01J8F2A active.
-                    </p>
-                  </div>
-                  <div class="health-detail">
-                    <div class="health-detail__top">
-                      <span class="health-detail__name">
-                        <span class="dot dot--ok"></span>Renter client
-                      </span>
-                      <span class="status status--ok">Online</span>
-                    </div>
-                    <p class="health-detail__meta">
-                      last 14:13:56 · seq 0027
-                    </p>
-                    <p class="health-detail__note">
-                      Endpoint reachable. Key rk_01J8F2B active.
-                    </p>
-                  </div>
-                  <div class="health-detail">
-                    <div class="health-detail__top">
-                      <span class="health-detail__name">
-                        <span class="dot dot--ok"></span>Platform probe
-                      </span>
-                      <span class="status status--ok">Online</span>
-                    </div>
-                    <p class="health-detail__meta">
-                      last 14:14:00 · seq 0121
-                    </p>
-                    <p class="health-detail__note">
-                      Platform-operated source. Not an independent third party.
-                    </p>
-                  </div>
-                </div>
-              </section>
-
-              <section class="card rail-card" aria-labelledby="assessment-title">
-                <div class="card__head">
+              <section class="panel rail-panel" aria-labelledby="assessment-title">
+                <div class="panel__head">
                   <div>
                     <h2 id="assessment-title">Assessment</h2>
-                    <p class="card__sub">Deterministic · versioned</p>
+                    <p class="panel__sub">Deterministic · versioned</p>
                   </div>
-                  <span class="status status--plain">At seal</span>
+                  <span class="chip chip--plain">At seal</span>
                 </div>
-                <div class="card__body">
-                  <div class="assessment-pending">
-                    <p class="assessment-pending__label">Current state</p>
-                    <h3>Pending</h3>
+                <div class="panel__body">
+                  <div class="assessment">
+                    <p class="assessment__label">Current state</p>
+                    <p class="assessment__code">PENDING</p>
+                    <p class="assessment__grade">Rules run after capture ends</p>
                     <p>
-                      Rules run only after capture ends and the bundle is
-                      sealed. No probability score or AI diagnosis is produced.
+                      No probability score or AI diagnosis. UNKNOWN is a valid
+                      outcome when evidence is insufficient or conflicting.
                     </p>
-                    <div class="grade-scale" aria-label="Possible evidence grades">
-                      <span class="grade">HIGH</span>
-                      <span class="grade">MEDIUM</span>
-                      <span class="grade">LOW</span>
-                      <span class="grade">INSUFFICIENT</span>
-                    </div>
                   </div>
-                  <p class="micro faint" style="margin-top: 10px; line-height: 1.55">
-                    <span class="mono">UNKNOWN</span> is a valid outcome when
-                    evidence is insufficient or conflicting. It is not a healthy
-                    result.
-                  </p>
+                  <div class="row wrap" style="margin-top: 10px; gap: 5px">
+                    <span class="chip chip--plain">HIGH</span>
+                    <span class="chip chip--plain">MEDIUM</span>
+                    <span class="chip chip--plain">LOW</span>
+                    <span class="chip chip--plain">INSUFFICIENT</span>
+                  </div>
                 </div>
               </section>
 
-              <section class="card rail-card" aria-labelledby="budget-title">
-                <div class="card__head">
+              <section class="panel rail-panel" aria-labelledby="budget-title">
+                <div class="panel__head">
                   <h2 id="budget-title">Evidence budget</h2>
                 </div>
-                <div class="card__body">
+                <div class="panel__body">
                   <div class="budget">
                     <div class="budget__top">
                       <span>Accepted events</span>
@@ -482,7 +512,7 @@
                   </div>
                   <div class="budget" style="margin-top: 11px">
                     <div class="budget__top">
-                      <span>Canonical event bytes</span>
+                      <span>Canonical bytes</span>
                       <span class="mono">2.1 MiB / 7 MiB</span>
                     </div>
                     <div class="meter"><span style="width: 30%"></span></div>
@@ -494,44 +524,40 @@
                 </div>
               </section>
 
-              <section class="card rail-card" aria-labelledby="invite-title">
-                <div class="card__head">
+              <section class="panel rail-panel" aria-labelledby="invite-title">
+                <div class="panel__head">
                   <div>
                     <h2 id="invite-title">Renter invitation</h2>
-                    <p class="card__sub">Single use · incident-scoped</p>
+                    <p class="panel__sub">Single use · 15 minutes</p>
                   </div>
-                  <span class="status status--ok">Active</span>
+                  <span class="chip chip--ok">Active</span>
                 </div>
-                <div class="card__body">
+                <div class="panel__body">
                   <div class="invite-box">
                     <div class="invite-box__line">
                       <span class="micro muted">Invitation link</span>
                       <button class="btn btn--ghost btn--sm" type="button">
-                        Copy
+                        <span class="icon icon-copy"></span>Copy
                       </button>
                     </div>
-                    <p class="invite-box__code">
-                      iwr_7f2a9c1e...4b8d
-                    </p>
-                    <p class="invite-box__meta">
-                      1 use · expires 14:29 UTC · token not shown after redemption
-                    </p>
+                    <p class="invite-box__code">iwr_7f2a9c1e...4b8d</p>
+                    <p class="invite-box__meta">1 use · expires 14:29 UTC</p>
                   </div>
                   <p class="micro faint" style="margin-top: 9px; line-height: 1.55">
-                    The integrator must also supply the endpoint hostname from
-                    the invitation context; it is not returned by enrollment.
+                    The integrator also supplies the endpoint hostname; enrollment
+                    does not return it.
                   </p>
                 </div>
               </section>
 
-              <section class="card rail-card" aria-labelledby="bundle-title">
-                <div class="card__head">
+              <section class="panel rail-panel" aria-labelledby="bundle-title">
+                <div class="panel__head">
                   <div>
                     <h2 id="bundle-title">Bundle</h2>
-                    <p class="card__sub">Immutable sealed JSON</p>
+                    <p class="panel__sub">Immutable sealed JSON</p>
                   </div>
                 </div>
-                <div class="card__body">
+                <div class="panel__body">
                   <button class="btn btn--secondary btn--block" type="button" disabled>
                     Download bundle
                   </button>
@@ -542,9 +568,9 @@
                   <a
                     class="btn btn--ghost btn--sm"
                     href="verify-desktop.html"
-                    style="margin-top: 7px; padding-left: 0"
-                    >Open local verifier →</a
-                  >
+                    style="margin-top: 6px; padding-left: 0"
+                    >Open local verifier <span class="icon icon-arrow-up-right"></span
+                  ></a>
                 </div>
               </section>
             </aside>

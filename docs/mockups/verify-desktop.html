@@ -3,32 +3,34 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta
-      name="description"
-      content="Incident Witness local verifier mockup: check a sealed evidence bundle in the browser without uploading it."
-    />
     <title>Incident Witness — Local verifier mockup</title>
     <link rel="stylesheet" href="assets/mockup.css" />
   </head>
-  <body class="theme-public">
+  <body>
     <div class="prototype-bar">
-      <strong>Static design mockup</strong> · Phase 6 · illustrative data · not
-      production UI
+      <strong>Static design mockup</strong> · Phase 6 revision · illustrative data
     </div>
     <a class="skip-link" href="#main">Skip to content</a>
 
-    <header class="pub-header">
-      <div class="container pub-nav">
-        <a class="wordmark" href="home-desktop.html">Incident Witness</a>
-        <nav class="pub-nav__links" aria-label="Primary">
+    <header class="public-stage" style="padding-bottom: 0">
+      <div class="topbar">
+        <a class="brand" href="home-desktop.html">
+          <span class="brand-mark" aria-hidden="true"
+            ><span class="icon icon-hash"></span
+          ></span>
+          Incident Witness
+        </a>
+        <nav class="topbar__nav" aria-label="Primary">
           <a href="home-desktop.html">Home</a>
           <a href="home-desktop.html#sources">Sources</a>
-          <a href="../DESIGN_DECISIONS.md">Protocol</a>
+          <a href="home-desktop.html#verification">Verification</a>
           <a href="verify-desktop.html" aria-current="page">Verify</a>
         </nav>
-        <div class="pub-nav__actions">
-          <a class="btn btn--ghost" href="dashboard-desktop.html">Sign in</a>
-          <a class="btn btn--primary" href="dashboard-desktop.html"
+        <div class="topbar__actions">
+          <a class="btn btn--ghost btn--sm" href="dashboard-desktop.html"
+            >Sign in</a
+          >
+          <a class="btn btn--primary btn--sm" href="dashboard-desktop.html"
             >Open workspace</a
           >
         </div>
@@ -36,8 +38,10 @@
     </header>
 
     <main id="main">
-      <section class="container verify-hero">
-        <span class="local-badge">Local only · no upload</span>
+      <section class="verify-hero">
+        <span class="chip chip--ok"
+          ><span class="dot dot--green"></span>Local only · no upload</span
+        >
         <h1>Verify an evidence bundle on your device.</h1>
         <p>
           Select a sealed Incident Witness JSON bundle. The verifier recomputes
@@ -46,303 +50,258 @@
         </p>
       </section>
 
-      <section class="container verify-grid" aria-label="Bundle verification">
-        <div class="card">
-          <div class="card__head">
+      <div class="verify-window">
+        <section class="verify-pane" aria-labelledby="select-title">
+          <div class="verify-pane__head">
             <div>
-              <h2>1 · Select a bundle</h2>
-              <p class="card__sub">
-                Sealed JSON · maximum 10 MiB · no account required
-              </p>
+              <h2 id="select-title">1 · Select a bundle</h2>
+              <p>Sealed JSON · maximum 10 MiB · no account required</p>
             </div>
-            <span class="status status--plain">Local file</span>
+            <span class="chip chip--plain">Local file</span>
           </div>
-          <div class="card__body">
-            <div class="dropzone">
-              <span class="dropzone__glyph" aria-hidden="true">JSON</span>
-              <h2>Choose a sealed bundle</h2>
-              <p>
-                Drag-and-drop is not required. Use the file picker to keep the
-                flow explicit and keyboard-accessible.
-              </p>
-              <div class="dropzone__actions">
-                <label class="btn btn--primary" for="bundle-file"
-                  >Choose JSON bundle</label
-                >
-                <input
-                  class="sr-only"
-                  id="bundle-file"
-                  type="file"
-                  accept="application/json,.json"
-                />
-              </div>
-              <p class="micro faint" style="margin-top: 10px">
-                Prototype control — file selection is not wired to verification
-                in this static mockup.
-              </p>
-            </div>
 
-            <div class="file-row" style="margin-top: 13px">
-              <span class="file-glyph" aria-hidden="true">JSON</span>
-              <div class="file-row__meta">
-                <strong>iw-8f2a-sealed.bundle.json</strong>
-                <span>2.1 MiB · selected locally · SHA-256 not displayed yet</span>
-              </div>
-              <button class="btn btn--ghost btn--sm" type="button">Clear</button>
+          <div class="dropzone">
+            <span class="dropzone__glyph" aria-hidden="true"
+              ><span class="icon icon-file"></span
+            ></span>
+            <h2>Choose a sealed bundle</h2>
+            <p>
+              Use the file picker for an explicit, keyboard-accessible flow.
+              Drag-and-drop is optional.
+            </p>
+            <div class="dropzone__actions">
+              <label class="btn btn--primary" for="bundle-file"
+                >Choose JSON bundle</label
+              >
+              <input
+                class="sr-only"
+                id="bundle-file"
+                type="file"
+                accept="application/json,.json"
+              />
             </div>
-
-            <div class="privacy-note">
-              <span class="status status--ok">Local</span>
-              <p>
-                <strong>No upload.</strong> The browser File API reads the
-                bundle locally. The page makes no API request with the bundle
-                contents.
-              </p>
-            </div>
-
-            <div class="row row--between wrap" style="margin-top: 14px">
-              <button class="btn btn--primary btn--lg" type="button">
-                Verify bundle
-              </button>
-              <span class="micro faint">Checks run offline in this tab.</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card__head">
-            <div>
-              <h2>2 · Read the result</h2>
-              <p class="card__sub">Check-by-check integrity report</p>
-            </div>
-            <span class="status status--ok">Verified</span>
-          </div>
-          <div class="card__body">
-            <div class="result-banner">
-              <span class="result-banner__mark" aria-hidden="true">✓</span>
-              <div>
-                <h2>Bundle verified</h2>
-                <p>7 required checks passed · 0 failed · 0 skipped</p>
-              </div>
-            </div>
-
-            <div class="check-list" aria-label="Verification checks">
-              <div class="check check--pass">
-                <span class="check__label">
-                  <span class="check__mark" aria-hidden="true">✓</span>
-                  Bundle and protocol versions
-                </span>
-                <span class="check__result">PASS</span>
-              </div>
-              <div class="check check--pass">
-                <span class="check__label">
-                  <span class="check__mark" aria-hidden="true">✓</span>
-                  Canonical manifest SHA-256
-                </span>
-                <span class="check__result">PASS</span>
-              </div>
-              <div class="check check--pass">
-                <span class="check__label">
-                  <span class="check__mark" aria-hidden="true">✓</span>
-                  Platform signature · pinned key
-                </span>
-                <span class="check__result">PASS</span>
-              </div>
-              <div class="check check--pass">
-                <span class="check__label">
-                  <span class="check__mark" aria-hidden="true">✓</span>
-                  Source certificates · 3 sources
-                </span>
-                <span class="check__result">PASS</span>
-              </div>
-              <div class="check check--pass">
-                <span class="check__label">
-                  <span class="check__mark" aria-hidden="true">✓</span>
-                  Event signatures · 128 / 128
-                </span>
-                <span class="check__result">PASS</span>
-              </div>
-              <div class="check check--pass">
-                <span class="check__label">
-                  <span class="check__mark" aria-hidden="true">✓</span>
-                  Deterministic order and sequence
-                </span>
-                <span class="check__result">PASS</span>
-              </div>
-              <div class="check check--pass">
-                <span class="check__label">
-                  <span class="check__mark" aria-hidden="true">✓</span>
-                  Capture-window and simulation labels
-                </span>
-                <span class="check__result">PASS</span>
-              </div>
-            </div>
-
-            <div class="verify-meta">
-              <div>
-                <dt>Assessment</dt>
-                <dd>POWER_RELATED</dd>
-              </div>
-              <div>
-                <dt>Grade</dt>
-                <dd>MEDIUM</dd>
-              </div>
-              <div>
-                <dt>Platform key</dt>
-                <dd>iw-platform-staging-1</dd>
-              </div>
-              <div>
-                <dt>Sealed</dt>
-                <dd>2026-10-31 14:32:04 UTC</dd>
-              </div>
-            </div>
-
-            <p class="micro faint" style="margin-top: 12px; line-height: 1.6">
-              Signature verification confirms integrity and provenance from a
-              key. It does not prove sensor truth, root cause or that the
-              observations are complete.
+            <p class="micro faint" style="margin-top: 9px">
+              Prototype control — file selection is not wired in this static
+              mockup.
             </p>
           </div>
-        </div>
-      </section>
 
-      <section class="container state-gallery" aria-labelledby="state-title">
-        <div class="state-gallery__head">
-          <div>
-            <p class="eyebrow">
-              <span class="eyebrow__dot"></span>Result states
-            </p>
-            <h2 id="state-title">Pass, tampered and unknown-key outcomes.</h2>
+          <div class="file-row" style="margin-top: 11px">
+            <span class="file-glyph" aria-hidden="true"
+              ><span class="icon icon-file"></span
+            ></span>
+            <div class="file-row__meta">
+              <strong>iw-8f2a-sealed.bundle.json</strong>
+              <span>2.1 MiB · selected locally · SHA-256 not displayed yet</span>
+            </div>
+            <button class="btn btn--ghost btn--sm" type="button">Clear</button>
           </div>
-          <p>
-            Failure is reported as a specific check failure. An unknown platform
-            key is not silently treated as a pass.
+
+          <div class="privacy-note">
+            <span class="chip chip--ok">Local</span>
+            <p>
+              <strong>No upload.</strong> The browser File API reads the bundle
+              locally. The page makes no API request with the bundle contents.
+            </p>
+          </div>
+
+          <div class="row row--between wrap" style="margin-top: 13px">
+            <button class="btn btn--primary btn--lg" type="button">
+              Verify bundle
+            </button>
+            <span class="micro faint">Checks run offline in this tab.</span>
+          </div>
+        </section>
+
+        <section class="verify-pane" aria-labelledby="result-title">
+          <div class="verify-pane__head">
+            <div>
+              <h2 id="result-title">2 · Read the result</h2>
+              <p>Check-by-check integrity report</p>
+            </div>
+            <span class="chip chip--ok">Verified</span>
+          </div>
+
+          <div class="result-banner">
+            <span class="result-banner__mark" aria-hidden="true"
+              ><span class="icon icon-check"></span
+            ></span>
+            <div>
+              <h3>Bundle verified</h3>
+              <p>7 required checks passed · 0 failed · 0 skipped</p>
+            </div>
+          </div>
+
+          <div class="checks" aria-label="Verification checks">
+            <div class="check">
+              <span class="check__label"
+                ><span class="check__mark" aria-hidden="true"
+                  ><span class="icon icon-check"></span></span
+                >Bundle and protocol versions</span
+              >
+              <span class="check__result">PASS</span>
+            </div>
+            <div class="check">
+              <span class="check__label"
+                ><span class="check__mark" aria-hidden="true"
+                  ><span class="icon icon-check"></span></span
+                >Canonical manifest SHA-256</span
+              >
+              <span class="check__result">PASS</span>
+            </div>
+            <div class="check">
+              <span class="check__label"
+                ><span class="check__mark" aria-hidden="true"
+                  ><span class="icon icon-check"></span></span
+                >Platform signature · pinned key</span
+              >
+              <span class="check__result">PASS</span>
+            </div>
+            <div class="check">
+              <span class="check__label"
+                ><span class="check__mark" aria-hidden="true"
+                  ><span class="icon icon-check"></span></span
+                >Source certificates · 3 sources</span
+              >
+              <span class="check__result">PASS</span>
+            </div>
+            <div class="check">
+              <span class="check__label"
+                ><span class="check__mark" aria-hidden="true"
+                  ><span class="icon icon-check"></span></span
+                >Event signatures · 128 / 128</span
+              >
+              <span class="check__result">PASS</span>
+            </div>
+            <div class="check">
+              <span class="check__label"
+                ><span class="check__mark" aria-hidden="true"
+                  ><span class="icon icon-check"></span></span
+                >Deterministic order and sequence</span
+              >
+              <span class="check__result">PASS</span>
+            </div>
+            <div class="check">
+              <span class="check__label"
+                ><span class="check__mark" aria-hidden="true"
+                  ><span class="icon icon-check"></span></span
+                >Capture-window and simulation labels</span
+              >
+              <span class="check__result">PASS</span>
+            </div>
+          </div>
+
+          <div class="verify-meta">
+            <div>
+              <dt>Assessment</dt>
+              <dd>POWER_RELATED</dd>
+            </div>
+            <div>
+              <dt>Grade</dt>
+              <dd>MEDIUM</dd>
+            </div>
+            <div>
+              <dt>Platform key</dt>
+              <dd>iw-platform-staging-1</dd>
+            </div>
+            <div>
+              <dt>Sealed</dt>
+              <dd>2026-10-31 14:32:04 UTC</dd>
+            </div>
+          </div>
+
+          <p class="micro faint" style="margin-top: 11px; line-height: 1.6">
+            Signature verification confirms integrity and provenance from a key.
+            It does not prove sensor truth, root cause or that the observations
+            are complete.
           </p>
-        </div>
+        </section>
+      </div>
 
-        <div class="state-grid">
-          <article class="state-card">
-            <div class="result-banner">
-              <span class="result-banner__mark" aria-hidden="true">✓</span>
-              <div>
-                <h2>Verified</h2>
-                <p>All required checks passed.</p>
-              </div>
+      <div class="state-row" aria-label="Verification result states">
+        <article class="state-card">
+          <div class="result-banner" style="margin-top: 0">
+            <span class="result-banner__mark" aria-hidden="true"
+              ><span class="icon icon-check"></span
+            ></span>
+            <div>
+              <h3>Verified</h3>
+              <p>All required checks passed.</p>
             </div>
-            <h3>Bundle integrity confirmed</h3>
-            <p>
-              Manifest, platform signature, certificates, event signatures and
-              ordering are consistent with the pinned key set.
-            </p>
-            <div class="check-list">
-              <div class="check check--pass">
-                <span class="check__label">Manifest digest</span>
-                <span class="check__result">PASS</span>
-              </div>
-              <div class="check check--pass">
-                <span class="check__label">Platform signature</span>
-                <span class="check__result">PASS</span>
-              </div>
-            </div>
-          </article>
+          </div>
+          <h3>Bundle integrity confirmed</h3>
+          <p>
+            Manifest, platform signature, certificates, event signatures and
+            ordering match the pinned key set.
+          </p>
+        </article>
 
-          <article class="state-card">
-            <div class="result-banner result-banner--fail">
-              <span class="result-banner__mark" aria-hidden="true">×</span>
-              <div>
-                <h2>Tampered or inconsistent</h2>
-                <p>One or more required checks failed.</p>
-              </div>
+        <article class="state-card">
+          <div class="result-banner result-banner--fail" style="margin-top: 0">
+            <span class="result-banner__mark" aria-hidden="true"
+              ><span class="icon icon-x"></span
+            ></span>
+            <div>
+              <h3>Tampered or inconsistent</h3>
+              <p>One or more required checks failed.</p>
             </div>
-            <h3>Do not rely on this bundle</h3>
-            <p>
-              A changed byte breaks the manifest digest or a signature. The
-              failed checks identify what no longer matches.
-            </p>
-            <div class="check-list">
-              <div class="check check--fail">
-                <span class="check__label">Manifest digest</span>
-                <span class="check__result">FAIL</span>
-              </div>
-              <div class="check check--fail">
-                <span class="check__label">Platform signature</span>
-                <span class="check__result">FAIL</span>
-              </div>
-            </div>
-          </article>
+          </div>
+          <h3>Do not rely on this bundle</h3>
+          <p>
+            A changed byte breaks the manifest digest or a signature. The failed
+            checks identify what no longer matches.
+          </p>
+        </article>
 
-          <article class="state-card">
-            <div class="result-banner result-banner--unknown">
-              <span class="result-banner__mark" aria-hidden="true">!</span>
-              <div>
-                <h2>Unknown platform key</h2>
-                <p>The bundle references a key outside this trust set.</p>
-              </div>
+        <article class="state-card">
+          <div class="result-banner result-banner--warn" style="margin-top: 0">
+            <span class="result-banner__mark" aria-hidden="true"
+              ><span class="icon icon-alert"></span
+            ></span>
+            <div>
+              <h3>Unknown platform key</h3>
+              <p>Signature check skipped.</p>
             </div>
-            <h3>Signature check skipped</h3>
-            <p>
-              The bundle may be valid, but this verifier cannot confirm the
-              platform signature without the corresponding public key.
-            </p>
-            <div class="check-list">
-              <div class="check check--pass">
-                <span class="check__label">Manifest digest</span>
-                <span class="check__result">PASS</span>
-              </div>
-              <div class="check check--skip">
-                <span class="check__label">Platform signature</span>
-                <span class="check__result">SKIP</span>
-              </div>
-            </div>
-          </article>
-        </div>
+          </div>
+          <h3>Unconfirmed, not silently passed</h3>
+          <p>
+            The bundle may be valid, but this verifier cannot confirm the
+            platform signature without the corresponding public key.
+          </p>
+        </article>
+      </div>
 
-        <p class="limitation-strip">
-          <strong>Limitation:</strong> a valid signature verifies integrity and
-          provenance from a key. It does not prove that a sensor reading is true,
-          that evidence is complete, or that a particular event caused an
-          outage. Missing observations remain gaps, not healthy results.
-        </p>
-      </section>
+      <p class="limitation-strip">
+        <strong>Limitation:</strong> a valid signature verifies integrity and
+        provenance from a key. It does not prove that a sensor reading is true,
+        that evidence is complete, or that a particular event caused an outage.
+        Missing observations remain gaps, not healthy results.
+      </p>
     </main>
 
-    <footer class="pub-footer">
-      <div class="container">
-        <div class="pub-footer__top">
-          <div class="pub-footer__brand">
-            <a class="wordmark" href="home-desktop.html">Incident Witness</a>
-            <p>
-              Portable, signature-verifiable incident evidence for
-              decentralized GPU compute.
-            </p>
-          </div>
-          <div class="pub-footer__col">
-            <h3>Product</h3>
-            <a href="home-desktop.html">Home</a>
-            <a href="home-desktop.html#sources">Observation sources</a>
-            <a href="verify-desktop.html">Local verifier</a>
-          </div>
-          <div class="pub-footer__col">
-            <h3>Documentation</h3>
-            <a href="../DESIGN_DECISIONS.md">Design decisions</a>
-            <a href="index.html">Phase 6 mockups</a>
-            <a href="https://github.com/onyebuchidaniel60/incident-witness"
-              >GitHub repository</a
-            >
-          </div>
-          <div class="pub-footer__col">
-            <h3>Account</h3>
-            <a href="dashboard-desktop.html">Sign in</a>
-            <a href="home-desktop.html#login">Provider workspace</a>
-          </div>
+    <footer class="public-footer" style="margin-top: 42px">
+      <div class="public-footer__top">
+        <div>
+          <a class="brand" href="home-desktop.html">
+            <span class="brand-mark" aria-hidden="true"
+              ><span class="icon icon-hash"></span
+            ></span>
+            Incident Witness
+          </a>
+          <p>Portable, signature-verifiable incident evidence.</p>
         </div>
-        <div class="pub-footer__bottom">
-          <p>
-            © 2026 Incident Witness · Signature verification is not proof of
-            cause. This page is a static Phase 6 mockup using illustrative data.
-          </p>
-          <p class="mono">STATIC MOCKUP · NOT PRODUCTION</p>
+        <div class="public-footer__links">
+          <a href="index.html">Mockup index</a>
+          <a href="home-desktop.html">Home</a>
+          <a href="../DESIGN_DECISIONS.md">Design record</a>
+          <a href="https://github.com/onyebuchidaniel60/incident-witness"
+            >GitHub</a
+          >
         </div>
+      </div>
+      <div class="public-footer__bottom">
+        <p>© 2026 Incident Witness · Signature verification is not proof of cause.</p>
+        <p class="mono">STATIC MOCKUP · NOT PRODUCTION</p>
       </div>
     </footer>
   </body>
