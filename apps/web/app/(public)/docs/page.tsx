@@ -21,10 +21,11 @@ export default function DocsPage() {
       <section className="rounded-lg border border-amber-300 bg-amber-50 p-5 text-sm leading-6 text-amber-950">
         <h2 className="font-semibold">Current phase</h2>
         <p className="mt-2">
-          Phase 1 provides a route-complete structural frontend only. It does not include
-          authentication, API endpoints, a database, host-agent or renter SDK packages, a platform
-          probe, evidence ingestion or a working bundle verifier. The documents describe the
-          approved design and planned phases; they are not claims that those features are live.
+          Phase 2 adds a Fastify API foundation, the PostgreSQL schema and RLS policies, and
+          Supabase Auth email OTP. It does not include host-agent or renter SDK packages, a platform
+          probe, evidence ingestion, a working bundle verifier or the domain API. The documents
+          describe the approved design and planned phases; they are not claims that those features
+          are live.
         </p>
       </section>
 

@@ -14,7 +14,7 @@ export default function ErrorPage({
         This page could not be displayed
       </h1>
       <p className="mt-4 text-slate-700">
-        The Phase 1 shell encountered an unexpected error. No provider data or credentials are
+        The Phase 2 shell encountered an unexpected error. No provider data or credentials are
         involved.
       </p>
       <p className="mt-2 text-sm text-slate-600">

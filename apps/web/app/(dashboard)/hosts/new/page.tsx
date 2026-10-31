@@ -12,7 +12,7 @@ export default function NewHostPage() {
     <div className="space-y-8">
       <PageIntro
         eyebrow="Hosts / new"
-        title="Host registration is not connected in Phase 1."
+        title="Host registration is not connected yet."
         description="The planned flow captures a host alias and public hostname, then issues a DNS TXT challenge and verifies the fixed HTTPS health endpoint."
       />
 

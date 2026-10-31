@@ -14,7 +14,7 @@ export function DashboardSidebar() {
         Provider workspace
       </p>
       <p className="mt-2 text-sm leading-6 text-slate-600">
-        Placeholder navigation only. Authentication and account data are not connected.
+        Authentication is connected. Host and incident data remain placeholders.
       </p>
       <nav aria-label="Provider workspace" className="mt-4">
         <ul className="grid gap-1 sm:grid-cols-2 lg:grid-cols-1">

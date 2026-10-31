@@ -12,7 +12,7 @@ export default function VerifyPage() {
     <div className="space-y-8">
       <PageIntro
         eyebrow="Offline verification"
-        title="The local bundle verifier is not connected in Phase 1."
+        title="The local bundle verifier is not connected in Phase 2."
         description="The intended verifier processes a selected evidence bundle locally, using shared protocol schemas and pinned platform public keys. It will report integrity, signature, trust and completeness checks separately."
       />
 

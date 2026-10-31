@@ -1,15 +1,54 @@
-import { NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
-/**
- * Phase 1 placeholder only.
- *
- * This file establishes the Next.js 16 proxy convention but intentionally
- * performs no authentication, session refresh, redirect or access control.
- * Authentication is a Phase 2 responsibility and must not be assumed from this
- * pass-through.
- */
-export function proxy() {
-  return NextResponse.next();
+import { getSupabasePublicEnvironment } from "@/lib/supabase/env";
+
+const protectedPathPrefixes = ["/dashboard", "/hosts", "/incidents", "/settings"];
+
+function isProtectedPath(pathname: string): boolean {
+  return protectedPathPrefixes.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+}
+
+export async function proxy(request: NextRequest) {
+  const { url, publishableKey } = getSupabasePublicEnvironment();
+  let response = NextResponse.next({ request });
+
+  const supabase = createServerClient(url, publishableKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet, headers) {
+        for (const { name, value } of cookiesToSet) {
+          request.cookies.set(name, value);
+        }
+        response = NextResponse.next({ request });
+        for (const { name, value, options } of cookiesToSet) {
+          response.cookies.set(name, value, options);
+        }
+        for (const [key, value] of Object.entries(headers)) {
+          response.headers.set(key, value);
+        }
+      },
+    },
+  });
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user && isProtectedPath(request.nextUrl.pathname)) {
+    const loginUrl = request.nextUrl.clone();
+    const requested = `${request.nextUrl.pathname}${request.nextUrl.search}`;
+    loginUrl.pathname = "/login";
+    loginUrl.search = "";
+    loginUrl.searchParams.set("next", requested);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  return response;
 }
 
 export const config = {

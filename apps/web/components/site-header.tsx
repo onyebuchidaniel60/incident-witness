@@ -11,7 +11,7 @@ export function SiteHeader() {
             Incident Witness
           </Link>
           <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Phase 1 structural shell
+            Phase 2 foundation
           </span>
         </div>
         <PrimaryNav />

@@ -1,10 +1,10 @@
 import Link from "next/link";
 
+import { LoginForm } from "@/components/login-form";
 import { PageIntro } from "@/components/page-intro";
-import { PlaceholderNotice } from "@/components/placeholder-notice";
 
 export const metadata = {
-  title: "Login placeholder",
+  title: "Provider sign-in",
 };
 
 export default function LoginPage() {
@@ -12,18 +12,25 @@ export default function LoginPage() {
     <div className="space-y-8">
       <PageIntro
         eyebrow="Provider access"
-        title="Sign-in is not connected in Phase 1."
-        description="Supabase email one-time-password authentication is planned for Phase 2. This page intentionally contains no login form and no account session."
+        title="Provider sign-in"
+        description="Use a one-time email code to access the provider workspace. There is no password stored by Incident Witness."
       />
 
-      <PlaceholderNotice title="No authentication is active">
-        <p>
-          Do not enter credentials, one-time codes or personal information here. This route exists
-          only to establish the public login destination and its future navigation context.
-        </p>
-      </PlaceholderNotice>
+      <div className="max-w-md rounded-lg border border-slate-200 bg-white p-5">
+        <LoginForm />
+      </div>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
+        <p className="font-semibold">Phase 2 authentication foundation</p>
+        <p className="mt-1">
+          The login form is connected to Supabase Auth. The Supabase email template must include
+          the one-time code for this flow, and the deployment origin must be allow-listed in
+          Supabase Auth settings. Until those dashboard settings are confirmed, email delivery may
+          fail even though the application is configured.
+        </p>
+      </div>
+
+      <div className="flex flex-wrap gap-4 text-sm">
         <Link href="/" className="font-medium text-slate-800 underline hover:text-slate-950">
           Return home
         </Link>

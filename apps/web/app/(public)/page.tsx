@@ -52,11 +52,12 @@ export default function HomePage() {
       </section>
 
       <section className="rounded-lg border border-amber-300 bg-amber-50 p-5 text-sm leading-6 text-amber-950">
-        <h2 className="font-semibold">Phase 1 status</h2>
+        <h2 className="font-semibold">Phase 2 status</h2>
         <p className="mt-2">
-          This is a structural frontend placeholder. Authentication, the API, the database, the
-          host agent, the renter SDK, the platform probe and the local verifier are not connected.
-          Nothing on this site currently creates, stores or verifies incident evidence.
+          The database, API foundation and Supabase Auth are connected. The host agent, renter SDK,
+          platform probe, evidence ingestion and working verifier are not connected. Provider data
+          workflows remain placeholders, and nothing on this site creates, stores or verifies
+          incident evidence yet.
         </p>
       </section>
 
@@ -110,7 +111,7 @@ export default function HomePage() {
             to those keys, not sensor truth or marketplace acceptance.
           </p>
           <p className="mt-3 text-sm leading-6 text-slate-700">
-            The public verifier is a structural placeholder in Phase 1. No file upload, network
+            The public verifier is a structural placeholder in Phase 2. No file upload, network
             submission or cryptographic verification is implemented.
           </p>
         </div>

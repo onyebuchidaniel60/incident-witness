@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     template: "%s | Incident Witness",
   },
   description:
-    "Incident Witness is a portable incident-evidence protocol for decentralized compute. This is the Phase 1 structural frontend.",
+    "Incident Witness is a portable incident-evidence protocol for decentralized compute. This is the Phase 2 foundation frontend.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

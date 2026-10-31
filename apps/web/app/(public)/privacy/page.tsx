@@ -16,11 +16,11 @@ export default function PrivacyPage() {
         description="This page is a structural placeholder. Operator-approved privacy content is required before production; this text is not a legal policy."
       />
 
-      <PlaceholderNotice title="Phase 1 data boundary">
+      <PlaceholderNotice title="Phase 2 data boundary">
         <p>
-          Phase 1 serves static frontend pages only. There is no authentication, user account,
-          evidence database, API, analytics integration or application authentication cookie. Do
-          not submit personal data, credentials or incident evidence through this shell.
+          Phase 2 includes Supabase Auth sessions and a provider API/database foundation. There is
+          no evidence-data workflow, analytics integration or evidence upload in this phase. Do not
+          submit personal data, credentials or incident evidence through placeholder screens.
         </p>
       </PlaceholderNotice>
 

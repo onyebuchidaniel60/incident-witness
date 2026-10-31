@@ -12,7 +12,7 @@ export default function NewIncidentPage() {
     <div className="space-y-8">
       <PageIntro
         eyebrow="Evidence sessions / new"
-        title="Session creation is not connected in Phase 1."
+        title="Session creation is not connected yet."
         description="The planned flow selects an active host, sets a bounded capture duration and optional opaque workload reference, then opens a collecting session and a one-time renter invitation."
       />
 

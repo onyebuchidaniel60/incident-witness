@@ -18,7 +18,7 @@ export default function IncidentsPage() {
 
       <PlaceholderNotice title="No session records">
         <p>
-          No evidence sessions are listed because the data layer is not connected. No sample
+          No evidence sessions are listed because the evidence data layer is not connected. No sample
           timeline, assessment or sealed record is being presented as real.
         </p>
       </PlaceholderNotice>

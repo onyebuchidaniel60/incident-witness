@@ -18,7 +18,7 @@ export default function HostsPage() {
 
       <PlaceholderNotice title="No host records">
         <p>
-          No hosts are listed because the API, database and authentication are not connected. No
+          No hosts are listed because the host data workflow is not connected. No
           sample host, online status or verified endpoint is being presented as real.
         </p>
       </PlaceholderNotice>

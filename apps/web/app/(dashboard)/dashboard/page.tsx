@@ -13,7 +13,7 @@ export default function DashboardPage() {
       <PageIntro
         eyebrow="Provider workspace"
         title="Dashboard placeholder"
-        description="This route will become the authenticated provider overview for host health, evidence sessions and sealed records. No account, host or incident data is connected in Phase 1."
+        description="This route will become the authenticated provider overview for host health, evidence sessions and sealed records. Authentication is connected; host and incident data workflows are not yet connected."
       />
 
       <PlaceholderNotice title="No provider data">
@@ -44,7 +44,7 @@ export default function DashboardPage() {
           <h2 className="text-lg font-semibold text-slate-950">Evidence sessions</h2>
           <p className="mt-2 text-sm leading-6 text-slate-700">
             Bounded capture, source health, deterministic assessment and sealed bundle download are
-            not implemented in Phase 1.
+            not implemented yet.
           </p>
           <div className="mt-4 flex flex-wrap gap-3 text-sm">
             <Link href="/incidents" className="font-medium underline">

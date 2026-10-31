@@ -1,24 +1,27 @@
 import { expect, test } from "@playwright/test";
 
-const routes = [
+const publicRoutes = [
   { path: "/", heading: "A common record of what each source observed." },
-  { path: "/login", heading: "Sign-in is not connected in Phase 1." },
-  { path: "/verify", heading: "The local bundle verifier is not connected in Phase 1." },
+  { path: "/login", heading: "Provider sign-in" },
+  { path: "/verify", heading: "The local bundle verifier is not connected in Phase 2." },
   { path: "/docs", heading: "Incident Witness documentation" },
   { path: "/privacy", heading: "Privacy policy not yet approved." },
   { path: "/terms", heading: "Terms of service not yet approved." },
-  { path: "/dashboard", heading: "Dashboard placeholder" },
-  { path: "/hosts", heading: "Host list placeholder" },
-  { path: "/hosts/new", heading: "Host registration is not connected in Phase 1." },
-  { path: "/hosts/test-host-id", heading: "Host detail placeholder" },
-  { path: "/incidents", heading: "Session list placeholder" },
-  { path: "/incidents/new", heading: "Session creation is not connected in Phase 1." },
-  { path: "/incidents/test-incident-id", heading: "Session timeline placeholder" },
-  { path: "/settings", heading: "Settings are not connected in Phase 1." },
 ];
 
-for (const route of routes) {
-  test(`${route.path} renders its structural placeholder`, async ({ page }) => {
+const protectedRoutes = [
+  "/dashboard",
+  "/hosts",
+  "/hosts/new",
+  "/hosts/test-host-id",
+  "/incidents",
+  "/incidents/new",
+  "/incidents/test-incident-id",
+  "/settings",
+];
+
+for (const route of publicRoutes) {
+  test(`${route.path} renders its public shell`, async ({ page }) => {
     const consoleErrors: string[] = [];
     page.on("console", (message) => {
       if (message.type() === "error") {
@@ -39,6 +42,23 @@ for (const route of routes) {
     expect(hasBlockingOverflow).toBe(false);
   });
 }
+
+for (const path of protectedRoutes) {
+  test(`${path} redirects to the authenticated sign-in route`, async ({ page }) => {
+    const response = await page.goto(path);
+
+    expect(response?.status()).toBe(200);
+    await expect(page).toHaveURL(/\/login\?next=/);
+    await expect(page.getByRole("heading", { level: 1, name: "Provider sign-in" })).toBeVisible();
+  });
+}
+
+test("login form exposes request and verification controls without submitting", async ({ page }) => {
+  await page.goto("/login");
+
+  await expect(page.getByLabel("Provider email address")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Send one-time code" })).toBeVisible();
+});
 
 test("not-found route returns 404 with useful navigation", async ({ page }) => {
   const response = await page.goto("/this-route-does-not-exist");
@@ -62,15 +82,6 @@ test("primary navigation works on the current viewport", async ({ page }) => {
   await expect(docsLink).toBeVisible();
   await docsLink.click();
   await expect(page).toHaveURL(/\/docs$/);
-});
-
-test("protected placeholder pages clearly state that no auth is active", async ({ page }) => {
-  await page.goto("/dashboard");
-
-  await expect(page.getByText("Protected-area placeholder", { exact: true })).toBeVisible();
-  await expect(
-    page.getByText(/Authentication is not connected in Phase 1/i).first(),
-  ).toBeVisible();
 });
 
 test("footer provides real documentation and repository destinations", async ({ page }) => {

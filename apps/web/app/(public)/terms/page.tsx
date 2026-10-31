@@ -18,7 +18,7 @@ export default function TermsPage() {
 
       <PlaceholderNotice title="No production service terms">
         <p>
-          Incident Witness is in Phase 1 implementation. No public production service, paid plan,
+          Incident Witness is in Phase 2 implementation. No public production service, paid plan,
           marketplace integration, adjudication process or service-level commitment is offered by
           this deployment. Operator-approved terms are required before production.
         </p>
