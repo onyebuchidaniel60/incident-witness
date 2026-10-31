@@ -28,17 +28,28 @@ No private signing key, DB URL, service-role/secret key, host credential or invi
 | `NODE_ENV` | yes | Runtime mode |
 | `PORT` | yes | HTTP listen port |
 | `APP_BASE_URL` | yes | Approved web origin and redirect validation |
+| `IW_API_BASE_URL` | optional | Public API origin returned to enrolling agents; defaults to `http://localhost:PORT` |
 | `SUPABASE_URL` | yes | Auth project URL |
 | `SUPABASE_JWKS_URL` | yes | Trusted JWT verification keys |
 | `SUPABASE_JWT_ISSUER` | yes | Expected issuer |
 | `DATABASE_URL_IW_API` | yes | Restricted API DB role, NOBYPASSRLS |
 | `IW_TOKEN_PEPPER` | yes | HMAC pepper for enrollment/invitation/device token hashes |
-| `IW_PLATFORM_SIGNING_PRIVATE_KEY` | yes | API-only Ed25519 root key for source certificates and sealed bundle manifests; never available to web or worker |
-| `IW_PLATFORM_KEY_ID` | yes | Active platform signing key identifier |
+| `IW_PLATFORM_SIGNING_PRIVATE_KEY` | yes | API-only Ed25519 root key for source certificates and sealed bundle manifests; base64-encoded PKCS8 DER; never available to web or worker |
+| `IW_PLATFORM_KEY_ID` | yes | Active platform signing key identifier; register its public half with `npm run db:provision-platform-key` |
 | `IW_ALLOWED_WEB_ORIGINS` | yes | Comma-separated exact allowed origins |
 | `IW_HEALTHCHECK_TOKEN` | yes unless a private health-check network is verified | Internal bearer token for `/health/ready`; compare in constant time and never log |
 | `IW_LOG_LEVEL` | optional | Structured log verbosity |
 | `IW_BUNDLE_MAX_BYTES` | optional | Bundle cap; default and hard maximum 10 MiB (10,485,760 bytes). The 7 MiB aggregate canonical event-entry budget is enforced separately. |
+
+### Platform signing key provisioning
+
+`IW_PLATFORM_SIGNING_PRIVATE_KEY` is a base64-encoded Ed25519 PKCS8 DER key held only by the API. Its public half must be registered once per environment:
+
+```bash
+npm run db:provision-platform-key
+```
+
+The command reads the private key and key ID from the environment, writes only the public key and SHA-256 fingerprint to `platform_signing_keys`, and prints only public metadata. It refuses to overwrite an existing key ID with a different public key. Do not rotate a platform key by simply replacing the environment value; follow the overlapping public-key pin/release process in `ARCHITECTURE.md`.
 
 ## Probe worker variables
 

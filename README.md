@@ -8,11 +8,17 @@ Incident Witness is a portable incident-evidence protocol for decentralized comp
 
 ## Project status
 
-Phase 2 backend/data/auth foundation is implemented and pending operator acceptance. It adds the
-Fastify API foundation, the Drizzle schema and SQL migrations for the 14 approved tables, restricted
-`iw_api`/`iw_worker` roles, RLS policies, Supabase JWT verification and Supabase email OTP sign-in.
-The provider routes are protected by the web auth guard; host, incident, evidence, agent, SDK,
-probe-worker and verifier functionality remain later phases.
+Phase 3B host/incident domain APIs are implemented and pending operator acceptance. The API now
+supports owner-scoped host CRUD, DNS TXT endpoint verification with public-IP/SSRF checks, host
+enrollment and signed operational presence, bounded incident creation/end with a lifecycle sweeper,
+renter invitations and scoped enrollment, key revocation, host archival, audit events and
+`Idempotency-Key` handling. Signed event ingestion, sealing, bundles, the host agent, renter SDK,
+probe worker and verifier remain Phase 3C–3F.
+
+Phase 2 backend/data/auth foundations remain in place: the Fastify API foundation, the Drizzle
+schema and SQL migrations for the 14 approved tables, restricted `iw_api`/`iw_worker` roles, RLS
+policies, Supabase JWT verification and Supabase email OTP sign-in. Provider routes are protected by
+the web auth guard; the data-backed web pages remain explicitly labelled placeholders.
 
 Public routes are `/`, `/login`, `/verify`, `/docs`, `/privacy`, `/terms`, and the not-found route.
 Protected placeholder routes are `/dashboard`, `/hosts`, `/hosts/new`, `/hosts/[hostId]`,
@@ -45,6 +51,7 @@ Phase 2 uses Node.js 26.13.0 and npm workspaces. The local interface is:
 npm ci
 npm run db:provision-roles
 npm run db:migrate
+npm run db:provision-platform-key
 npm run db:migrate:status
 npm run dev:api
 npm run dev
@@ -52,27 +59,30 @@ npm run lint
 npm run typecheck
 npm run build
 npm test
+npm run test:integration --workspace @incident-witness/api
 npm run test:e2e
 ```
 
 `npm test` runs the staging database integration tests (including ADR-001 T01–T14) followed by the
-API Vitest suite. It requires the staging `.env` credentials and must never be run against
-production. `npm run test:e2e` runs the Playwright public-route, auth-redirect, navigation and footer
-checks at desktop and mobile viewport sizes.
+API Vitest suite. The Phase 3B API integration suite is run explicitly with
+`npm run test:integration --workspace @incident-witness/api` because it requires staging
+credentials and must never be run against production. `npm run test:e2e` runs the Playwright
+public-route, auth-redirect, navigation and footer checks at desktop and mobile viewport sizes.
 
 The database migration runner uses `DATABASE_URL_MIGRATOR`. The API and probe worker use the
 restricted `DATABASE_URL_IW_API` and `DATABASE_URL_IW_WORKER` roles. See `docs/CONFIGURATION.md`
 and the accepted ADR for the role/GUC design.
 
-Local Phase 2 verification on 2026-10-31 passed dependency installation, lint, typecheck, build,
-14 ADR-001 database integration tests, 10 API unit tests and 36 Playwright checks. Actual results
-and any remaining blockers are recorded in `AI_HANDOFF.md`.
+Local Phase 3B verification on 2026-10-31 passed lint, typecheck, build, 20 protocol tests,
+14 ADR-001 database tests, 17 API unit tests, 39 Phase 3B API integration tests and 36 Playwright
+checks. Actual results and any remaining blockers are recorded in `AI_HANDOFF.md`.
 
 ### Database setup
 
 1. Provision the restricted roles from the configured URLs with `npm run db:provision-roles`.
 2. Apply the versioned migrations with `npm run db:migrate`.
-3. Confirm migration status with `npm run db:migrate:status`.
+3. Register the platform public key with `npm run db:provision-platform-key`.
+4. Confirm migration status with `npm run db:migrate:status`.
 
 Migrations are in `packages/db/migrations/`. The migration ledger is `iw_schema_migrations`.
 Supabase's `auth` schema is owned by `supabase_admin`; because the staging migrator cannot grant
