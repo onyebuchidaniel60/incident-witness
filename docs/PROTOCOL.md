@@ -1,6 +1,6 @@
 # Incident Witness Protocol v1 — Design Reference
 
-**Status:** Protocol design; no implementation exists yet. This document must remain consistent with `ARCHITECTURE.md` and tests in `packages/protocol`.
+**Status:** Protocol v1 is implemented in `packages/protocol`; API-side event ingestion, deterministic correlation (`@incident-witness/correlator`) and bundle sealing/download are implemented in Phase 3C. Host agent, renter SDK, probe worker and CLI verifier remain later phases. This document must remain consistent with `ARCHITECTURE.md` and the protocol/correlator tests.
 
 ## Purpose
 
@@ -101,6 +101,17 @@ Verification checks schema, canonical digest, trusted platform key, platform sig
 ## Deterministic assessments
 
 Supported v1 outputs: `POWER_RELATED`, `EXTERNAL_REACHABILITY_LOSS`, `HOST_OR_WORKLOAD_EXIT`, `UNKNOWN`. GPU/driver anomaly is not classified in v1 because the baseline collector does not provide a sufficiently validated fault signal; such cases remain UNKNOWN. Output wording must say “consistent with” or “observed”; no absolute causal conclusion. Evidence grades HIGH/MEDIUM/LOW/INSUFFICIENT describe evidence completeness under a named rule version—not probability. Simulated decisive signals cap grade at LOW. Demo sessions carry a top-level demo marker in the manifest.
+
+### Rule version `iw-rules-v1`
+
+- Correlation window: 120 seconds around the first relevant transition.
+- Power chain window: 180 seconds from the UPS transition.
+- Probe/host adjacency: 30 seconds between a platform-probe failure and a signed host heartbeat/agent-health observation.
+- `POWER_RELATED` requires a host UPS `on_battery`/`low_battery` transition, a prior host heartbeat, no host heartbeat in the following power window, and a renter or probe reachability failure near the transition.
+- `EXTERNAL_REACHABILITY_LOSS` requires a platform-probe failure and a host heartbeat/agent-health observation within 30 seconds; renter endpoint failures may corroborate. UPS online alone is not sufficient.
+- `HOST_OR_WORKLOAD_EXIT` requires an explicit host-agent `stopped` or renter-client `stopped` signal plus a supporting probe/client observation in the correlation window.
+- `HIGH` requires three decisive source categories, `MEDIUM` two with at least one external to the host, `LOW` one or a simulated decisive signal, and `INSUFFICIENT` zero usable observations. The correlator is pure and input-order independent.
+- `event_sha256` is SHA-256 over the canonical event body without `signature`; `manifest_sha256` is SHA-256 over the canonical manifest. The platform signature covers the canonical manifest.
 
 ## Compatibility
 

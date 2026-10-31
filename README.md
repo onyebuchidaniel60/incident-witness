@@ -8,12 +8,17 @@ Incident Witness is a portable incident-evidence protocol for decentralized comp
 
 ## Project status
 
-Phase 3B host/incident domain APIs are implemented and pending operator acceptance. The API now
-supports owner-scoped host CRUD, DNS TXT endpoint verification with public-IP/SSRF checks, host
-enrollment and signed operational presence, bounded incident creation/end with a lifecycle sweeper,
-renter invitations and scoped enrollment, key revocation, host archival, audit events and
-`Idempotency-Key` handling. Signed event ingestion, sealing, bundles, the host agent, renter SDK,
-probe worker and verifier remain Phase 3C–3F.
+Phase 3C API-side signed event ingestion, deterministic correlation and bundle sealing are
+implemented and pending operator acceptance. The API now accepts canonical Ed25519-signed host and
+renter events, enforces incident time windows and atomic evidence budgets, runs the pure
+`@incident-witness/correlator` rule engine, seals an immutable bundle in one transaction, and serves
+the exact bundle to its owner. The host agent, renter SDK, probe worker and CLI verifier remain
+Phase 3D–3F.
+
+Phase 3B host/incident domain APIs are accepted and closed. The API supports owner-scoped host CRUD,
+DNS TXT endpoint verification with public-IP/SSRF checks, host enrollment and signed operational
+presence, bounded incident creation/end with a lifecycle sweeper, renter invitations and scoped
+enrollment, key revocation, host archival, audit events and `Idempotency-Key` handling.
 
 Phase 2 backend/data/auth foundations remain in place: the Fastify API foundation, the Drizzle
 schema and SQL migrations for the 14 approved tables, restricted `iw_api`/`iw_worker` roles, RLS
@@ -73,9 +78,9 @@ The database migration runner uses `DATABASE_URL_MIGRATOR`. The API and probe wo
 restricted `DATABASE_URL_IW_API` and `DATABASE_URL_IW_WORKER` roles. See `docs/CONFIGURATION.md`
 and the accepted ADR for the role/GUC design.
 
-Local Phase 3B verification on 2026-10-31 passed lint, typecheck, build, 20 protocol tests,
-14 ADR-001 database tests, 17 API unit tests, 39 Phase 3B API integration tests and 36 Playwright
-checks. Actual results and any remaining blockers are recorded in `AI_HANDOFF.md`.
+Local Phase 3C verification on 2026-10-31 passed lint, typecheck, build, 20 protocol tests,
+12 correlator tests, 14 ADR-001 database tests, 17 API unit tests, 57 API integration tests and
+36 Playwright checks. Actual results and any remaining blockers are recorded in `AI_HANDOFF.md`.
 
 ### Database setup
 

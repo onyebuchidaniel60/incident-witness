@@ -2,11 +2,11 @@
 
 **Last updated:** 2026-10-31
 
-**Project status:** Phase 0, Phase 1, Phase 2, Phase 3A and Phase 3B are complete and accepted. Phase 3B host/incident domain APIs and transactional lifecycle are closed.
+**Project status:** Phase 0, Phase 1, Phase 2, Phase 3A and Phase 3B are complete and accepted. Phase 3C API-side signed event ingestion, deterministic correlation and bundle sealing are implemented and tested; the Phase 3C checkpoint is pending operator acceptance.
 
-**Current phase:** Phase 3B — COMPLETE AND CLOSED (operator accepted 2026-10-31). Phase 3C is authorized and not yet started.
+**Current phase:** Phase 3C — IMPLEMENTED, PENDING OPERATOR ACCEPTANCE.
 
-**Next task:** Phase 3C only — signed event ingestion, correlation and sealing.
+**Next task:** Phase 3D only — Linux host agent — awaiting explicit operator authorization.
 
 **Phase 2 acceptance:** Operator accepted the Phase 2 checkpoint and approved the `public.iw_uid()` security-definer wrapper on 2026-10-31.
 
@@ -34,17 +34,23 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 - Next.js 16.4.3 App Router + Tailwind CSS 4.x frontend; temporary styling only.
 - Fastify 5.12.7 API with Pino redaction, request IDs, CORS, rate limiting, Helmet and the documented error envelope.
 - `@incident-witness/protocol` pure TypeScript package with strict v1 schemas, RFC 8785 JCS via pinned `canonicalize@5.1.0`, Node Ed25519 signing via `node:crypto`, browser public-key verification via `@noble/ed25519@3.2.0`, source-key certificates and signed bundle manifests. No DB/network/UI imports; no browser private-key code.
+- `@incident-witness/correlator` pure TypeScript package implementing rule version `iw-rules-v1`; input-order independent, no timestamps or random values.
 - Supabase Postgres/Auth; Drizzle ORM + `pg`; versioned SQL migrations in `packages/db/migrations`.
 - `jose` JWT verification against Supabase JWKS; issuer, audience, expiry and UUID subject checks.
 - Accepted ADR-001 mechanism: API connects as restricted `iw_api`, sets transaction-local JWT subject and request mode, and never uses `SET ROLE authenticated`.
 - Supabase's staging `auth` schema is owned by `supabase_admin`; the migrator cannot grant `auth` USAGE to `iw_api`. Policies therefore call a narrow `SECURITY DEFINER` wrapper `public.iw_uid()` which calls `auth.uid()`. No role switch, service-role connection or auth-schema grant to `iw_api` is used. **Operator approved this wrapper on 2026-10-31.**
-- Linux host agent, renter SDK, platform probe worker, evidence ingestion, sealing and bundle verifier are **not implemented** (Phase 3C+).
+- Linux host agent, renter SDK, platform probe worker and CLI verifier are **not implemented** (Phase 3D+).
 
 ## Repository state
 
 - **Repository URL:** confirmed public — https://github.com/onyebuchidaniel60/incident-witness
 - **Working directory/repo root:** `/root/incident-witness`
 - **Branch:** `main`
+- **Phase 3C commits:**
+  - `ebf6ab7974a5ed8f25f725880cb01f35fb2592d8` — `feat(correlator): add deterministic assessment rules`
+  - `1c4905c575e029690b878b3f0a6b98ff2066b63a` — `feat(db): add phase 3c evidence access policies`
+  - `9d192d826d98ec2eb76896bd46773ce47301b8a7` — `feat(api): add signed ingestion and bundle sealing`
+  - `5896c951791f9e18de103fb893fb588163f242d3` — `test(api): cover ingestion sealing and correlation`
 - **Phase 3B commits:**
   - `b3cd94b58fc3595f7731bbe7655fe0d69037db3d` — `feat(db): add phase 3b domain access policies`
   - `5d62e12595b12889a1fe768bb9a2abdebdcdce62` — `feat(api): implement host and incident domain lifecycle`
@@ -64,123 +70,142 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 - **API deployment:** **not deployed to Render**. The deployed web app does not call a deployed API.
 - **Preview:** no separate Preview URL was created for this commit; the Git-connected `main` deployment targets Production.
 - **Safe staging:** web deployment uses public Supabase URL/publishable-key configuration for the staging project; no server-only secrets, database URLs, platform signing keys or host credentials are available to the browser.
-- **Phase 3B deployment:** no frontend files changed, so no new Vercel deployment was made. The Phase 3B API is verified locally against staging; Render deployment remains outstanding.
+- **Phase 3C deployment:** no frontend files changed, so no new Vercel deployment was made. The Phase 3C API is verified locally against staging; Render deployment remains outstanding.
 
-## Completed in Phase 3B
+## Completed in Phase 3B (accepted and closed)
 
-### Host and endpoint APIs
+- Owner-scoped host CRUD, DNS TXT endpoint challenge/verification with public-IP/SSRF rules and fixed HTTPS health check.
+- Host enrollment codes, atomic agent enrollment, platform-signed source certificates and HMAC-only credential storage.
+- Signed operational-presence heartbeat with independent monotonic sequence, freshness and replay handling; not an evidence event.
+- Bounded incident creation/end, one active session per host, max three per owner, probe-job cancellation and lifecycle sweeper auto-end.
+- Renter invitations, incident-scoped renter enrollment and key revocation.
+- Host archive, audit events and `Idempotency-Key` handling.
+- Migrations `0009`–`0012` added only grants/RLS policies; no table/column changes.
+- 39 Phase 3B integration tests passed.
 
-- `GET /v1/hosts` — owner-scoped cursor list.
-- `POST /v1/hosts` — alias/hostname validation, IDNA normalization, public-DNS-only hostname rules, owner-scoped duplicate protection and required `Idempotency-Key`.
-- `GET /v1/hosts/:hostId` — safe host metadata, endpoint state, source-key status and install instructions; never returns credentials or key material.
-- `PATCH /v1/hosts/:hostId` — alias-only update with audit.
-- `POST /v1/hosts/:hostId/endpoint-challenge` — random `iw1=` TXT value, HMAC hash stored, 10-minute expiry, previous challenge invalidated.
-- `POST /v1/hosts/:hostId/endpoint-verify` — exact TXT match, 10-attempt cap, DNS resolution, public-address/SSRF rules, fixed HTTPS `GET https://<hostname>/.well-known/incident-witness/health`, TLS validation, no redirects, 3-second timeout, 1 KiB body cap and exact health body.
-- `POST /v1/hosts/:hostId/archive` — terminal archive; rejects active incidents; revokes host credentials and unredeemed enrollment tokens; cancels pending/retry probe jobs.
-- `POST /v1/hosts/:hostId/keys/:keyId/revoke` — host-key-only revocation; atomically revokes linked credentials.
+## Completed in Phase 3C
 
-### Enrollment and operational presence
+### Signed event ingestion
 
-- `POST /v1/hosts/:hostId/enrollment-codes` — one active code per host, older codes revoked, 10-minute expiry, raw code returned once.
-- `POST /v1/agent/enroll` — atomic one-use redemption, public-key validation, platform-signed source certificate, one-time device credential, HMAC-only credential storage.
-- `POST /v1/agent/heartbeat` — `application/vnd.incident-witness.presence+json`, exact RFC 8785 canonical bytes, domain-separated Ed25519 signature, independent monotonic presence sequence, exact-retry duplicate handling, 60-second past/30-second future freshness, replay rejection, host/key/credential revocation checks. It does **not** insert into `evidence_events`.
+- `POST /v1/agent/events` and `POST /v1/renter/events`.
+- Requires `Content-Type: application/vnd.incident-witness.event+json`.
+- Preserves raw bytes, parses JSON, validates strict protocol schemas, canonicalizes with RFC 8785 JCS and requires exact byte equality with the request. Whitespace, reordered keys, duplicate properties and noncanonical numbers are rejected before signature verification.
+- Verifies the Ed25519 signature against the registered source public key and checks credential/key status, source type, host/incident scope and incident state.
+- Enforces request ≤ 8 KiB, payload ≤ 2 KiB canonical bytes, `observed_at` inside `[capture_started_at, effective capture end]` (using `endedAt` when earlier) and server receipt before `ingestion_deadline`.
+- Enforces the 4,000-event and 7 MiB aggregate canonical event-entry budgets atomically under the incident row lock; returns `INCIDENT_EVIDENCE_LIMIT`.
+- Exact duplicate event ID/body/signature returns the prior receipt with `duplicate:true` (HTTP 200). Same event ID with different content or sequence reuse returns `EVENT_CONFLICT` (409).
+- Simulated events are accepted only in demo sessions. Event ingestion does **not** update operational presence.
+- No raw event payloads or signatures are logged.
 
-### Incident lifecycle
+### Deterministic correlator
 
-- `POST /v1/incidents` — owner advisory lock, host row lock, active host and fresh heartbeat check, 2–240 minute duration, one active session per host, maximum three active sessions per owner, demo flag gate, initial probe job, audit and `Idempotency-Key`.
-- `GET /v1/incidents` — owner-scoped list with status/host filters and cursor pagination.
-- `GET /v1/incidents/:incidentId` — session metadata, source-key status, event counts and bounded timeline summary; assessment only when sealed.
-- `POST /v1/incidents/:incidentId/end` — `collecting → awaiting_finalize`, sets `ended_at`, cancels future probe jobs, idempotent while awaiting finalization.
-- API lifecycle sweeper — 2-second bounded loop, `FOR UPDATE SKIP LOCKED`, transitions overdue `collecting` incidents to `awaiting_finalize` and audits the transition.
+- New pure `packages/correlator` package; no DB, network, clock or random dependency.
+- Rule version `iw-rules-v1`: 120-second correlation window, 180-second power chain, 30-second probe/host adjacency.
+- Outputs `POWER_RELATED`, `EXTERNAL_REACHABILITY_LOSS`, `HOST_OR_WORKLOAD_EXIT` or `UNKNOWN`, with `HIGH`/`MEDIUM`/`LOW`/`INSUFFICIENT` grades.
+- `POWER_RELATED` requires a UPS on-battery/low-battery transition, prior host heartbeat, no host heartbeat in the power window and renter/probe reachability loss near the transition.
+- `EXTERNAL_REACHABILITY_LOSS` requires a platform-probe failure plus a host heartbeat/agent-health observation within 30 seconds; renter results may corroborate.
+- `HOST_OR_WORKLOAD_EXIT` requires an explicit host-agent/renter stop signal plus supporting probe/client observation.
+- Simulated decisive evidence caps grade at `LOW` and adds `SIMULATED_EVIDENCE_PRESENT`; demo sessions are labelled and capped at `LOW`.
+- Extracts `source_gap` events into deterministic bundle gap entries.
+- Input-order independent; tested with reordered events.
 
-### Renter invitations and key revocation
+### Sealing transaction
 
-- `POST /v1/incidents/:incidentId/renter-invitations` — 15-minute one-time invitation, one active invitation per incident, one active renter key per incident, token hash only.
-- `POST /v1/renter/enroll` — atomic one-use redemption, incident-scoped key/certificate, credential expiring at the incident ingestion deadline.
-- `POST /v1/incidents/:incidentId/keys/:keyId/revoke` — renter-key-only revocation; atomically revokes linked credentials.
+- `POST /v1/incidents/:incidentId/seal`.
+- Locks the incident row `FOR UPDATE`, requires `awaiting_finalize`, rejects active probe leases and zero accepted events.
+- Loads accepted events in deterministic order (`observed_at`, source type, key ID, sequence, event ID), verifies stored event digests/signatures and source certificates.
+- Runs the correlator, constructs the manifest, validates it against the protocol schema, hashes and signs it with the platform Ed25519 key.
+- Inserts the immutable `evidence_bundles` row, updates the incident to `sealed` and appends an audit event in one transaction. Any failure rolls back completely.
+- Rejects a complete bundle over 10 MiB.
+- Idempotent repeated seal returns the existing bundle metadata.
+- Seal and event ingestion both lock the incident row; exactly one state transition wins.
 
-### Transactions, idempotency and audit
+### Bundle download
 
-- All lifecycle state transitions use transactions and row locks (or owner/incident advisory locks).
-- Enrollment and invitation issuance/redemption use consistent host-before-token and incident-before-invitation lock ordering to avoid deadlocks.
-- `Idempotency-Key` is required for `POST /v1/hosts` and `POST /v1/incidents`; keyed request hash and non-secret resource ID are stored for 24 hours. Same key/different body returns `IDEMPOTENCY_CONFLICT`.
-- Audit events are appended for host creation/update, challenge issue/verify, enrollment-code issue, host enrollment, incident creation/end, renter invitation/enrollment, key revocation, host archive and sweeper transitions. Metadata contains no raw tokens, credentials or private keys.
-- Raw enrollment codes, invitation tokens, DNS challenge values and device/renter credentials are never stored in plaintext; only HMAC-SHA-256 hashes using `IW_TOKEN_PEPPER`.
+- `GET /v1/incidents/:incidentId/bundle`.
+- Owner-scoped; 404 for non-owned/missing, 409 when not sealed.
+- Returns the exact canonical JSON bundle with `application/vnd.incident-witness.bundle+json`, attachment filename, `Cache-Control: no-store` and `X-Content-Type-Options: nosniff`.
 
-### Database access additions (no table/column changes)
+### Lifecycle sweeper enhancements
 
-- `0009_phase3b_domain_access` — narrow column grants and RLS policies for probe-job lifecycle, credential revocation, machine enrollment, provider key revocation and the bounded lifecycle sweeper.
-- `0010_phase3b_credential_provider_select` — provider-scoped credential visibility needed for revocation updates; the API never returns credential hashes.
-- `0011_phase3b_system_select_transition` — allows the sweeper to see the post-transition `awaiting_finalize` row; also removes local diagnostic policies.
-- `0012_phase3b_enroll_incident_lock` — narrow enrollment-mode incident policy required for `SELECT ... FOR SHARE` during renter enrollment.
-- No table or column definitions were changed. Phase 2 schema was sufficient.
+- At `capture_ends_at`, transitions overdue `collecting` incidents to `awaiting_finalize`.
+- At `ingestion_deadline`, automatically seals incidents with accepted evidence or cancels with `NO_EVIDENCE` when none exists.
+- Active probe leases leave the incident in `awaiting_finalize` for retry.
+- Signing/DB failures roll back and leave the incident `awaiting_finalize`; the 2-second bounded loop retries and logs a safe error category.
 
-### Platform signing key
+### Consistency and access changes
 
-The staging `.env` did not contain `IW_PLATFORM_SIGNING_PRIVATE_KEY` or `IW_PLATFORM_KEY_ID`, which are required for enrollment certificates. A staging Ed25519 key was generated and stored only in the ignored local `.env` (mode 0600); the public half was registered in `platform_signing_keys`:
-
-- **Key ID:** `iw-platform-staging-1`
-- **Public key (base64url):** `U0lXLgkEbyAWigI-_WWJjxAfYnYQQpfTcPtRZEqe4TI`
-- **Fingerprint (SHA-256 base64url):** `5xL-KJE2WSs1tQkh1zt7QYVWG3HtrZFwHeErOPqzP4A`
-
-A reproducible provisioning command was added: `npm run db:provision-platform-key`. It writes only public metadata and refuses to overwrite an existing key ID with a different public key. The operator may rotate this staging key through the documented overlapping-key process if a different trust anchor is required.
+- Manual end now clamps `endedAt` to the latest accepted observation so accepted events remain inside the effective capture window.
+- Migrations `0013`–`0017` add only grants/RLS policies for machine event reads, scoped incident locks, provider/system bundle inserts, platform-key lookup, system finalization visibility and the auto-end transition. No table or column definitions changed.
+- The machine incident policy avoids RLS recursion and prevents a host key from locking another host's incident; renter key scope is validated before the incident lock.
 
 ## Visible behaviour vs placeholders
 
 **Functional locally against staging:**
 
-- All Phase 3B host, endpoint, enrollment, presence, incident, renter-invitation, renter-enrollment, key-revocation and archive routes.
-- Owner isolation (404 for non-owned resources).
-- DNS challenge expiry/mismatch/private-IP rejection and fixed HTTPS endpoint verification with injected test resolver/checker.
-- One-use enrollment and invitation races; one active session per host; maximum three active sessions per owner.
-- Presence replay/future/stale rejection and revocation enforcement.
-- Idempotent host/incident creation.
-- Lifecycle sweeper auto-end.
-- Audit rows and HMAC-only secret storage.
+- All Phase 3B host/incident/enrollment/renter/key/archive routes.
+- Signed host and renter event ingestion with canonical-byte rejection, signature verification, time-window checks and atomic budgets.
+- Deterministic correlation and evidence grades.
+- Full seal → bundle download → protocol signature/certificate/event verification.
+- Seal vs ingest serialization and post-seal rejection.
+- Sweeper auto-seal and `NO_EVIDENCE` cancellation.
+- Demo-session labelling and grade cap.
+- Owner isolation for bundles and incidents.
 
 **Placeholder or unverified:**
 
-- Signed evidence-event ingestion (`/v1/agent/events`, `/v1/renter/events`) is **not implemented**.
-- Sealing, bundle generation/download, grace-expiry auto-seal/auto-cancel and assessment are **not implemented** (Phase 3C).
-- Host agent, renter SDK, probe worker and CLI verifier are **not implemented** (Phase 3D–3F).
-- API is not deployed to Render; no new Vercel deployment for Phase 3B.
-- Web host/incident pages remain Phase 1 placeholders and are not wired to these APIs (Phase 4).
-- Real DNS/HTTPS endpoint verification was exercised through injected test resolver/checker in integration tests; the production resolver/checker is implemented but not tested against a live public hostname in this checkpoint.
+- Linux host agent, renter SDK, platform probe worker and CLI verifier are **not implemented** (Phase 3D–3F).
+- Event ingestion is tested with generated test keys/events, not an actual agent or SDK.
+- No real platform-probe observations or worker leases are produced; probe-lease behavior is tested with seeded rows.
+- Web host/incident/timeline/bundle pages remain Phase 1 placeholders and are not wired to these APIs (Phase 4).
+- API is not deployed to Render; no new Vercel deployment for Phase 3C.
+- Source-certificate verification uses the current configured platform key. Platform-key rotation with old source certificates is not yet exercised.
 
 ## Tests and evidence
 
 Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 
-- `npm run db:migrate` — **PASS**: applied `0009`–`0012` to staging after the existing `0001`–`0008`.
-- `npm run db:migrate:status` — **PASS**: all migrations `0001`–`0012` applied.
-- `npm run db:provision-platform-key` — **PASS**: public key/fingerprint registered; private key not printed.
-- `npm run lint` — **PASS** across protocol, db, API and web.
-- `npm run typecheck` — **PASS** across protocol, db, API and web.
-- `npm run build` — **PASS**: protocol ESM/CJS/declarations, DB, Fastify API and Next.js 16.4.3.
-- `npm test` — **PASS**: 20/20 protocol tests, 14/14 ADR-001 staging tests, 17/17 API unit tests.
-- `npm run test:integration --workspace @incident-witness/api` — **PASS**: 39/39 Phase 3B API integration tests across hosts, enrollment/presence, incidents/lifecycle sweeper and renter invitations.
+- `npm run db:migrate` — **PASS**: applied `0013`–`0017` after `0001`–`0012`.
+- `npm run db:migrate:status` — **PASS**: all migrations `0001`–`0017` applied.
+- `npm run lint` — **PASS** across protocol, correlator, db, API and web.
+- `npm run typecheck` — **PASS** across protocol, correlator, db, API and web.
+- `npm run build` — **PASS**: protocol ESM/CJS/declarations, correlator, DB, Fastify API and Next.js 16.4.3.
+- `npm test` — **PASS**: 20/20 protocol tests, 12/12 correlator tests, 14/14 ADR-001 staging tests, 17/17 API unit tests.
+- `npm run test:integration --workspace @incident-witness/api` — **PASS**: 57/57 API integration tests across Phase 3B and Phase 3C.
 - `npm run test:e2e` — **PASS**: 36/36 Playwright checks (desktop Chromium + mobile Pixel 7).
 - `npm audit --omit=dev` — **PASS**: 0 production vulnerabilities.
 - Full dependency audit still reports 20 moderate development-only advisories (ESLint/esbuild tooling); no non-breaking fix is available without a forced breaking downgrade.
 
-### Phase 3B integration coverage
+### Phase 3C integration coverage
 
-- Owner A/B isolation for hosts, incidents, invitations and key routes (404 for non-owned).
-- Hostname validation, duplicate hostnames, idempotency replay/conflict.
-- DNS challenge wrong value, expired challenge, private-IP target, exact TXT success and fixed HTTPS checker invocation.
-- Enrollment code expiry, older-code revocation, concurrent double redemption (exactly one success), HMAC-only credential/token storage and certificate verification.
-- Presence accepted, exact retry duplicate, lower-sequence replay, future/stale timestamps, wrong host and revoked key/credential.
-- Incident duration boundaries, stale heartbeat, one active per host, max three per owner, concurrent create race, idempotency replay, owner isolation, end/idempotent end, future probe-job cancellation and sweeper auto-end.
-- Renter invitation TTL/hash-only storage, concurrent double redemption (exactly one success), expired invitation, older-invitation revocation, one renter key per incident, scoped key revocation and owner isolation.
+- Valid host event accepted; incident counters updated; operational presence unchanged.
+- Exact duplicate returns prior receipt and does not append twice.
+- Same event ID/different bytes and sequence reuse return 409.
+- Invalid Ed25519 signature rejected.
+- Noncanonical raw bytes and duplicate JSON properties rejected.
+- Observation before capture start, after capture end, after early `endedAt`, and more than five minutes in the future rejected.
+- 4,000-event budget concurrency: exactly one of two simultaneous events accepted.
+- 7 MiB aggregate byte budget concurrency: exactly one of two simultaneous events accepted.
+- Renter event accepted; cross-incident renter use rejected.
+- Simulated event in a live incident rejected.
+- Wrong content type returns 415; oversized request returns 413.
+- Full seal with host+renter evidence produces `POWER_RELATED`/`MEDIUM`; downloaded bundle passes `verifyBundleManifest`, source-certificate verification, event-signature verification and event-digest checks.
+- Bundle download is owner-only; another owner receives 404.
+- Seal rejects active probe lease and zero accepted events.
+- Seal vs event ingestion: seal always succeeds; event is either accepted and included or rejected with 409; no event accepted after seal.
+- Sweeper auto-seals with evidence and auto-cancels with `NO_EVIDENCE`.
+- Demo session is labelled, `simulation_present=true` and capped at `LOW`.
+- Correlator unit tests cover `UNKNOWN`/insufficient, power pattern, external reachability, exit pattern, simulation cap, missing sources, gaps, determinism and unsupported rule version.
 
 ## Database and migration status
 
 - **Staging database:** Supabase Postgres 17.11.
 - **Migration ledger:** `iw_schema_migrations`.
-- **Applied migrations:** `0001_phase2_schema` through `0012_phase3b_enroll_incident_lock`.
+- **Applied migrations:** `0001_phase2_schema` through `0017_phase3c_system_transition_visibility`.
 - **Roles:** `iw_api` and `iw_worker` are login roles with `NOSUPERUSER`, `NOBYPASSRLS`, `NOCREATEDB`, `NOCREATEROLE`.
 - **Schema decision:** `public.iw_uid()` security-definer wrapper remains approved and in use.
 - **Platform key:** `iw-platform-staging-1` registered in `platform_signing_keys`; private key only in ignored `.env`.
+- **Phase 3C schema:** no table or column changes; only grants/RLS policies.
 
 ## Design reference and approval status
 
@@ -188,28 +213,28 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - **Design references:** NOT COLLECTED/APPROVED.
 - **Mockups:** NOT CREATED.
 - **Operator approval:** NOT GRANTED.
-- Phase 3B did not change frontend styling or visual behaviour.
+- Phase 3C did not change frontend styling or visual behaviour.
 
 ## Documentation/footer status
 
-- `docs/API_REFERENCE.md` updated with implemented Phase 3B endpoints, error codes, idempotency and lifecycle notes.
-- `docs/CONFIGURATION.md` updated with `IW_API_BASE_URL` and platform-key provisioning.
-- `README.md` updated with Phase 3B status, migration/provisioning and test commands.
+- `docs/API_REFERENCE.md` updated with event ingestion, sealing, bundle download, error codes and correlator rules.
+- `docs/PROTOCOL.md` updated with rule version `iw-rules-v1`, correlation windows and digest semantics.
+- `README.md` updated with Phase 3C status and test counts.
 - `/docs` route and footer Documentation/GitHub links remain unchanged and reachable from Phase 2.
 - `/privacy` and `/terms` remain clearly labelled placeholders; no legal copy is approved.
 
 ## Known risks and operator actions
 
-1. **Phase 3B accepted and closed:** host/incident APIs are operator-accepted. The staging platform key, migrations `0009`–`0012` and manual-end `endedAt`/`captureEndsAt` semantics are approved.
-2. **Staging platform key generated:** `.env` lacked the required platform signing key. A staging key was generated and registered as `iw-platform-staging-1`. The operator should confirm this trust anchor or rotate it through the documented overlap process.
-3. **Manual end semantics:** `POST /end` records actual `endedAt` but leaves `captureEndsAt` as the bounded scheduled end because the Phase 2 schema enforces a minimum 2-minute capture window. Phase 3C must use `endedAt` as the effective end when earlier.
-4. **Sweeper scope:** only auto-ends at `capture_ends_at`. Grace-expiry auto-seal/auto-cancel is Phase 3C.
-5. **API not deployed:** no Render API deployment or new Vercel deployment for Phase 3B. Local staging verification only.
-6. **No live endpoint verification:** production DNS/HTTPS checker is implemented but integration tests use injected resolver/checker; a real public hostname test remains outstanding.
-7. **Credential provider SELECT policy:** `source_credentials_provider_select` was added so revocation can update linked rows. It is scoped to owned keys; the API never returns hashes. Review during Phase 9 security pass.
+1. **Phase 3C pending acceptance:** signed ingestion, correlation, sealing and bundle download are implemented and tested but not operator-accepted. Do not start Phase 3D without explicit authorization.
+2. **No agent/SDK/probe/CLI:** events are generated by test code; real host-agent and renter-SDK integration remains Phase 3D/3E. The platform probe worker does not exist, so probe observations and leases are simulated with seeded test rows.
+3. **Platform-key rotation:** source certificates are verified against the current configured platform key. A future rotation must preserve old certificate verification or re-enroll source keys; this is not yet exercised.
+4. **Manual end clamp:** `endedAt` is clamped to the latest accepted observation to keep the capture window consistent. `captureEndsAt` remains the bounded scheduled end due the Phase 2 minimum-2-minute constraint.
+5. **Demo cap:** demo sessions are labelled and capped at `LOW` even when their events are real; this is conservative and matches the permanent simulation-label requirement.
+6. **API not deployed:** no Render API deployment or new Vercel deployment for Phase 3C. Local staging verification only.
+7. **Event rejection auditing:** rejected events are not inserted into `audit_events`; the API returns safe error codes and does not log payloads/signatures. Revisit in Phase 9 if DB-level security audit of rejects is required.
 8. **Development advisories:** 20 moderate development-only npm advisories remain; `npm audit --omit=dev` is clean.
 9. **Fastify deprecation warning:** `requestIdLogLabel` is deprecated in Fastify 5 and will be removed in Fastify 6. Existing Phase 2 configuration; non-blocking.
-10. **No Phase 3C+ functionality:** no event ingestion, sealing, bundles, host agent, renter SDK, probe worker or verifier.
+10. **No Phase 4 UI integration:** the web pages do not yet display events, assessments or bundle downloads.
 
 ## Things not to change
 
@@ -224,4 +249,4 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 
 ## Exact next task
 
-**Phase 3C only — signed event ingestion, correlation and sealing — awaiting explicit operator authorization.** Do not start Phase 3C from this checkpoint.
+**Phase 3D only — Linux host agent — awaiting explicit operator authorization.** Do not start Phase 3D from this checkpoint.
