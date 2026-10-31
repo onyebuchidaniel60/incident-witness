@@ -3,6 +3,8 @@ import { expect, test } from "@playwright/test";
 import { E2E_SESSION_COOKIE, e2eSessionToken } from "../../lib/e2e-auth";
 import { getSupabaseCookieOptions } from "../../lib/supabase/env";
 
+const API_URL = "http://127.0.0.1:4100";
+
 test("production Supabase cookies are path-scoped, lax and secure", () => {
   expect(getSupabaseCookieOptions("production")).toEqual({
     path: "/",
@@ -48,11 +50,27 @@ test("proxy redirects without a session and accepts a test-injected session", as
 
   const anonymous = await browser.newContext({ baseURL });
   const anonymousPage = await anonymous.newPage();
+  const apiRequests: string[] = [];
+  anonymousPage.on("request", (request) => {
+    if (request.url().startsWith(API_URL)) apiRequests.push(request.url());
+  });
+
   await anonymousPage.goto("/dashboard");
   await expect(anonymousPage).toHaveURL(/\/login\?next=%2Fdashboard$/);
   await expect(
     anonymousPage.getByRole("heading", { level: 1, name: "Provider sign-in" }),
   ).toBeVisible();
+  await expect(
+    anonymousPage.getByText(/authentication token is invalid/i),
+  ).toHaveCount(0);
+
+  await anonymousPage.goto("/hosts");
+  await expect(anonymousPage).toHaveURL(/\/login\?next=%2Fhosts$/);
+  await expect(
+    anonymousPage.getByText(/authentication token is invalid/i),
+  ).toHaveCount(0);
+
+  expect(apiRequests).toEqual([]);
   await anonymous.close();
 
   const authenticated = await browser.newContext({ baseURL });
@@ -78,4 +96,33 @@ test("proxy redirects without a session and accepts a test-injected session", as
     authenticatedPage.getByRole("heading", { level: 1, name: "Your hosts" }),
   ).toBeVisible();
   await authenticated.close();
+});
+
+test("API 401 redirects to login without rendering a raw auth error", async ({ page }) => {
+  await page.goto("/auth/callback?code=e2e-magic-link");
+  await expect(page.getByRole("heading", { level: 1, name: "Provider dashboard" })).toBeVisible();
+
+  await page.route(`${API_URL}/**`, async (route) => {
+    await route.fulfill({
+      status: 401,
+      contentType: "application/json",
+      body: JSON.stringify({
+        error: {
+          code: "AUTH_INVALID_TOKEN",
+          message: "The authentication token is invalid.",
+          request_id: "req-auth-session-test",
+        },
+      }),
+    });
+  });
+
+  try {
+    await page.goto("/dashboard");
+  } catch (error) {
+    // The API client can complete a hard login redirect while the document is
+    // still loading, which Playwright reports as an aborted navigation.
+    if (!String(error).includes("ERR_ABORTED")) throw error;
+  }
+  await expect(page).toHaveURL(/\/login\?next=%2Fdashboard$/, { timeout: 10_000 });
+  await expect(page.getByText(/authentication token is invalid/i)).toHaveCount(0);
 });
