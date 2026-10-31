@@ -8,21 +8,13 @@ Incident Witness is a portable incident-evidence protocol for decentralized comp
 
 ## Project status
 
-Phases 0–7 are complete and accepted. Phase 8 frontend and documentation completeness is implemented and test-verified; operator acceptance is pending.
+Phases 0–8 are complete and accepted. **Phase 9 final regression, security audit and release readiness is complete and green.** Incident Witness MVP is a release candidate, pending explicit operator authorization for production release.
 
-Phase 8 adds:
+The MVP includes the signed evidence protocol, Fastify API, Linux host agent, renter SDK, platform probe worker, deterministic correlator, transactional bundle sealing, offline CLI and browser verifiers, provider workspace, public documentation, legal status pages, metadata/SEO, accessible responsive UI and link auditing.
 
-- a real in-app documentation destination at `/docs` covering quick start, host-agent installation and enrollment, renter SDK integration, the signed evidence protocol and limitations;
-- real `/privacy` and `/terms` routes that state clearly that operator-approved legal review is pending;
-- page titles, descriptions, canonical URLs, a favicon, OpenGraph/Twitter metadata, `robots.txt` and `sitemap.xml`;
-- `noindex` rules for authenticated provider routes and the sign-in page, with public-only sitemap entries;
-- working footer links to Documentation, Privacy, Terms, Verify and the public GitHub repository;
-- styled 404 and error states with links back to safety;
-- keyboard, accessible-name, focus and status-text checks, plus link-crawl coverage.
+Authentication uses the standard **Supabase magic-link email flow**. The temporary judge-demo bypass has been removed; there is no alternate sign-in path. The API and probe worker are **not deployed to Render** from this repository state. The Next.js web app is deployed on Vercel against the staging Supabase project; provider data pages require a reachable API origin configured through `NEXT_PUBLIC_API_BASE_URL`.
 
-Phase 8 does **not** change business logic, API contracts, database schemas, the cryptographic protocol or verifier behaviour.
-
-Current deployment: the Next.js web app is deployed on Vercel against the staging Supabase project. The Fastify API and probe worker are **not deployed to Render** from this repository state. Provider data pages therefore require a locally running or otherwise reachable API origin configured through `NEXT_PUBLIC_API_BASE_URL`.
+Production release requires separate explicit operator authorization, production secrets/services, legal copy and a verified backup/restore plan.
 
 ## Quick start
 
@@ -75,33 +67,7 @@ The provider login uses Supabase's default **magic-link email** flow rather than
 - Every deployment origin and `/auth/callback` must be allow-listed in Supabase Auth redirect settings.
 - Authenticated routes are protected by `proxy.ts` and a server-side user check before any provider API call. Unauthenticated requests redirect to `/login?next=…` without flashing an API error.
 
-The normal provider login uses no custom SMTP, external identity provider or service-role key. The optional judge-demo bypass below uses a server-only service-role key for the fixed demo account only.
-
-### Hackathon judge demo login (opt-in)
-
-The home page can show a clearly labelled **Enter as Judge / Try Demo** button for judges. It POSTs to `/api/demo-login`, which creates a session only for the fixed, pre-seeded demo account `judge@incidentwitness.com`. The route accepts no email address from the browser and cannot sign in any other user.
-
-The route is disabled by default in production. It requires **both**:
-
-- `SUPABASE_SERVICE_ROLE_KEY` set as a server-only Vercel environment variable; and
-- `IW_ENABLE_DEMO_LOGIN=true` explicitly set for the deployment.
-
-To enable it for a hackathon:
-
-1. Seed the demo account and a sealed sample incident against staging:
-
-   ```bash
-   npm run seed:judge-demo
-   ```
-
-   The script creates/updates the confirmed demo user, a verified host, a signed demo session and a sealed bundle. It is safe to re-run; it resets only the demo account's data.
-
-2. In Vercel → Project → Settings → Environment Variables, add `SUPABASE_SERVICE_ROLE_KEY` for the desired environment (Preview and/or Production). Use the Supabase secret/service-role key. **Never** rename it to `NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY` or place it in browser code.
-3. Add `IW_ENABLE_DEMO_LOGIN=true` for the same environment.
-4. Redeploy so the server-only variables and the home-page button are available.
-5. After the hackathon, set `IW_ENABLE_DEMO_LOGIN=false` (or remove it) and redeploy. Rotating the service-role key is recommended if it was exposed for the event.
-
-The route is same-origin POST-only, returns `no-store` responses, uses the service-role key only on the server to generate a magic link for the fixed demo email, and writes the resulting Supabase session cookies through the existing route-handler client. The normal magic-link flow for real providers remains unchanged.
+The provider login uses no custom SMTP or external identity provider. The standard magic-link flow is the only sign-in path; the temporary judge-demo bypass was removed before release.
 
 ## Testing
 
@@ -115,28 +81,30 @@ npm run test:integration --workspace @incident-witness/probe-worker
 npm run test:e2e
 npm run test:integration --workspace @incident-witness/demo-harness
 npm run demo        # staging-only synthetic lifecycle
-npm run seed:judge-demo
 npm run verify -- path/to/bundle.json
 ```
 
-Recorded results on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
+Recorded Phase 9 results on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`, from a clean `npm ci`:
 
+- `npm ci` — PASS (549 packages audited; 20 moderate development-only advisories).
 - `npm run lint` — PASS across all workspaces.
 - `npm run typecheck` — PASS across all workspaces.
-- `npm run build` — PASS across the monorepo, including the Next.js 16.4.3 production build and the new `/api/demo-login` route.
-- `npm test` — PASS: 164 unit tests (20 protocol, 11 CLI verifier, 15 correlator, 14 ADR-001, 49 host-agent, 14 renter SDK, 20 probe worker, 21 API).
-- `npm run test:integration --workspace @incident-witness/api` — PASS: 60/60 against staging (Phase 8 run; no API contract changed for the judge-demo work).
-- `npm run test:integration --workspace @incident-witness/probe-worker` — PASS: 2/2 against staging (Phase 8 run; no worker contract changed).
-- `npm run test:e2e` — PASS: 90 Playwright checks, 89 passed and one intentional mobile provider-flow skip. Coverage includes public metadata, link crawling, accessibility, the original provider journey, the production demo-login guard, fixed demo email, cross-origin rejection, missing-config failure and POST-only behaviour.
-- `npm run test:integration --workspace @incident-witness/demo-harness` — PASS: 2/2.
-- `npm run seed:judge-demo` — PASS against staging: judge user, email identity, one verified host, one sealed incident and one verified bundle.
-- The demo-login success/cookie path was exercised against a local fake Supabase Auth endpoint (200, session cookie set, `/dashboard` rendered). A real-key login remains operator verification after the Vercel secret is added.
+- `npm run build` — PASS across the monorepo, including the Next.js 16.4.3 production build.
+- `npm test` — PASS: 165 unit tests (20 protocol, 11 CLI verifier, 15 correlator, 14 ADR-001, 49 host-agent, 14 renter SDK, 20 probe worker, 22 API).
+- `npm run test:integration --workspace @incident-witness/api` — PASS: 60/60 against staging.
+- `npm run test:integration --workspace @incident-witness/probe-worker` — PASS: 2/2 against staging.
+- `npm run test:e2e` — PASS: 78 Playwright checks, 77 passed and one intentional mobile provider-flow skip. Coverage includes the provider journey, protected-route click redirects with zero API calls, login-page cleanup, metadata, link crawling, accessibility and local verification.
+- `npm run demo` — PASS: sealed `POWER_RELATED`/`LOW` bundle verified with exit 0; one-byte tampered copy failed with exit 1.
+- `npm audit --omit=dev` — PASS: 0 production vulnerabilities.
+- Secret scan — PASS: no `.env`, private-key or service-role files tracked; no sensitive environment value found in the client static bundle.
+- Pino/probe/host-agent redaction paths reviewed; host-agent redaction test passes.
 
 E2E uses test-only `IW_E2E_*`/`NEXT_PUBLIC_IW_E2E_*` seams for a static test session and file-backed DNS resolver. The API seam is disabled unless `NODE_ENV=test` and the explicit flag are both set; the web seam is disabled in production builds. These are test infrastructure, not production authentication or SSRF bypasses.
 
 ## Documentation
 
 - In-app documentation: `/docs`
+- [Changelog](./CHANGELOG.md)
 - Repository documentation index: [`docs/README.md`](./docs/README.md)
 - [Provider user guide](./docs/USER_GUIDE.md)
 - [Host agent operator guide](./docs/HOST_AGENT.md)

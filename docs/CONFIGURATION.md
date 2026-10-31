@@ -18,18 +18,9 @@
 | `NEXT_PUBLIC_SUPABASE_URL` | yes for auth-enabled app | yes | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | yes for auth-enabled app | yes | Supabase publishable key; RLS must be enforced |
 | `NEXT_PUBLIC_API_BASE_URL` | yes | yes | Fastify API origin used by browser requests; not a secret |
+| `NEXT_PUBLIC_SITE_URL` | optional | yes | Canonical public origin for metadata, sitemap and robots |
 
 No private signing key, DB URL, service-role/secret key, host credential or invitation token may be exposed in `NEXT_PUBLIC_*`.
-
-### Web server-only judge-demo variables
-
-| Variable | Required | Client-safe | Purpose |
-|---|---|---|---|
-| `SUPABASE_SERVICE_ROLE_KEY` | only when judge demo is enabled | no | Server-only Supabase secret used by `/api/demo-login` to generate a link for the fixed seeded judge account. Never expose in a `NEXT_PUBLIC_*` variable. |
-| `IW_ENABLE_DEMO_LOGIN` | only for the hackathon | no | Must be exactly `true` in production to enable the judge-demo route and home-page button. Set `false` or remove after the event. |
-| `NEXT_PUBLIC_SITE_URL` | optional | yes | Canonical public origin for metadata, sitemap and robots. |
-
-The judge-demo route is disabled in production unless both `IW_ENABLE_DEMO_LOGIN=true` and `SUPABASE_SERVICE_ROLE_KEY` are present. Seed its data with `npm run seed:judge-demo` against staging. The normal magic-link flow does not use the service-role key.
 
 ## API variables
 

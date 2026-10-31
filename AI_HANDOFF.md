@@ -2,11 +2,11 @@
 
 **Last updated:** 2026-10-31
 
-**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**. Phase 6 reference-driven mockups (revision 0.3) are **APPROVED**. Phase 7 final UI implementation is implemented, deployed and **COMPLETE AND CLOSED**; the magic-link session bug and the protected-route API-call race are fixed, verified and accepted. Phase 8 frontend and documentation completeness is implemented, test-verified, deployed and **COMPLETE AND CLOSED**.
+**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**. Phase 6 reference-driven mockups (revision 0.3) are **APPROVED**. Phase 7 final UI implementation is implemented, deployed and **COMPLETE AND CLOSED**; the magic-link session bug and the protected-route API-call race are fixed, verified and accepted. Phase 8 frontend and documentation completeness is implemented, test-verified, deployed and **COMPLETE AND CLOSED**. Phase 9 final regression, security audit and release readiness is **COMPLETE AND GREEN**. The MVP is a release candidate awaiting explicit production release authorization.
 
-**Current phase:** Post-Phase 8 secure hackathon judge-demo login enhancement. Phase 9 is not authorized.
+**Current phase:** Phase 9 — complete. Awaiting explicit operator production release authorization.
 
-**Next task:** Complete and verify the judge-demo login bypass, then wait for explicit Phase 9 authorization.
+**Next task:** Obtain explicit production release authorization. Do not deploy Production before it.
 
 **Phase 2 acceptance:** Operator accepted the Phase 2 checkpoint and approved the `public.iw_uid()` security-definer wrapper on 2026-10-31.
 
@@ -28,7 +28,7 @@
 
 **Phase 8 acceptance:** Operator reviewed the Phase 8 report on 2026-10-31 and **APPROVED** the checkpoint. Documentation, SEO metadata, link audits and accessibility fixes are accepted. The Vercel edge `403` responses were confirmed as bot protection rather than an application failure. Phase 8 is **COMPLETE AND CLOSED**.
 
-**Judge-demo authorization:** After Phase 8 acceptance, the operator authorized a secure one-click judge demo login bypass for the hackathon. This is an additive demo-only path; the existing magic-link flow remains the real-user authentication path.
+**Phase 9 authorization:** The operator authorized Phase 9 final regression, security audit and release readiness on 2026-10-31. Production release still requires separate explicit authorization.
 
 **Authentication deviation (operator-approved 2026-10-31):** The provider login was changed from a six-digit Supabase email OTP to Supabase's default magic-link flow. This bypasses the Supabase free-tier requirement for custom SMTP and an editable email template. The form calls `signInWithOtp` with `emailRedirectTo=/auth/callback`; the callback exchanges the code for a session and redirects to `/dashboard`, or redirects to `/login?error=invalid_link` on failure. The Supabase Auth redirect allow-list must include the deployment origin and `/auth/callback`. No external email service or backend/database change was introduced.
 
@@ -897,43 +897,44 @@ When unauthenticated or after the session disappeared, protected routes could br
 - **Git-connected Production deployment (auto-created by pushing `main`):** https://incident-witness-fqbgv60f1-uhhh2.vercel.app, deployment ID `dpl_9rdMekQvCtpx8bziWUYFFk8XZVWh`, target `production`, status `READY`, Git metadata commit `3122b3fe9d720982faf8f11f059e275203e8cb7c` on `main`. Stable alias https://incident-witness.vercel.app serves the Phase 8 `/docs` page (HTTP 200). No separate `vercel deploy --prod` command was run; the deployment was auto-created by the Git integration. Production release approval remains a separate Phase 9/operator decision.
 - Subsequent docs-only handoff commits may auto-deploy without an application-code change.
 
-## Judge demo login bypass (implemented 2026-10-31; pending operator verification)
+## Temporary demo bypass removal (2026-10-31)
 
-### Security model
+The temporary one-click demo sign-in bypass was removed before release at the operator's request. The route, home-page button, seed script, tests and environment-variable documentation are deleted. The standard Supabase magic-link flow is the only sign-in path.
 
-- Added `POST /api/demo-login` in `apps/web/app/api/demo-login/route.ts`. It is Node-runtime and dynamic, accepts no request body and never reads an email address from the caller.
-- The only account it can prepare is the fixed `judge@incidentwitness.com` demo user.
-- The Supabase service-role key is read only from the server-only `SUPABASE_SERVICE_ROLE_KEY` environment variable. It is never exported, never placed in a `NEXT_PUBLIC_*` variable and never sent to the browser.
-- The route is disabled in production unless `IW_ENABLE_DEMO_LOGIN=true` is explicitly set. When disabled it returns 404.
-- Requests are same-origin POST-only; cross-site requests and `GET` are rejected. Responses use `Cache-Control: no-store`.
-- The service-role client only calls `auth.admin.generateLink` for the fixed demo email. The resulting one-time token hash is exchanged through the existing Supabase route-handler client, which writes the normal session cookies onto the returned response.
-- The existing magic-link login and `/auth/callback` flow are unchanged for real users.
-- The home page renders the “Enter as Judge / Try Demo” button only when both the enablement flag and service-role key are configured.
+## Phase 9 final regression and release readiness (COMPLETE AND GREEN 2026-10-31)
 
-### Demo data seeding
+### Clean-install regression
 
-- Added `npm run seed:judge-demo` in `tools/demo-harness`.
-- The script creates/updates the confirmed judge auth user, an email identity, a profile, a DNS-verified host, an enrolled host source, a labelled demo capture session, signed synthetic events and a sealed bundle. It resets only the judge account’s data and is safe to re-run.
-- Seed result against staging: user `7f3c1a2e-5b4d-4c8f-9a6e-2d1b0c3e4f5a`, one host, one sealed incident, one bundle, assessment `POWER_RELATED` / `LOW`, simulation label present.
-- The demo harness was parameterized so its existing disposable Phase 3F demo behaviour is unchanged; the existing 2/2 demo-harness integration tests remain green.
-
-### Test evidence
-
+- `npm ci` — **PASS** (549 packages; 20 moderate development-only advisories remain).
 - `npm run lint` — **PASS** across all workspaces.
-- `npm run typecheck` — **PASS** across all workspaces.
-- `npm run build` — **PASS**, including the new `/api/demo-login` dynamic route.
-- `npm test` — **PASS**: 164 unit tests.
-- `npm run test:e2e` — **PASS**: 90 Playwright checks, 89 passed and one intentional mobile provider-flow skip. New coverage includes the production enablement guard, required service-role configuration, fixed demo email, cross-origin rejection, missing-config 503, POST-only behaviour and hidden-button state.
-- `npm run test:integration --workspace @incident-witness/demo-harness` — **PASS**: 2/2.
-- `npm run seed:judge-demo` — **PASS** against staging; sealed bundle passed the offline verifier and the one-byte tamper check failed as expected.
-- Local fake-Supabase route verification: `POST /api/demo-login` returned 200, set the Supabase session cookie, and an authenticated request to `/dashboard` rendered the provider dashboard. This proves the cookie/redirect path without a real service-role key. A real-key login remains operator verification after adding the Vercel secret.
-- The real service-role key is absent from this environment. No real Supabase Admin API call or real judge login was performed here.
+- `npm run typecheck` — **PASS** across all workspaces. An initial run encountered stale generated `.next/types` metadata referencing the deleted demo route; removing the generated `apps/web/.next` directory and re-running produced a clean pass. No source change was required.
+- `npm run build` — **PASS** across the monorepo, including the Next.js 16.4.3 production build.
+- `npm test` — **PASS**: 165 unit tests (20 protocol, 11 CLI verifier, 15 correlator, 14 ADR-001, 49 host-agent, 14 renter SDK, 20 probe worker, 22 API).
+- `npm run test:integration --workspace @incident-witness/api` — **PASS**: 60/60 against staging. An intermediate full run had one transient lifecycle-sweeper assertion failure; the isolated test and the complete rerun both passed with no source change.
+- `npm run test:integration --workspace @incident-witness/probe-worker` — **PASS**: 2/2 against staging.
+- `npm run test:e2e` — **PASS**: 78 Playwright checks, 77 passed and one intentional mobile provider-flow skip.
+- `npm run demo` — **PASS**: sealed `POWER_RELATED`/`LOW` bundle verified with exit 0; one-byte tampered copy failed with exit 1.
 
-### Deployment requirement
+### Security and dependency audit
 
-- Add `SUPABASE_SERVICE_ROLE_KEY` and `IW_ENABLE_DEMO_LOGIN=true` to the desired Vercel environment, then redeploy. The home-page button only appears when both are present.
-- After the hackathon, set `IW_ENABLE_DEMO_LOGIN=false` or remove it and redeploy; rotate the service-role key if appropriate.
-- Never expose the key in browser code or a `NEXT_PUBLIC_*` variable.
+- `npm audit --omit=dev` — **PASS**: 0 production vulnerabilities. 20 moderate development-only advisories remain; no runtime fix is required for release.
+- `git ls-files` secret-file scan — **PASS**: no `.env`, `.pem`, `.pk8` or `secrets/` files tracked.
+- Tracked-content scan for private-key blocks and JWT/service-role literals — **PASS**: none found.
+- Client-bundle scan — **PASS**: five sensitive environment values checked against 28 production static files; zero matches. The service-role variable name is absent from the client bundle.
+- Pino API redaction initially covered nested fields and request headers but not root-level `authorization`, `cookie`, `token`, `password` and similar fields. During the Phase 9 audit this was fixed by centralizing the redaction paths in `apps/api/src/logging.ts` and adding root-level, nested and header paths for authorization, cookie, token, password, secret, credential, database URL, connection string, private key, access token, refresh token and API key. Re-test produced six `[REDACTED]` values and zero raw test secrets. A unit test asserts the required paths remain configured.
+- Probe-worker logger redacts address/credential/hostname/IP/key/private/secret/token fields; host-agent redaction is covered by its passing test.
+- The service-role key is no longer required by any application code or environment documentation.
+
+### UI fixes
+
+- The login-page magic-link implementation notice was removed. The form, callback and error handling remain.
+- `proxy.ts` continues to intercept `/dashboard`, `/hosts`, `/incidents` and `/settings` before protected HTML is served. A new Playwright test clicks the public-header Workspace link while unauthenticated and asserts an immediate `/login?next=%2Fdashboard` result, no dashboard heading, no raw API error and zero API requests.
+
+### Documentation and release notes
+
+- Added `CHANGELOG.md` with MVP features, authentication change, removals, security controls and known limitations.
+- README updated to the final release-candidate status, magic-link-only authentication and Phase 9 results.
+- Temporary one-click demo sign-in route, button, seed script, tests, environment variables and documentation removed. A search for the former demo email, route, seed command and feature flags returns no matches outside ignored build artifacts.
 
 ## Design reference and approval status
 
