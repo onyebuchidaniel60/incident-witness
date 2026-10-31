@@ -35,7 +35,7 @@ import {
   type EndpointChecker,
 } from "./services/endpoint.js";
 
-const expectedMigration = "0019_phase3e_worker_counter_select";
+const expectedMigration = "0022_phase5_worker_ended_at_grant";
 
 export type BuildAppOptions = {
   config?: AppConfig;

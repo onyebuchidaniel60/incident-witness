@@ -136,9 +136,7 @@ function requireBearerToken(authorization: string | undefined): string {
  * and sealing. This serializes seal-vs-ingest so exactly one state transition
  * wins.
  */
-export async function ingestSignedEvent(
-  input: EventIngestionInput,
-): Promise<EventIngestionResult> {
+export async function ingestSignedEvent(input: EventIngestionInput): Promise<EventIngestionResult> {
   const envelope = parseEvent(input.rawBody);
   if (envelope.source_type !== input.expectedSourceType) {
     throw new ApiError(422, "VALIDATION_ERROR", "The event source type is not accepted here.");
@@ -326,19 +324,6 @@ export async function ingestSignedEvent(
           );
         }
 
-        const sequenceResult = await client.query<{ id: string }>(
-          `select id from evidence_events where source_key_id = $1 and sequence = $2`,
-          [key.id, envelope.sequence],
-        );
-        const sequenceOwner = sequenceResult.rows[0];
-        if (sequenceOwner && sequenceOwner.id !== envelope.event_id) {
-          throw new ApiError(
-            409,
-            "EVENT_CONFLICT",
-            "This source sequence was already used by another event.",
-          );
-        }
-
         const receivedAt = new Date();
         const entryBytes = canonicalEventEntryBytes(envelope, receivedAt, eventSha256);
         const acceptedCount = Number(incident.accepted_event_count);
@@ -352,6 +337,21 @@ export async function ingestSignedEvent(
             409,
             "INCIDENT_EVIDENCE_LIMIT",
             "The incident has reached its accepted evidence budget.",
+          );
+        }
+
+        const sequenceResult = await client.query<{ max_sequence: string | null }>(
+          `select max(sequence)::text as max_sequence
+             from evidence_events
+            where source_key_id = $1`,
+          [key.id],
+        );
+        const maxSequence = Number(sequenceResult.rows[0]?.max_sequence ?? "0");
+        if (maxSequence > 0 && envelope.sequence <= maxSequence) {
+          throw new ApiError(
+            409,
+            "EVENT_SEQUENCE_ROLLBACK",
+            "This source sequence is behind the last accepted sequence.",
           );
         }
 
@@ -394,11 +394,7 @@ export async function ingestSignedEvent(
     );
   } catch (error) {
     if (isUniqueViolation(error)) {
-      throw new ApiError(
-        409,
-        "EVENT_CONFLICT",
-        "This event or source sequence was already used.",
-      );
+      throw new ApiError(409, "EVENT_CONFLICT", "This event or source sequence was already used.");
     }
     throw error;
   }

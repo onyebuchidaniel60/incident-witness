@@ -171,7 +171,35 @@ describe("signed event ingestion", () => {
       observedAt: at(captureStartedAt, 300),
     });
     expect(reusedSequence.response.statusCode).toBe(409);
-    expect(reusedSequence.response.json().error.code).toBe("EVENT_CONFLICT");
+    expect(reusedSequence.response.json().error.code).toBe("EVENT_SEQUENCE_ROLLBACK");
+  });
+
+  it("rejects a lower unused sequence after a higher sequence", async () => {
+    const { host, incidentId, captureStartedAt } = await hostAndIncident();
+    const higher = await sendSignedEvent("/v1/agent/events", host.credential, {
+      incidentId,
+      sourceKeyId: host.sourceKeyId,
+      sourceType: "host_agent",
+      privateKey: host.privateKey,
+      eventType: "host_heartbeat",
+      payload: HOST_HEARTBEAT_PAYLOAD,
+      sequence: 5,
+      observedAt: at(captureStartedAt, 100),
+    });
+    expect(higher.response.statusCode).toBe(202);
+
+    const lower = await sendSignedEvent("/v1/agent/events", host.credential, {
+      incidentId,
+      sourceKeyId: host.sourceKeyId,
+      sourceType: "host_agent",
+      privateKey: host.privateKey,
+      eventType: "host_heartbeat",
+      payload: HOST_HEARTBEAT_PAYLOAD,
+      sequence: 4,
+      observedAt: at(captureStartedAt, 200),
+    });
+    expect(lower.response.statusCode).toBe(409);
+    expect(lower.response.json().error.code).toBe("EVENT_SEQUENCE_ROLLBACK");
   });
 
   it("rejects an invalid Ed25519 signature", async () => {

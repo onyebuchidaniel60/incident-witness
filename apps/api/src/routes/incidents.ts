@@ -167,12 +167,7 @@ async function replayIncidentCreation(
   keyHash: Buffer,
   expectedRequestHash: Buffer,
 ): Promise<ReturnType<typeof incidentSummary>> {
-  const existing = await findIdempotencyRecord(
-    transaction.client,
-    ownerUserId,
-    operation,
-    keyHash,
-  );
+  const existing = await findIdempotencyRecord(transaction.client, ownerUserId, operation, keyHash);
   if (!existing) {
     throw new ApiError(409, "IDEMPOTENCY_CONFLICT", "The idempotency key could not be replayed.");
   }
@@ -266,10 +261,9 @@ export async function registerIncidentRoutes(
         withProviderTransaction(apiPool, userId, async (transaction) => {
           await ensureProfile(transaction.client, userId);
 
-          await transaction.client.query(
-            `select pg_advisory_xact_lock(hashtextextended($1, 0))`,
-            [userId],
-          );
+          await transaction.client.query(`select pg_advisory_xact_lock(hashtextextended($1, 0))`, [
+            userId,
+          ]);
 
           const existing = await findIdempotencyRecord(
             transaction.client,
@@ -524,8 +518,7 @@ export async function registerIncidentRoutes(
       return {
         data: rows.map(incidentSummary),
         page: {
-          nextCursor:
-            rows.length === limit && last ? encodeCursor(last.created_at, last.id) : null,
+          nextCursor: rows.length === limit && last ? encodeCursor(last.created_at, last.id) : null,
         },
       };
     },
@@ -587,8 +580,11 @@ export async function registerIncidentRoutes(
           sequence: string;
           observed_at: Date;
           received_at: Date;
+          canonical_event: unknown;
+          simulation_mode: boolean;
         }>(
-          `select id, source_key_id, source_type, event_type, sequence, observed_at, received_at
+          `select id, source_key_id, source_type, event_type, sequence, observed_at, received_at,
+                  canonical_event, simulation_mode
              from evidence_events
             where incident_id = $1
             order by observed_at asc, source_type asc, source_key_id asc, sequence asc, id asc
@@ -608,15 +604,30 @@ export async function registerIncidentRoutes(
               acceptedEventCount: Number(countBySource.get(key.source_type)?.count ?? "0"),
               lastObservedAt: countBySource.get(key.source_type)?.last_observed_at ?? null,
             })),
-            timeline: timeline.rows.map((event) => ({
-              eventId: event.id,
-              sourceKeyId: event.source_key_id,
-              sourceType: event.source_type,
-              eventType: event.event_type,
-              sequence: Number(event.sequence),
-              observedAt: event.observed_at,
-              receivedAt: event.received_at,
-            })),
+            timeline: timeline.rows.map((event) => {
+              const body =
+                typeof event.canonical_event === "object" &&
+                event.canonical_event !== null &&
+                !Array.isArray(event.canonical_event)
+                  ? (event.canonical_event as Record<string, unknown>)
+                  : {};
+              return {
+                eventId: event.id,
+                sourceKeyId: event.source_key_id,
+                sourceType: event.source_type,
+                eventType: event.event_type,
+                sequence: Number(event.sequence),
+                observedAt: event.observed_at,
+                receivedAt: event.received_at,
+                payload:
+                  typeof body.payload === "object" &&
+                  body.payload !== null &&
+                  !Array.isArray(body.payload)
+                    ? body.payload
+                    : {},
+                simulationMode: event.simulation_mode,
+              };
+            }),
           },
         };
       });
