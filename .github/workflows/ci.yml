@@ -30,6 +30,9 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Test protocol golden vectors and cross-runtime verification
+        run: npm run test --workspace @incident-witness/protocol
+
       - name: Test API unit and JWT validation
         run: npm run test --workspace @incident-witness/api
 

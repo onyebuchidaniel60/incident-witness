@@ -2,11 +2,11 @@
 
 **Last updated:** 2026-10-31
 
-**Project status:** Phase 2 backend/data/auth foundation accepted and closed. Phase 3A is authorized; Phase 3B has not started.
+**Project status:** Phase 2 backend/data/auth foundation accepted and closed. Phase 3A protocol and cryptographic core implemented; Phase 3A checkpoint pending operator acceptance. Phase 3B has not started.
 
-**Current phase:** Phase 2 — COMPLETE, ACCEPTED. Phase 3A — AUTHORIZED, NOT STARTED.
+**Current phase:** Phase 3A — IMPLEMENTED, PENDING OPERATOR ACCEPTANCE.
 
-**Next task:** Phase 3A only — protocol and cryptographic core.
+**Next task:** Phase 3B only, awaiting explicit operator authorization.
 
 **Phase 2 acceptance:** Operator accepted the Phase 2 checkpoint and approved the `public.iw_uid()` security-definer wrapper on 2026-10-31.
 
@@ -31,6 +31,7 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 - Node.js 26.13.0 LTS, TypeScript strict, npm workspaces.
 - Next.js 16.4.3 App Router + Tailwind CSS 4.x frontend; temporary styling only.
 - Fastify 5.12.7 API with Pino redaction, request IDs, CORS, rate limiting, Helmet and the documented error envelope.
+- `@incident-witness/protocol` pure TypeScript package with strict v1 schemas, RFC 8785 JCS via pinned `canonicalize@5.1.0`, Node Ed25519 signing via `node:crypto`, browser public-key verification via `@noble/ed25519@3.2.0`, source-key certificates and signed bundle manifests. No DB/network/UI imports; no browser private-key code.
 - Supabase Postgres/Auth; Drizzle ORM + `pg`; versioned SQL migrations in `packages/db/migrations`.
 - `jose` JWT verification against Supabase JWKS; issuer, audience, expiry and UUID subject checks.
 - Accepted ADR-001 mechanism: API connects as restricted `iw_api`, sets transaction-local JWT subject and request mode, and never uses `SET ROLE authenticated`.
@@ -89,6 +90,25 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 - CI updated to run lint, typecheck, API unit tests and build; database integration tests remain explicit staging commands because they require staging credentials.
 - README Phase 2 setup, migration, auth and test instructions.
 
+## Completed in Phase 3A
+
+- `packages/protocol` created as a pure TypeScript package with no database, network or UI dependency.
+- Strict `Zod` v1 schemas for the event envelope and all eight event types:
+  `host_heartbeat`, `host_power_state`, `gpu_telemetry`, `host_agent_status`,
+  `renter_heartbeat`, `renter_endpoint_result`, `platform_probe_result`, `source_gap`.
+- Unknown fields are rejected at every object boundary; unsafe/non-finite numbers, invalid Unicode,
+  malformed signatures and invalid base64url are rejected.
+- RFC 8785 JCS canonicalization uses the exact pinned `canonicalize@5.1.0` dependency.
+- Canonical raw-body parsing rejects duplicate keys at any depth and requires exact canonical bytes.
+- SHA-256 and Ed25519 helpers; Node uses `node:crypto`; browser public-key verification uses
+  `@noble/ed25519@3.2.0`.
+- Source-key certificate creation/verification and bundle-manifest digest/signature creation/verification.
+- ESM/CommonJS builds with declarations; explicit `./node` and `./browser` exports.
+- Cross-runtime tests include RFC 8032 vector 1, RFC 8785 vectors, duplicate-key/I-JSON vectors,
+  Node/noble identical signatures, Node/browser verification, source-certificate and bundle
+  verification, unknown key, invalid signature, algorithm change and single-byte tamper detection.
+- Browser bundle inspection confirms no Node built-in imports and no private signing exports.
+
 ## Visible behaviour vs placeholders
 
 **Functional locally and/or in the deployed shell:**
@@ -113,12 +133,14 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 
 Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 
-- `npm ci` — **PASS** (496 packages; clean install from lockfile; development advisories reported separately).
-- `npm run lint` — **PASS** across web, API and DB packages.
-- `npm run typecheck` — **PASS** across web, API and DB packages.
-- `npm run build` — **PASS**; Next.js 16.4.3, Fastify/TS and DB packages built.
-- `npm test` — **PASS**: 14/14 ADR-001 staging integration tests and 10/10 API unit tests.
+- `npm ci` — **PASS** (529 packages; clean install from lockfile; development advisories reported separately).
+- `npm run lint` — **PASS** across protocol, web, API and DB packages.
+- `npm run typecheck` — **PASS** across protocol, web, API and DB packages.
+- `npm run build` — **PASS**; protocol ESM/CJS/declarations, Next.js 16.4.3, Fastify/TS and DB packages built.
+- `npm test` — **PASS**: 20/20 protocol tests, 14/14 ADR-001 staging integration tests and 10/10 API unit tests.
 - `npm run test:e2e` — **PASS**: 36/36 Playwright checks across desktop Chromium and mobile Pixel 7 profiles.
+- Browser bundle check — **PASS**: `dist/browser.js`/`browser.cjs` contain no Node built-in imports or private signing exports.
+- ESM/CJS package check — **PASS**: both runtime entry points load and export the expected API.
 - `npm run db:migrate:status` — **PASS**: migrations `0001`–`0008` applied.
 - Database shape: 14 product tables; 42 RLS policies.
 - `npm audit --omit=dev` — **PASS**: 0 production vulnerabilities.
@@ -192,7 +214,8 @@ The test suite seeds disposable auth users/profiles and removes them in `afterAl
 5. **Deployment uses staging auth configuration:** Vercel Preview/Production public Supabase settings point at the staging project for this checkpoint. No production database or secret is used; this is not a production-ready environment.
 6. **CI scope:** CI runs lint, typecheck, API unit tests and build. ADR-001 integration tests require staging credentials and are run locally/explicitly with `npm test`; repository-wide CI must not receive production credentials.
 7. **Development advisories:** 20 moderate development-only npm advisories remain; `npm audit --omit=dev` is clean. Do not run a forced dependency downgrade.
-8. **No Phase 3 functionality:** no event ingestion, host agent, renter SDK, probe worker, protocol package or evidence sealing exists yet.
+8. **Phase 3A is pending operator acceptance:** the protocol schemas and bundle/certificate shapes are implemented and tested, but the final protocol interface has not yet been formally accepted. Phase 3B must not start until this checkpoint is accepted.
+9. **No Phase 3B+ functionality:** no event ingestion, host agent, renter SDK, probe worker or evidence sealing exists yet.
 
 ## Things not to change
 
@@ -207,4 +230,4 @@ The test suite seeds disposable auth users/profiles and removes them in `afterAl
 
 ## Exact next task
 
-**Phase 3A only — protocol and cryptographic core — awaiting explicit operator authorization.** Do not start Phase 3A from this checkpoint.
+**Phase 3B only — host/incident domain APIs and transactional lifecycle — awaiting explicit operator authorization.** Do not start Phase 3B from this checkpoint.
