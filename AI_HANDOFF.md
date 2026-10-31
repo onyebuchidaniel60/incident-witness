@@ -2,11 +2,11 @@
 
 **Last updated:** 2026-10-31
 
-**Project status:** Phase 1 skeletal frontend implemented; Phase 2 not started.
+**Project status:** Phase 1 skeletal frontend complete and closed; Phase 2 not started.
 
-**Current phase:** Phase 1 — COMPLETE (pending operator acceptance).
+**Current phase:** Phase 1 — COMPLETE, CLOSED.
 
-**Next task:** Phase 2 only, awaiting explicit operator authorization.
+**Next task:** ADR-001 draft only, awaiting operator authorization.
 
 ## Project
 
@@ -45,22 +45,25 @@ No AI, payment, blockchain, Arweave, marketplace, public bundle directory, Redis
 - **Working directory/repo root:** `/root/incident-witness`
 - **Branch:** `main`
 - **Latest implementation commit:** `27651555794a867c1d98c28b93fb0d2837c58280` — `feat(web): add route-complete Phase 1 skeletal shell`
-- **Checkpoint commit:** a docs-only follow-up commit containing this handoff update follows the implementation commit.
+- **Current Git HEAD / origin/main:** `c0eb9e30c53129a200f1a350ec927792684696ca` — `chore: trigger normal vercel deploy`
+- **Git sync:** `main` and `origin/main` were verified in sync at `c0eb9e30c53129a200f1a350ec927792684696ca` before this closeout commit. This docs-only closeout commit is intentionally not pushed.
 - **Existing application code:** `apps/web` Phase 1 structural frontend only.
 - **Existing deployment project:** Vercel project `incident-witness`, ID `prj_YOmSDUci8FSEsqW16mw0X1MldfJ7`, team `uhhh2`.
 - **Node runtime:** confirmed `v26.13.0`; npm `11.20.0`; `.node-version` pins `26.13.0`.
 
-## Preview / deployment checkpoint
+## Phase 1 deployment checkpoint
 
-- **Preview URL:** https://incident-witness-yru7b9b75-uhhh2.vercel.app
-- **Preview deployment ID:** `dpl_FDFnDhhX5jvWHyrNbdQyaLASRpHx`
-- **Deployed source commit:** `27651555794a867c1d98c28b93fb0d2837c58280`
-- **Deployment target:** Preview (`target: preview`, state `READY`)
-- **Git metadata:** Vercel CLI local deployment did not attach Git metadata; `vercel inspect --json` reports no `meta`/`gitSource`. The working tree was clean at commit `2765155` when the Preview was built.
-- **Preview protection:** currently **NOT PROTECTED**. Vercel SSO protection was temporarily disabled to run deployed browser checks. Re-enabling is blocked by Vercel authorization: the protection API returns `forbidden`, while some CLI commands intermittently return `login_required`; `vercel whoami` is not consistently usable. This is a no-data, no-secret static shell, but the operator must restore SSO protection through the Vercel dashboard or a freshly authenticated team-owner CLI session.
-- **Production deployment:** Vercel auto-promoted the project's first deployment to Production at https://incident-witness.vercel.app because it was the first deployment. No production secrets, production database or real data were used, and no production release was approved. The operator should decide whether to remove/rename or otherwise clean up that auto-promotion.
-- **Production URL approval:** NOT APPROVED as a release; do not treat it as a production launch.
-- **Safe staging config:** CONFIRMED for content — explicit no-auth placeholder mode; no Supabase, API, database, analytics, production data or real credentials are connected. SSO protection restoration remains outstanding.
+- **Deployed URL (Git-attested deployment):** https://incident-witness-dxl1vuu1x-uhhh2.vercel.app
+- **Stable aliases:** https://incident-witness.vercel.app and https://incident-witness-git-main-uhhh2.vercel.app
+- **Deployment ID:** `dpl_DbXXV1n29YDb7KLZttZiiYnqzhWk`
+- **Deployed SHA:** `c0eb9e30c53129a200f1a350ec927792684696ca`
+- **Deployment branch/message:** `main` — `chore: trigger normal vercel deploy`
+- **Deployment status:** `READY`; HTTP 200 verified; target `production`
+- **Git attestation:** Confirmed from Vercel deployment metadata (`githubCommitSha`, `githubCommitRef`, `githubCommitOrg`, `githubCommitRepo`); the SHA matches `origin/main`.
+- **Vercel protection:** **DISABLED** — `ssoProtection` is `null`; no protection-bypass secret remains (`bypassCount: 0`).
+- **Production deployment:** Operator explicitly authorized the `main` branch to deploy to Production for this static shell. The Git-attested Production deployment is the one recorded above.
+- **Safe production/staging content:** CONFIRMED — explicit no-auth placeholder mode; no Supabase, API, database, analytics, production data or real credentials are connected. `.env.example` and `apps/web/.env.local.example` contain placeholders only.
+- **Design status:** UNCHANGED — no final visual design is approved; temporary styling only.
 
 ## Completed in Phase 1
 
@@ -77,7 +80,7 @@ No AI, payment, blockchain, Arweave, marketplace, public bundle directory, Redis
 - CI workflow running `npm ci`, lint, typecheck and build on push/PR.
 - Playwright smoke suite covering every route, not-found handling, navigation, footer links, protected-area labelling, overflow and console errors at desktop and mobile viewports.
 - `README.md` Phase 1 status and verified commands.
-- Vercel project created and Preview deployed.
+- Vercel project created; Git-attested Production deployment verified for the static shell.
 
 ## Visible behaviour vs placeholders
 
@@ -107,7 +110,8 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - `npm run typecheck` — **PASS**.
 - `npm run build` — **PASS** (Next.js 16.4.3; all 14 route entries plus proxy built).
 - `npm run test:e2e` — **PASS**: 36 Playwright tests passed across desktop Chromium and mobile Pixel 7 profiles.
-- Deployed Preview route check — **PASS**: 34 browser checks across 14 routes plus the not-found route at desktop and mobile viewport; navigation, footer links, overflow, console-error and page-error checks passed.
+- Earlier deployed Preview route check (source commit `2765155`) — **PASS**: 34 browser checks across 14 routes plus the not-found route at desktop and mobile viewport; navigation, footer links, overflow, console-error and page-error checks passed.
+- Latest Git-attested Production deployment (`c0eb9e3`) — **READY**, HTTP 200; route checks were not rerun against this deployment.
 - Client bundle scan — **PASS**: no `DATABASE_URL`, platform private-key, token-pepper, service-role or private-key markers found in local or deployed client assets/routes.
 - `npm audit` — full development tree reports 16 moderate `minimatch` advisories; no non-breaking fix is available (`npm audit fix --force` would downgrade/break ESLint). Production dependency audit reports 0 vulnerabilities.
 
@@ -132,12 +136,10 @@ No tests are claimed beyond those run above. Vitest, pgTAP and API/security inte
 ## Known risks and operator actions
 
 1. **ADR-001 prerequisite for Phase 2:** resolve `docs/DEPLOYMENT.md` wording about `SET LOCAL ROLE` versus `ARCHITECTURE.md` §5.2, which specifies `iw_api` transactions and explicitly forbids `SET ROLE authenticated`. Do not implement Phase 2 DB identity until the role/GUC approach is decided and tested.
-2. **Vercel CLI auth/protection permissions:** `vercel whoami` is intermittent, some commands return `login_required`, and protection changes return `forbidden` even when the project can be inspected. Do not attempt interactive login without operator direction. Use a freshly authenticated session with project/team protection permission.
-3. **Preview SSO protection is off:** restore it from the Vercel dashboard or an authorized CLI session. The current Preview and auto-promoted Production deployment are static with no data or secrets, but they are publicly reachable.
-4. **First deployment auto-promoted to Production:** Vercel assigned the first deployment to Production despite the default command. No production release was approved; operator should decide how to handle the production alias.
-5. **No Vercel-attested Git SHA:** local CLI deployment metadata lacks a Git commit. Source commit `2765155` is known from the clean tree at build time, but `vercel inspect` cannot independently attest it. Future deployments should use Git-connected deployment metadata.
-6. **Development dependency advisories:** 16 moderate `minimatch` advisories in the ESLint toolchain; production dependency audit is clean. Revisit when upstream packages publish compatible fixes; do not use a forced breaking downgrade.
-7. **No Phase 2+ functionality:** no API, database, auth, agent, SDK, probe worker, protocol package or working verifier exists. Do not describe those as implemented.
+2. **Vercel Authentication is disabled:** `ssoProtection` is `null`. The static shell has no data or secrets, but it is publicly reachable; enable Vercel Authentication if public access is not intended.
+3. **Development dependency advisories:** 16 moderate `minimatch` advisories in the ESLint toolchain; production dependency audit is clean. Revisit when upstream packages publish compatible fixes; do not use a forced breaking downgrade.
+4. **No Phase 2+ functionality:** no API, database, auth, agent, SDK, probe worker, protocol package or working verifier exists. Do not describe those as implemented.
+5. **Closeout commit is unpushed:** the docs-only Phase 1 closeout commit follows the verified `c0eb9e3` sync point and was intentionally not pushed.
 
 ## Things not to change
 
@@ -152,4 +154,4 @@ No tests are claimed beyond those run above. Vitest, pgTAP and API/security inte
 
 ## Exact next task
 
-**Phase 2 only, awaiting explicit operator authorization.** Resolve ADR-001 first, then implement the backend/data/auth foundation as specified in `IMPLEMENTATION_PLAN.md` Phase 2. Do not start Phase 2 from this checkpoint.
+**ADR-001 draft only, awaiting operator authorization.** Do not draft it yet, and do not start Phase 2.
