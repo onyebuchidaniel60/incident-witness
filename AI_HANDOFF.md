@@ -2,11 +2,11 @@
 
 **Last updated:** 2026-10-31
 
-**Project status:** Phase 1 skeletal frontend complete and closed; ADR-001 accepted; Phase 2 not started.
+**Project status:** Phase 2 backend/data/auth foundation implemented; Phase 2 checkpoint pending operator acceptance. Phase 3 not started.
 
-**Current phase:** Phase 1 — COMPLETE, CLOSED. ADR-001 Accepted.
+**Current phase:** Phase 2 — IMPLEMENTED, PENDING OPERATOR ACCEPTANCE.
 
-**Next task:** Phase 2 — backend/data/auth foundation, awaiting explicit operator authorization.
+**Next task:** Phase 3A only, awaiting explicit operator authorization.
 
 ## Project
 
@@ -22,100 +22,148 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 - `AGENTS.md` — mandatory coding-agent instructions.
 - `README.md` — repository introduction and operating instructions.
 - `docs/` — research, protocol, operational, user and security docs.
+- `docs/adr/ADR-001-database-transaction-identity.md` — accepted database identity decision.
 
 ## Current architecture
 
-- Node.js 26.13.0 LTS baseline; use later supported 26.x security patches when available, TypeScript strict, npm workspaces.
-- Next.js 16.4.3 App Router + Tailwind CSS 4.x frontend; Next 16 `proxy.ts` placeholder is present.
-- Fastify 5 API — **not implemented**.
-- Supabase Postgres/Auth; Drizzle + `pg`; RLS and restricted DB roles — **not implemented**.
-- Database identity: **ADR-001 accepted** — Option B: Fastify connects as the restricted `iw_api` role, sets transaction-local JWT/mode GUCs, keeps RLS targeted to `iw_api`, and forbids `SET ROLE authenticated`. `docs/DEPLOYMENT.md` has been corrected accordingly.
-- `jose` JWT verification — **not implemented**.
-- RFC 8785 JCS via pinned `canonicalize@5.1.0` + SHA-256 + Ed25519 protocol — **not implemented**.
-- Linux x86_64 host agent with SQLite spool — **not implemented**.
-- Incident-scoped TypeScript renter SDK — **not implemented**.
-- Render background probe worker — **not implemented**.
-- Vercel Preview/Production for frontend; Render API/worker — Vercel project exists; Render not configured.
-- Vitest, Playwright and pgTAP — Playwright smoke tests exist; Vitest/pgTAP tests not created.
-
-No AI, payment, blockchain, Arweave, marketplace, public bundle directory, Redis, Kubernetes or object-storage requirement in MVP.
+- Node.js 26.13.0 LTS, TypeScript strict, npm workspaces.
+- Next.js 16.4.3 App Router + Tailwind CSS 4.x frontend; temporary styling only.
+- Fastify 5.12.7 API with Pino redaction, request IDs, CORS, rate limiting, Helmet and the documented error envelope.
+- Supabase Postgres/Auth; Drizzle ORM + `pg`; versioned SQL migrations in `packages/db/migrations`.
+- `jose` JWT verification against Supabase JWKS; issuer, audience, expiry and UUID subject checks.
+- Accepted ADR-001 mechanism: API connects as restricted `iw_api`, sets transaction-local JWT subject and request mode, and never uses `SET ROLE authenticated`.
+- Supabase's staging `auth` schema is owned by `supabase_admin`; the migrator cannot grant `auth` USAGE to `iw_api`. Policies therefore call a narrow `SECURITY DEFINER` wrapper `public.iw_uid()` which calls `auth.uid()`. No role switch, service-role connection or auth-schema grant to `iw_api` is used. This environment-specific workaround must be reviewed by the operator and replaced with direct `auth.uid()` access if the staging project can grant auth-schema usage.
+- Linux host agent, renter SDK, platform probe worker, evidence ingestion, sealing and bundle verifier are **not implemented** (Phase 3+).
 
 ## Repository state
 
 - **Repository URL:** confirmed public — https://github.com/onyebuchidaniel60/incident-witness
 - **Working directory/repo root:** `/root/incident-witness`
 - **Branch:** `main`
-- **Latest implementation commit:** `27651555794a867c1d98c28b93fb0d2837c58280` — `feat(web): add route-complete Phase 1 skeletal shell`
-- **Verified Git sync before ADR-001 acceptance:** `431339cf009f0eafa57c9b95630361824d475fa3` — `docs: close Phase 1 checkpoint (operator approved production deployment)`; `main` and `origin/main` were synchronized at that SHA. The ADR-001 acceptance documentation commit is pushed on completion.
-- **Existing application code:** `apps/web` Phase 1 structural frontend only.
-- **Existing deployment project:** Vercel project `incident-witness`, ID `prj_YOmSDUci8FSEsqW16mw0X1MldfJ7`, team `uhhh2`.
+- **Phase 2 commits:**
+  - `f6e5632c220f1f91fadc15de93e8ace302332623` — `feat(db): add schema roles and RLS foundation`
+  - `6c6597a95b5091748bdb8a6d17c7afd889bb4075` — `feat(api): add Fastify foundation and JWT auth`
+  - `6b02c1a4081833879fe892ef9831f387d52b402c` — `feat(web): connect Supabase OTP auth guard`
+  - `29547c8a86a13c83ad3289636767855bdca1446b` — `docs: document Phase 2 setup and CI coverage`
+- **Deployed implementation SHA:** `29547c8a86a13c83ad3289636767855bdca1446b`
 - **Node runtime:** confirmed `v26.13.0`; npm `11.20.0`; `.node-version` pins `26.13.0`.
 
-## Phase 1 deployment checkpoint
+## Phase 2 deployment checkpoint
 
-- **Deployed URL (Git-attested deployment):** https://incident-witness-dxl1vuu1x-uhhh2.vercel.app
+- **Deployed URL (Git-attested production deployment):** https://incident-witness-2zb16ifpw-uhhh2.vercel.app
 - **Stable aliases:** https://incident-witness.vercel.app and https://incident-witness-git-main-uhhh2.vercel.app
-- **Deployment ID:** `dpl_DbXXV1n29YDb7KLZttZiiYnqzhWk`
-- **Deployed SHA:** `c0eb9e30c53129a200f1a350ec927792684696ca`
-- **Deployment branch/message:** `main` — `chore: trigger normal vercel deploy`
-- **Deployment status:** `READY`; HTTP 200 verified; target `production`
-- **Git attestation:** Confirmed from Vercel deployment metadata (`githubCommitSha`, `githubCommitRef`, `githubCommitOrg`, `githubCommitRepo`); the SHA matches `origin/main`.
-- **Vercel protection:** **DISABLED** — `ssoProtection` is `null`; no protection-bypass secret remains (`bypassCount: 0`).
-- **Production deployment:** Operator explicitly authorized the `main` branch to deploy to Production for this static shell. The Git-attested Production deployment is the one recorded above.
-- **Safe production/staging content:** CONFIRMED — explicit no-auth placeholder mode; no Supabase, API, database, analytics, production data or real credentials are connected. `.env.example` and `apps/web/.env.local.example` contain placeholders only.
-- **Design status:** UNCHANGED — no final visual design is approved; temporary styling only.
+- **Deployment ID:** `dpl_J3PLLpQaSg9nNibqQkQj6q7T2Xnf`
+- **Deployed SHA:** `29547c8a86a13c83ad3289636767855bdca1446b`
+- **Deployment target/status:** Production; `READY`; Git metadata matched `main`.
+- **Git attestation:** Confirmed from Vercel deployment metadata (`githubCommitSha`, `githubCommitRef`, `githubCommitOrg`, `githubCommitRepo`).
+- **Vercel Authentication:** **DISABLED** (`ssoProtection: null`; no protection-bypass secret remains).
+- **Production authorization:** Operator previously authorized the `main` branch to deploy the static shell to Production. This Phase 2 deployment is the same static/auth shell with no provider data.
+- **Preview:** no separate Preview URL was created for this commit; the Git-connected `main` deployment targets Production.
+- **API deployment:** **not deployed to Render**. The deployed web app uses Supabase Auth directly; it does not call a deployed API. The Fastify health endpoints and `/v1/me` were verified locally against staging.
+- **Safe staging:** web deployment uses public Supabase URL/publishable-key configuration for the staging project; no server-only secrets, database URLs, platform signing keys or host credentials are available to the browser. No production database or production secrets are used.
+- **Deployment checks:** `/`, `/login`, `/docs`, `/verify` return 200; protected `/dashboard` and `/settings` return redirects to `/login?next=...`; login form renders at mobile viewport; no deployed client-bundle sensitive markers found.
 
-## Completed in Phase 1
+## Completed in Phase 2
 
-- Root npm workspace baseline with private root package, lockfile, Node pin, `.gitignore`, strict shared `tsconfig.base.json`, Prettier and ESLint configuration.
-- `apps/web` Next.js 16.4.3 App Router application with TypeScript strict and Tailwind CSS 4.x temporary styling.
-- All required routes:
-  - Public: `/`, `/login`, `/verify`, `/docs`, `/privacy`, `/terms`
-  - Protected placeholders: `/dashboard`, `/hosts`, `/hosts/new`, `/hosts/[hostId]`, `/incidents`, `/incidents/new`, `/incidents/[incidentId]`, `/settings`
-  - `not-found.tsx`, `error.tsx`, `loading.tsx`
-- Public header with keyboard-accessible mobile menu, dashboard sidebar navigation, responsive layouts and footer.
-- Footer links to real `/docs` route and the confirmed public GitHub repository.
-- `proxy.ts` Phase 1 pass-through placeholder with explicit comment that no authentication or access control exists.
-- `.env.local.example` with placeholder comments only; `.env.example` unchanged because Phase 1 needs no new variables.
-- CI workflow running `npm ci`, lint, typecheck and build on push/PR.
-- Playwright smoke suite covering every route, not-found handling, navigation, footer links, protected-area labelling, overflow and console errors at desktop and mobile viewports.
-- `README.md` Phase 1 status and verified commands.
-- Vercel project created; Git-attested Production deployment verified for the static shell.
+- `packages/db` Drizzle schema for all 14 approved tables, enums, constraints, indexes and ownership relationships.
+- Versioned SQL migrations `0001`–`0008`, applied to the staging Supabase database; dedicated `iw_schema_migrations` ledger.
+- Restricted `iw_api` and `iw_worker` login roles with `NOSUPERUSER` and `NOBYPASSRLS`.
+- RLS enabled on all 14 product tables, with 42 policies covering provider ownership, machine-ingest scope and worker operations.
+- Column/table grants for `iw_api`, `iw_worker`; no product-table grants for `anon`, `authenticated` or `PUBLIC`.
+- Provider transaction wrapper sets `request.jwt.claim.sub` and `iw.request_mode` transaction-locally; no `SET ROLE`.
+- Fastify API foundation with:
+  - `GET /health/live` (no DB).
+  - `GET /health/ready` (protected health token + DB/migration readiness).
+  - `GET /v1/me` (JWT-protected, idempotent profile bootstrap).
+  - Pino redaction, request IDs, safe error envelope, CORS allow-list, rate limiting and Helmet.
+  - `jose` JWT verification with ES256/RS256 allow-list, issuer/audience/expiry checks and UUID subject validation.
+- Web Supabase Auth foundation:
+  - `@supabase/ssr` browser/server adapters.
+  - `proxy.ts` session refresh and protected-route redirect.
+  - Server-side `AuthGuard` on dashboard routes.
+  - Functional `/login` email OTP request and verification form.
+  - Functional sign-out control on `/settings`.
+- Playwright tests updated for public routes and unauthenticated protected redirects.
+- CI updated to run lint, typecheck, API unit tests and build; database integration tests remain explicit staging commands because they require staging credentials.
+- README Phase 2 setup, migration, auth and test instructions.
 
 ## Visible behaviour vs placeholders
 
-**Functional:**
+**Functional locally and/or in the deployed shell:**
 
-- Static page rendering and client-side navigation.
-- Public and dashboard placeholder route structure.
-- Responsive header, mobile menu, sidebar, footer, skip link and focus styles.
-- 404/not-found handling and route error retry control.
-- `/docs` is a real reachable documentation index with repository links.
-- Footer Documentation and GitHub links.
+- Public pages render and navigate.
+- `/login` requests and verifies Supabase OTP codes; protected routes redirect when no session exists.
+- Supabase session refresh is wired through `proxy.ts`; `AuthGuard` checks the server session.
+- `/docs`, footer Documentation link and approved GitHub link work.
+- API liveness and readiness work; readiness checks DB connectivity and migration version.
+- API JWT rejection paths return the documented error shape.
+- Database migration, role and RLS behavior is evidenced by automated staging tests.
 
-**Placeholder only:**
+**Placeholder or unverified:**
 
-- No login form or authentication; `/login` explicitly states no sign-in exists.
-- No file input or verification; `/verify` explicitly states the verifier is not connected.
-- No provider data. Dashboard, hosts, incidents and settings pages clearly state that no API, database, auth or session is connected.
-- No hosts, incidents, evidence timeline, assessments, bundles or signature verification.
-- No Phase 2+ backend, database, auth, agent, SDK, protocol, worker or CLI verifier.
+- Hosts, incidents, source health, timeline, evidence events, sealing, bundles and verifier remain placeholder/absent.
+- `/v1/me` is implemented but has not been exercised with a real Supabase-issued user token from the deployed web app.
+- Actual OTP email delivery has not been tested because Supabase email-template and redirect allow-list configuration is external to the repository.
+- API is not deployed to Render; the deployed web shell does not use an API origin.
+- No Phase 3 event ingestion, host agent, renter SDK, platform probe or bundle sealing exists.
 
 ## Tests and evidence
 
 Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 
-- `npm ci` — **PASS** (364 packages installed; `npm audit --omit=dev` reports 0 production vulnerabilities).
-- `npm run lint` — **PASS**.
-- `npm run typecheck` — **PASS**.
-- `npm run build` — **PASS** (Next.js 16.4.3; all 14 route entries plus proxy built).
-- `npm run test:e2e` — **PASS**: 36 Playwright tests passed across desktop Chromium and mobile Pixel 7 profiles.
-- Earlier deployed Preview route check (source commit `2765155`) — **PASS**: 34 browser checks across 14 routes plus the not-found route at desktop and mobile viewport; navigation, footer links, overflow, console-error and page-error checks passed.
-- Latest Git-attested Production deployment (`c0eb9e3`) — **READY**, HTTP 200; route checks were not rerun against this deployment.
-- Client bundle scan — **PASS**: no `DATABASE_URL`, platform private-key, token-pepper, service-role or private-key markers found in local or deployed client assets/routes.
-- `npm audit` — full development tree reports 16 moderate `minimatch` advisories; no non-breaking fix is available (`npm audit fix --force` would downgrade/break ESLint). Production dependency audit reports 0 vulnerabilities.
+- `npm ci` — **PASS** (496 packages; clean install from lockfile; development advisories reported separately).
+- `npm run lint` — **PASS** across web, API and DB packages.
+- `npm run typecheck` — **PASS** across web, API and DB packages.
+- `npm run build` — **PASS**; Next.js 16.4.3, Fastify/TS and DB packages built.
+- `npm test` — **PASS**: 14/14 ADR-001 staging integration tests and 10/10 API unit tests.
+- `npm run test:e2e` — **PASS**: 36/36 Playwright checks across desktop Chromium and mobile Pixel 7 profiles.
+- `npm run db:migrate:status` — **PASS**: migrations `0001`–`0008` applied.
+- Database shape: 14 product tables; 42 RLS policies.
+- `npm audit --omit=dev` — **PASS**: 0 production vulnerabilities.
+- Full dependency audit reports 20 moderate development-only advisories (ESLint/esbuild tooling); no non-breaking fix is available without a forced breaking downgrade.
+- API local staging checks:
+  - `GET /health/live` → 200 `{status:"ok"}`
+  - `GET /health/ready` without token → 401
+  - `GET /health/ready` with health token → 200 `{status:"ready"}`
+  - `GET /v1/me` without token → 401 documented envelope
+  - `GET /v1/me` with invalid token → 401 `AUTH_INVALID`
+  - CORS preflight from the approved local origin → 204 with allowed origin
+  - Authorization sentinel absent from Pino logs
+- Deployed checks:
+  - `GET /`, `/login`, `/docs`, `/verify` → 200
+  - `GET /dashboard`, `/settings` without session → 307 redirect to `/login?next=...`
+  - Login form rendered and protected redirect checked with mobile Playwright viewport
+  - No sensitive server-only markers found in deployed HTML or referenced client JS
 
-No tests are claimed beyond those run above. Vitest, pgTAP and API/security integration tests do not exist yet.
+### ADR-001 test coverage
+
+All 14 ADR-001 §5 tests ran against the real staging Supabase database using the real `iw_api`/`iw_worker` roles:
+
+- T01 role attributes: PASS
+- T02 grant matrix: PASS
+- T03 transaction-local JWT identity: PASS
+- T04 pool-reuse isolation: PASS
+- T05 rollback isolation: PASS
+- T06 cross-owner database isolation: PASS
+- T07 policy targeting/default deny: PASS
+- T08 scoped machine-ingest context: PASS
+- T09 worker boundaries: PASS
+- T10 role-escalation/bypass attempts: PASS
+- T11 session-pooler identity/scoping: PASS
+- T12 auth.uid/wrapper alignment: PASS
+- T13 immutable evidence/audit: PASS
+- T14 transaction-failure rollback: PASS
+
+The test suite seeds disposable auth users/profiles and removes them in `afterAll`; no production data is used.
+
+## Database and migration status
+
+- **Staging database:** Supabase Postgres 17.11.
+- **Migration ledger:** `iw_schema_migrations`.
+- **Applied migrations:** `0001_phase2_schema`, `0002_roles_and_grants`, `0003_rls`, `0004_health_grants`, `0005_uid_wrapper`, `0006_ledger_grants`, `0007_ledger_rls`, `0008_ledger_revoke_defaults`.
+- **Roles:** `iw_api` and `iw_worker` are login roles with `NOSUPERUSER`, `NOBYPASSRLS`, `NOCREATEDB`, `NOCREATEROLE`.
+- **Schema caveat:** `public.iw_uid()` security-definer wrapper is required for the staging project because `auth` schema usage cannot be granted to `iw_api`; it calls `auth.uid()` and preserves transaction-local claim semantics.
+- **Role passwords:** supplied only through the ignored local `.env`; no credential is committed or printed.
 
 ## Design reference and approval status
 
@@ -123,22 +171,26 @@ No tests are claimed beyond those run above. Vitest, pgTAP and API/security inte
 - **Design references:** NOT COLLECTED/APPROVED.
 - **Mockups:** NOT CREATED.
 - **Operator approval:** NOT GRANTED.
-- Phase 1 uses temporary, generic Tailwind styling only. Do not treat it as an approved visual direction. Reference collection and desktop/mobile mockups remain Phase 6 work after the functionality gate.
+- Phase 2 uses temporary, generic styling only. No final visual direction has been implemented.
 
 ## Documentation/footer status
 
 - Root documentation and `docs/` remain the source of truth.
-- `/docs` route exists and is reachable on the Preview.
-- Footer contains the real Documentation link and the approved public GitHub repository link.
-- `/privacy` and `/terms` are clearly labelled placeholders; no legal copy is approved.
-- No support/contact address is published because none has been supplied.
+- `/docs` route exists and is reachable on the deployed shell.
+- Footer Documentation and approved public GitHub links are present.
+- `/privacy` and `/terms` remain clearly labelled placeholders; no legal copy is approved.
+- README contains Phase 2 database/auth setup, migration and test instructions.
 
 ## Known risks and operator actions
 
-1. **Phase 2 implementation gate:** ADR-001 is accepted; Phase 2 must implement Option B and complete the ADR-001-T01–T14 integration tests against a real staging Supabase database with the real `iw_api`/`iw_worker` login roles before any RLS-dependent feature is accepted.
-2. **Vercel Authentication is disabled:** `ssoProtection` is `null`. The static shell has no data or secrets, but it is publicly reachable; enable Vercel Authentication if public access is not intended.
-3. **Development dependency advisories:** 16 moderate `minimatch` advisories in the ESLint toolchain; production dependency audit is clean. Revisit when upstream packages publish compatible fixes; do not use a forced breaking downgrade.
-4. **No Phase 2+ functionality:** no API, database, auth, agent, SDK, probe worker, protocol package or working verifier exists. Do not describe those as implemented.
+1. **ADR-001 implementation caveat:** the staging Supabase project does not permit the migrator to grant `auth` schema usage to `iw_api`; policies use `public.iw_uid()` as a security-definer wrapper around `auth.uid()`. This preserves the no-role-switch intent but requires operator/security review. If the staging project can grant usage, replace the wrapper with direct `auth.uid()` policies in a later approved change.
+2. **OTP delivery unverified:** Supabase email template must include `{{ .Token }}` and the local/Vercel origins must be allow-listed in Supabase Auth. No real one-time email was requested or verified in this task.
+3. **API not deployed:** Fastify runs locally and its health/error/JWT behavior was verified there; Render API/worker services are not configured. The deployed web shell does not call an API.
+4. **Vercel Authentication disabled:** `ssoProtection` is `null`; the deployed shell is publicly reachable. It contains no provider data or server secrets, but enable protection if public access is not intended.
+5. **Deployment uses staging auth configuration:** Vercel Preview/Production public Supabase settings point at the staging project for this checkpoint. No production database or secret is used; this is not a production-ready environment.
+6. **CI scope:** CI runs lint, typecheck, API unit tests and build. ADR-001 integration tests require staging credentials and are run locally/explicitly with `npm test`; repository-wide CI must not receive production credentials.
+7. **Development advisories:** 20 moderate development-only npm advisories remain; `npm audit --omit=dev` is clean. Do not run a forced dependency downgrade.
+8. **No Phase 3 functionality:** no event ingestion, host agent, renter SDK, probe worker, protocol package or evidence sealing exists yet.
 
 ## Things not to change
 
@@ -153,4 +205,4 @@ No tests are claimed beyond those run above. Vitest, pgTAP and API/security inte
 
 ## Exact next task
 
-**Phase 2 — backend/data/auth foundation, awaiting explicit operator authorization.** Do not start Phase 2.
+**Phase 3A only — protocol and cryptographic core — awaiting explicit operator authorization.** Do not start Phase 3A from this checkpoint.
