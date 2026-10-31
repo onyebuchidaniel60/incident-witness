@@ -1,6 +1,6 @@
 # Incident Witness Protocol v1 — Design Reference
 
-**Status:** Protocol v1 is implemented in `packages/protocol`; API-side event ingestion, deterministic correlation (`@incident-witness/correlator`) and bundle sealing/download are implemented in Phase 3C. Host agent, renter SDK, probe worker and CLI verifier remain later phases. This document must remain consistent with `ARCHITECTURE.md` and the protocol/correlator tests.
+**Status:** Protocol v1 is implemented in `packages/protocol`; API-side event ingestion, deterministic correlation (`@incident-witness/correlator`) and bundle sealing/download are implemented in Phase 3C. Host agent, renter SDK and probe worker are implemented in Phases 3D–3E. The Phase 3F offline CLI verifier and synthetic demo harness are implemented and pending operator acceptance. This document must remain consistent with `ARCHITECTURE.md` and the protocol/correlator tests.
 
 ## Purpose
 

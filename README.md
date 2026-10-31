@@ -18,13 +18,19 @@ with a local Ed25519 key, owner-only key/credential storage, a 50 MiB SQLite spo
 and presence sequences, signed operational-presence heartbeats, evidence heartbeats, fixed-argument
 `nvidia-smi`/`upsc` collectors, and bounded retry/backoff.
 
-Phase 3E adds the renter SDK in `packages/renter-sdk` and the separate secure platform probe worker
-in `apps/probe-worker`. The SDK redeems a one-use invitation, signs 30-second heartbeats and
+Phase 3E adds the accepted renter SDK in `packages/renter-sdk` and the separate secure platform probe
+worker in `apps/probe-worker`. The SDK redeems a one-use invitation, signs 30-second heartbeats and
 60-second/state-change endpoint observations into a bounded 5 MiB queue. The worker leases
 `probe_jobs`, resolves and pins the provider IP, enforces SSRF/DNS-rebinding controls, performs the
 fixed HTTPS health check, signs `platform_probe_result` events and appends them as the restricted
-`iw_worker` role. Phase 3E is implemented and locally/integration tested; operator acceptance is
-pending. The CLI verifier remains Phase 3F.
+`iw_worker` role.
+
+Phase 3F adds the offline `iw-verify` CLI in `tools/iw-verify` and the synthetic end-to-end demo
+harness in `tools/demo-harness`. The CLI validates schema/version, manifest digest, pinned platform
+key/signature, source certificates, event signatures/digests and deterministic ordering without any
+network request. The harness runs a fully labelled simulated power-pattern lifecycle against the
+staging database, seals/downloads the bundle, verifies it and demonstrates one-byte tamper detection.
+Phase 3F is implemented and tested; operator acceptance is pending.
 
 Phase 3B host/incident domain APIs are accepted and closed. The API supports owner-scoped host CRUD,
 DNS TXT endpoint verification with public-IP/SSRF checks, host enrollment and signed operational
@@ -93,10 +99,11 @@ and the accepted ADR for the role/GUC design.
 
 Local Phase 3C verification on 2026-10-31 passed lint, typecheck, build, 20 protocol tests,
 12 correlator tests, 14 ADR-001 database tests, 17 API unit tests, 57 API integration tests and
-36 Playwright checks. Phase 3D added 49 host-agent tests. Phase 3E adds 14 renter-SDK tests,
+36 Playwright checks. Phase 3D added 49 host-agent tests. Phase 3E added 14 renter-SDK tests,
 20 probe-worker unit tests, one probe-worker database/RLS integration test and one correlator
-regression check for probe-service errors. Actual results and remaining blockers are recorded in
-`AI_HANDOFF.md`.
+regression check for probe-service errors. Phase 3F adds 11 CLI verifier tests and two staging demo
+harness tests (158 unit tests total), plus a 57/57 API integration re-run and 1/1 probe-worker
+integration re-run. Actual results and remaining blockers are recorded in `AI_HANDOFF.md`.
 
 ### Renter SDK and probe worker
 
@@ -111,6 +118,26 @@ npm run test:integration --workspace @incident-witness/probe-worker
 See [`docs/RENTER_SDK.md`](./docs/RENTER_SDK.md) and
 [`docs/PROBE_WORKER.md`](./docs/PROBE_WORKER.md). The probe key must be provisioned before a live
 worker can start.
+
+### Platform probe key provisioning
+
+`npm run db:provision-probe-key` registers the platform-probe public key, fingerprint and
+platform-signed `platform_probe` certificate in `witness_keys`. It never writes the private key to the
+database or prints it.
+
+To generate a new probe keypair locally (the private key is written only to the requested file with
+mode `0600`, and the public half is registered):
+
+```bash
+export IW_PLATFORM_PROBE_KEY_ID="<witness_keys UUID>"
+npm run db:provision-probe-key -- --generate --out secrets/probe-worker.pk8
+```
+
+`secrets/` is git-ignored. Put the generated file's base64 contents into the worker-only
+`IW_PLATFORM_PROBE_PRIVATE_KEY` secret; never commit it or expose it to the web/API runtime. To
+provision an operator-managed key instead, set `IW_PLATFORM_PROBE_PRIVATE_KEY` (base64 PKCS8 DER
+Ed25519) and run `npm run db:provision-probe-key` without `--generate`. A key ID with different
+existing key material is rejected rather than replaced.
 
 ### Host agent
 
@@ -154,6 +181,42 @@ See [Environment and configuration](./docs/CONFIGURATION.md). Secrets belong in 
 ## Verification model
 
 The protocol uses RFC 8785 JSON Canonicalization Scheme via pinned `canonicalize@5.1.0`, SHA-256 and Ed25519. The shared protocol package has explicit Node and browser entry points: Node services/agents use built-in `node:crypto` for signing and verification; the browser verifier uses `@noble/ed25519` 3.2.x for public-key verification only. Shared RFC 8785 canonicalization test vectors and RFC 8032 Ed25519 golden vectors must prove cross-runtime parity. Web verification is local to the browser; bundle contents are not uploaded for checking. Trust is anchored to a versioned, pinned platform public-key set. A valid result establishes integrity and signatures relative to those keys—not the truth of underlying readings.
+
+### Offline CLI verifier
+
+The Phase 3F CLI verifies a downloaded bundle without uploading it or making any network request:
+
+```bash
+npm run build --workspace @incident-witness/cli-verifier
+node tools/iw-verify/dist/cli.js path/to/incident-witness-bundle.json
+# or:
+npm run verify -- path/to/incident-witness-bundle.json
+```
+
+Exit code `0` means the schema, versions, manifest digest, pinned platform key/signature, source
+certificates, event signatures/digests and sequence/order checks all pass. Exit code `1` means the
+bundle is invalid or was modified. Exit code `2` means the bundle file is missing/unparseable or the
+trust set cannot be loaded. The pinned public-key set is
+[`tools/iw-verify/trusted-platform-keys.json`](./tools/iw-verify/trusted-platform-keys.json); it
+contains public keys only. Use `--trust <path>` for a separately operated trust set.
+
+### Synthetic integration demo
+
+The Phase 3F demo harness runs the full local lifecycle against the configured staging database: a
+disposable provider, host, simulated host agent and renter enrollment, a labelled demo session,
+signed synthetic power/reachability events, end, seal, bundle download, CLI verification and a
+one-byte tamper check.
+
+```bash
+npm run demo
+npm run test:demo
+```
+
+Every generated event carries `simulation_mode: true`, the session is created with `demoMode: true`,
+and the sealed manifest has `simulation_present: true` with a grade capped at `LOW`. The harness does
+not collect real GPU, UPS or renter workload telemetry. It seeds a disposable staging auth user with
+the migrator role and uses an in-process API instance; it does not use production data or deploy
+anything.
 
 ## Deployment lifecycle
 

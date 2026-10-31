@@ -36,6 +36,18 @@ This registers only the public key, fingerprint and signed certificate; it print
 metadata. It refuses to replace an existing key ID with different material. The corresponding
 `IW_PLATFORM_PROBE_KEY_ID` must be the `witness_keys.id` UUID.
 
+To generate a new keypair during provisioning instead of supplying an existing private key, pass
+`--generate` and an output path. The private key is written with mode `0600` and is never printed:
+
+```bash
+export IW_PLATFORM_PROBE_KEY_ID="<witness_keys UUID>"
+npm run db:provision-probe-key -- --generate --out secrets/probe-worker.pk8
+```
+
+Use a git-ignored directory such as `secrets/`. Move the file contents into the worker-only
+`IW_PLATFORM_PROBE_PRIVATE_KEY` secret. `--generate` refuses to overwrite an existing file and is
+rejected if `IW_PLATFORM_PROBE_PRIVATE_KEY` is also set.
+
 Required worker environment:
 
 | Variable | Purpose |
