@@ -2,11 +2,13 @@
 
 **Last updated:** 2026-10-31
 
-**Project status:** Phase 2 backend/data/auth foundation implemented; Phase 2 checkpoint pending operator acceptance. Phase 3 not started.
+**Project status:** Phase 2 backend/data/auth foundation accepted and closed. Phase 3A is authorized; Phase 3B has not started.
 
-**Current phase:** Phase 2 — IMPLEMENTED, PENDING OPERATOR ACCEPTANCE.
+**Current phase:** Phase 2 — COMPLETE, ACCEPTED. Phase 3A — AUTHORIZED, NOT STARTED.
 
-**Next task:** Phase 3A only, awaiting explicit operator authorization.
+**Next task:** Phase 3A only — protocol and cryptographic core.
+
+**Phase 2 acceptance:** Operator accepted the Phase 2 checkpoint and approved the `public.iw_uid()` security-definer wrapper on 2026-10-31.
 
 ## Project
 
@@ -32,7 +34,7 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 - Supabase Postgres/Auth; Drizzle ORM + `pg`; versioned SQL migrations in `packages/db/migrations`.
 - `jose` JWT verification against Supabase JWKS; issuer, audience, expiry and UUID subject checks.
 - Accepted ADR-001 mechanism: API connects as restricted `iw_api`, sets transaction-local JWT subject and request mode, and never uses `SET ROLE authenticated`.
-- Supabase's staging `auth` schema is owned by `supabase_admin`; the migrator cannot grant `auth` USAGE to `iw_api`. Policies therefore call a narrow `SECURITY DEFINER` wrapper `public.iw_uid()` which calls `auth.uid()`. No role switch, service-role connection or auth-schema grant to `iw_api` is used. This environment-specific workaround must be reviewed by the operator and replaced with direct `auth.uid()` access if the staging project can grant auth-schema usage.
+- Supabase's staging `auth` schema is owned by `supabase_admin`; the migrator cannot grant `auth` USAGE to `iw_api`. Policies therefore call a narrow `SECURITY DEFINER` wrapper `public.iw_uid()` which calls `auth.uid()`. No role switch, service-role connection or auth-schema grant to `iw_api` is used. **Operator approved this wrapper on 2026-10-31;** it preserves the ADR-001 transaction-local identity model without exposing the `auth` schema.
 - Linux host agent, renter SDK, platform probe worker, evidence ingestion, sealing and bundle verifier are **not implemented** (Phase 3+).
 
 ## Repository state
@@ -162,7 +164,7 @@ The test suite seeds disposable auth users/profiles and removes them in `afterAl
 - **Migration ledger:** `iw_schema_migrations`.
 - **Applied migrations:** `0001_phase2_schema`, `0002_roles_and_grants`, `0003_rls`, `0004_health_grants`, `0005_uid_wrapper`, `0006_ledger_grants`, `0007_ledger_rls`, `0008_ledger_revoke_defaults`.
 - **Roles:** `iw_api` and `iw_worker` are login roles with `NOSUPERUSER`, `NOBYPASSRLS`, `NOCREATEDB`, `NOCREATEROLE`.
-- **Schema caveat:** `public.iw_uid()` security-definer wrapper is required for the staging project because `auth` schema usage cannot be granted to `iw_api`; it calls `auth.uid()` and preserves transaction-local claim semantics.
+- **Schema decision:** `public.iw_uid()` security-definer wrapper is approved for the staging project because `auth` schema usage cannot be granted to `iw_api`; it calls `auth.uid()` and preserves transaction-local claim semantics.
 - **Role passwords:** supplied only through the ignored local `.env`; no credential is committed or printed.
 
 ## Design reference and approval status
@@ -183,7 +185,7 @@ The test suite seeds disposable auth users/profiles and removes them in `afterAl
 
 ## Known risks and operator actions
 
-1. **ADR-001 implementation caveat:** the staging Supabase project does not permit the migrator to grant `auth` schema usage to `iw_api`; policies use `public.iw_uid()` as a security-definer wrapper around `auth.uid()`. This preserves the no-role-switch intent but requires operator/security review. If the staging project can grant usage, replace the wrapper with direct `auth.uid()` policies in a later approved change.
+1. **ADR-001 implementation decision:** the staging Supabase project does not permit the migrator to grant `auth` schema usage to `iw_api`; policies use `public.iw_uid()` as a security-definer wrapper around `auth.uid()`. The operator approved this wrapper on 2026-10-31; it preserves the no-role-switch intent without exposing the `auth` schema.
 2. **OTP delivery unverified:** Supabase email template must include `{{ .Token }}` and the local/Vercel origins must be allow-listed in Supabase Auth. No real one-time email was requested or verified in this task.
 3. **API not deployed:** Fastify runs locally and its health/error/JWT behavior was verified there; Render API/worker services are not configured. The deployed web shell does not call an API.
 4. **Vercel Authentication disabled:** `ssoProtection` is `null`; the deployed shell is publicly reachable. It contains no provider data or server secrets, but enable protection if public access is not intended.
