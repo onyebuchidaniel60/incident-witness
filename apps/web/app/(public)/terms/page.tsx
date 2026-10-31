@@ -18,17 +18,17 @@ export default function TermsPage() {
 
       <PlaceholderNotice title="No production service terms">
         <p>
-          Incident Witness is in Phase 4 implementation. No public production service, paid plan,
+          Incident Witness is in Phase 7 implementation. No public production service, paid plan,
           marketplace integration, adjudication process or service-level commitment is offered by
           this deployment. Operator-approved terms are required before production.
         </p>
       </PlaceholderNotice>
 
-      <div className="flex flex-wrap gap-4 text-sm">
-        <Link href="/docs" className="font-medium text-slate-800 underline hover:text-slate-950">
+      <div className="flex flex-wrap gap-4 text-[10px] font-medium">
+        <Link href="/docs" className="iw-link">
           Documentation
         </Link>
-        <Link href="/privacy" className="font-medium text-slate-800 underline hover:text-slate-950">
+        <Link href="/privacy" className="iw-link">
           Privacy placeholder
         </Link>
       </div>

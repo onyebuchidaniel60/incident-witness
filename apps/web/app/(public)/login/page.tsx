@@ -3,6 +3,7 @@ import Link from "next/link";
 import { E2eSignInButton } from "@/components/e2e-sign-in-button";
 import { LoginForm } from "@/components/login-form";
 import { PageIntro } from "@/components/page-intro";
+import { Icon } from "@/components/ui/icon";
 
 export const metadata = {
   title: "Provider sign-in",
@@ -29,31 +30,34 @@ export default async function LoginPage({
         description="Enter your email address and we will send a magic sign-in link. There is no password stored by Incident Witness."
       />
 
-      <div className="max-w-md rounded-lg border border-slate-200 bg-white p-5">
-        <LoginForm initialError={initialError} />
-      </div>
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] lg:items-start">
+        <div className="iw-panel p-5">
+          <LoginForm initialError={initialError} />
+        </div>
 
-      <div className="max-w-md">
-        <E2eSignInButton />
-      </div>
-
-      <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
-        <p className="font-semibold">Magic-link sign-in</p>
-        <p className="mt-1">
-          Supabase sends the default email login link, so no custom SMTP template is required. The
-          deployment origin and <code className="font-mono text-xs">/auth/callback</code> path must
-          be allow-listed in the Supabase Auth redirect settings. If email delivery is unavailable,
-          the sign-in link cannot be issued.
-        </p>
-      </div>
-
-      <div className="flex flex-wrap gap-4 text-sm">
-        <Link href="/" className="font-medium text-slate-800 underline hover:text-slate-950">
-          Return home
-        </Link>
-        <Link href="/docs" className="font-medium text-slate-800 underline hover:text-slate-950">
-          Read the documentation
-        </Link>
+        <div className="space-y-4">
+          <div className="iw-notice iw-notice-info flex-col gap-1.5">
+            <p className="flex items-center gap-2 font-semibold">
+              <Icon name="shield" size="sm" />
+              Magic-link sign-in
+            </p>
+            <p className="text-[11px] leading-5">
+              Supabase sends the default email login link, so no custom SMTP template is required.
+              The deployment origin and <code className="font-mono text-[10px]">/auth/callback</code>{" "}
+              path must be allow-listed in the Supabase Auth redirect settings. If email delivery is
+              unavailable, the sign-in link cannot be issued.
+            </p>
+          </div>
+          <E2eSignInButton />
+          <div className="flex flex-wrap gap-4 text-[10px] font-medium">
+            <Link href="/" className="iw-link">
+              Return home
+            </Link>
+            <Link href="/docs" className="iw-link">
+              Read the documentation
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

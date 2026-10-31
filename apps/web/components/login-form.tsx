@@ -40,10 +40,10 @@ export function LoginForm({ initialError = null }: { initialError?: string | nul
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <form onSubmit={requestLink} className="space-y-4">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-slate-800">
+          <label htmlFor="email" className="iw-label">
             Provider email address
           </label>
           <input
@@ -55,25 +55,21 @@ export function LoginForm({ initialError = null }: { initialError?: string | nul
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             disabled={busy}
-            className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-950 disabled:bg-slate-100"
+            className="iw-input mt-1.5"
           />
         </div>
-        <button
-          type="submit"
-          disabled={busy}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
-        >
+        <button type="submit" disabled={busy} className="iw-btn iw-btn-primary">
           {busy ? "Sending link…" : "Send login link"}
         </button>
       </form>
 
       {message ? (
-        <p role="status" className="text-sm leading-6 text-slate-700">
+        <p role="status" className="iw-notice iw-notice-success text-[11px] leading-5">
           {message}
         </p>
       ) : null}
       {error ? (
-        <p role="alert" className="text-sm leading-6 text-red-800">
+        <p role="alert" className="iw-notice iw-notice-danger text-[11px] leading-5">
           {error}
         </p>
       ) : null}
