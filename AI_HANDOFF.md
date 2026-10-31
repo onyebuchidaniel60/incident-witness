@@ -2,9 +2,9 @@
 
 **Last updated:** 2026-10-31
 
-**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**. Phase 6 reference-driven mockups (revision 0.3) are **APPROVED**. Phase 7 final UI implementation is implemented and deployed; the critical magic-link session bug is fixed and verified. Operator acceptance is pending.
+**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**. Phase 6 reference-driven mockups (revision 0.3) are **APPROVED**. Phase 7 final UI implementation is implemented and deployed; the magic-link session bug and the protected-route API-call race are fixed and verified. Operator acceptance is pending.
 
-**Current phase:** Phase 7 — implemented, tested and deployed; critical auth session bug fixed. Awaiting operator acceptance; Phase 8 is not authorized.
+**Current phase:** Phase 7 — implemented, tested and deployed; critical auth bugs fixed. Awaiting operator acceptance; Phase 8 is not authorized.
 
 **Next task:** Operator acceptance of the Phase 7 checkpoint. Phase 8 only after explicit authorization.
 
@@ -762,6 +762,55 @@ The independent hardening gap was that no Supabase client passed explicit cookie
 - A real magic-link inbox click on this Preview remains the operator-side confirmation step.
 
 **Phase 7 visual verification was blocked by this auth bug.** Phase 8 was not started.
+
+## Protected-route API-call race fix (2026-10-31)
+
+### Bug
+
+When unauthenticated or after the session disappeared, protected routes could briefly render, issue API requests and then redirect to `/login`. The API could return “authentication token is invalid” and that raw message could flash before navigation.
+
+### Diagnosis
+
+- `apps/web/app/(dashboard)/layout.tsx` wrapped `AppShell` in an async server `AuthGuard`, and `AuthGuard` correctly called `supabase.auth.getUser()` and `redirect("/login")`. It was **not** a client component and there was no client-side auth check racing the server.
+- `apps/web/proxy.ts` already intercepted `/dashboard`, `/hosts`, `/incidents` and `/settings` and redirected before rendering. Direct unauthenticated requests were already guarded.
+- The remaining race occurred when a protected client view was already mounted or reused from the Next client router cache after the session was removed. Those client hooks could still fire while navigation was in progress.
+- `apps/web/lib/api/client.ts` pre-fix lines 122–140 handled a 401/403 by calling `redirectToLogin()` and then returning the response. `apiRequest` parsed the API envelope and `useApiResource` rendered the raw message before the hard redirect completed.
+- `accessToken()` did not preemptively refresh a session close to expiry, so a stale token could reach the API.
+- `sign-out-button.tsx` used client router navigation, which could leave protected RSC entries in the client cache.
+
+### Fix
+
+- Replaced the nested `AuthGuard` render wrapper with `requireAuthenticatedUser()`, awaited directly in `(dashboard)/layout.tsx` before `AppShell` is returned. Added `export const dynamic = "force-dynamic"`.
+- The API client now:
+  - redirects immediately when there is no session;
+  - refreshes tokens within 30 seconds of expiry before sending;
+  - treats a final 401/403 as `AUTH_REQUIRED`, redirects and throws a sanitized error instead of returning the raw API response;
+  - uses a single `window.location.replace` redirect guard.
+- `useApiResource` suppresses `AUTH_REQUIRED` errors while the browser is navigating to login, so the raw API message is never rendered.
+- Sign-out now performs a full navigation to `/`, clearing the client router cache.
+- `proxy.ts` remains unchanged as the edge guard for direct protected requests.
+
+### Test coverage
+
+- E2E `npm run test:e2e` — **PASS**: 52 checks, 51 passed and one intentional mobile provider-flow skip.
+- The proxy test now asserts that `/dashboard` and `/hosts` without a cookie redirect to `/login?next=…`, make **zero** requests to the API base URL, and never show “authentication token is invalid”.
+- A new API-401 test forces a 401 response and verifies the browser redirects to `/login?next=%2Fdashboard` without rendering the raw API message.
+- Magic-link callback cookie persistence, refresh survival and proxy behavior remain covered.
+- `npm run lint --workspace @incident-witness/web` — **PASS**.
+- `npm run typecheck --workspace @incident-witness/web` — **PASS**.
+- `npm run build --workspace @incident-witness/web` — **PASS**.
+
+### Manual verification
+
+- Built app without a session:
+  - `/dashboard` → `307` `location: /login?next=%2Fdashboard`
+  - `/hosts` → `307` `location: /login?next=%2Fhosts`
+  - `/incidents` → `307` `location: /login?next=%2Fincidents`
+  - `/settings` → `307` `location: /login?next=%2Fsettings`
+- No client bundle or API request is served for those redirects.
+- No `/workspace` route exists in the current app; `/dashboard` is the provider workspace entry.
+
+**Phase 8 was not started.** The Phase 7 checkpoint remains pending operator acceptance.
 
 ## Design reference and approval status
 
