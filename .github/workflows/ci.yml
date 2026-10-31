@@ -30,5 +30,11 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Test API unit and JWT validation
+        run: npm run test --workspace @incident-witness/api
+
+      # Database integration tests require the approved staging secrets and
+      # are run explicitly with `npm test` in the staging environment. They are
+      # intentionally not wired to repository-wide CI credentials.
       - name: Build
         run: npm run build

@@ -8,16 +8,16 @@ Incident Witness is a portable incident-evidence protocol for decentralized comp
 
 ## Project status
 
-Phase 1 is implemented and pending operator acceptance: a route-complete, navigable
-Next.js structural frontend in explicit no-auth placeholder mode. There is no API, database,
-authentication, host agent, renter SDK, platform probe or working evidence verifier yet. The
-product requirements, architecture, security rules and phase plan remain in the root
-documentation.
+Phase 2 backend/data/auth foundation is implemented and pending operator acceptance. It adds the
+Fastify API foundation, the Drizzle schema and SQL migrations for the 14 approved tables, restricted
+`iw_api`/`iw_worker` roles, RLS policies, Supabase JWT verification and Supabase email OTP sign-in.
+The provider routes are protected by the web auth guard; host, incident, evidence, agent, SDK,
+probe-worker and verifier functionality remain later phases.
 
-Phase 1 routes are `/`, `/login`, `/verify`, `/docs`, `/privacy`, `/terms`, `/dashboard`,
-`/hosts`, `/hosts/new`, `/hosts/[hostId]`, `/incidents`, `/incidents/new`,
-`/incidents/[incidentId]`, `/settings`, and the not-found route. All protected-area routes are
-clearly labelled placeholders and do not expose provider data.
+Public routes are `/`, `/login`, `/verify`, `/docs`, `/privacy`, `/terms`, and the not-found route.
+Protected placeholder routes are `/dashboard`, `/hosts`, `/hosts/new`, `/hosts/[hostId]`,
+`/incidents`, `/incidents/new`, `/incidents/[incidentId]` and `/settings`; unauthenticated requests
+are redirected to `/login`. The data-backed pages remain explicitly labelled placeholders.
 
 ## Source-of-truth documentation
 
@@ -39,25 +39,53 @@ Node.js 26.13.0 LTS (released 2026-10-28), TypeScript, npm workspaces, Next.js 1
 
 ## Development commands
 
-Phase 1 uses Node.js 26.13.0 and npm workspaces. The following commands are the verified local
-interface:
+Phase 2 uses Node.js 26.13.0 and npm workspaces. The local interface is:
 
 ```bash
 npm ci
+npm run db:provision-roles
+npm run db:migrate
+npm run db:migrate:status
+npm run dev:api
 npm run dev
 npm run lint
 npm run typecheck
 npm run build
+npm test
 npm run test:e2e
 ```
 
-`npm test` is the same Playwright smoke suite as `npm run test:e2e`. The suite loads every route
-at desktop and mobile viewport sizes, checks the not-found response, tests primary navigation,
-and confirms the documentation and GitHub footer links. Phase 1 does not include unit,
-integration or API tests yet.
+`npm test` runs the staging database integration tests (including ADR-001 T01–T14) followed by the
+API Vitest suite. It requires the staging `.env` credentials and must never be run against
+production. `npm run test:e2e` runs the Playwright public-route, auth-redirect, navigation and footer
+checks at desktop and mobile viewport sizes.
 
-Local Phase 1 verification on 2026-10-31 passed `npm ci`, lint, typecheck, build and 36 Playwright
-checks. Use `npm.cmd` from Windows PowerShell where required.
+The database migration runner uses `DATABASE_URL_MIGRATOR`. The API and probe worker use the
+restricted `DATABASE_URL_IW_API` and `DATABASE_URL_IW_WORKER` roles. See `docs/CONFIGURATION.md`
+and the accepted ADR for the role/GUC design.
+
+Local Phase 2 verification on 2026-10-31 passed dependency installation, lint, typecheck, build,
+14 ADR-001 database integration tests, 10 API unit tests and 36 Playwright checks. Actual results
+and any remaining blockers are recorded in `AI_HANDOFF.md`.
+
+### Database setup
+
+1. Provision the restricted roles from the configured URLs with `npm run db:provision-roles`.
+2. Apply the versioned migrations with `npm run db:migrate`.
+3. Confirm migration status with `npm run db:migrate:status`.
+
+Migrations are in `packages/db/migrations/`. The migration ledger is `iw_schema_migrations`.
+Supabase's `auth` schema is owned by `supabase_admin`; because the staging migrator cannot grant
+schema usage to `iw_api`, the RLS policies use a narrow security-definer `public.iw_uid()` wrapper
+that calls `auth.uid()`. No `SET ROLE authenticated` or service-role connection is used. This
+environment-specific detail is recorded in `AI_HANDOFF.md`.
+
+### Authentication setup
+
+The web login uses Supabase email OTP through the pinned `@supabase/ssr` adapter. The Supabase
+email template must include the one-time token, and the local/Preview origins must be allow-listed
+in the Supabase Auth redirect settings. Those dashboard settings are not verifiable from the
+repository and remain an operational prerequisite for a live OTP delivery test.
 
 ## Configuration
 
@@ -69,7 +97,7 @@ The protocol uses RFC 8785 JSON Canonicalization Scheme via pinned `canonicalize
 
 ## Deployment lifecycle
 
-The first implementation milestone is a navigable skeletal frontend deployed to a stable Preview URL. The Preview must use staging/test data only and be updated at each verified checkpoint. Core functionality must pass end-to-end before final visual design begins. Final design requires operator-approved references and mockups. Production deployment requires separate explicit operator authorization. See `IMPLEMENTATION_PLAN.md`.
+The first implementation milestone was a navigable skeletal frontend deployed to a stable Preview URL. The Preview must use staging/test data only and be updated at each verified checkpoint. Phase 2 authentication uses Supabase Auth; no production database or production secrets are used in Preview. Core functionality must pass end-to-end before final visual design begins. Final design requires operator-approved references and mockups. Production deployment requires separate explicit operator authorization. See `IMPLEMENTATION_PLAN.md`.
 
 ## Contributions and AI coding agents
 
