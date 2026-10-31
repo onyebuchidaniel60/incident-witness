@@ -3,6 +3,8 @@ import { DashboardView } from "@/components/views/dashboard-view";
 
 export const metadata = {
   title: "Dashboard",
+  description:
+    "Provider workspace overview: owned hosts, active evidence sessions and recent sealed records from the authenticated Incident Witness API.",
 };
 
 export default function DashboardPage() {

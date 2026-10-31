@@ -1,11 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PageIntro } from "@/components/page-intro";
 import { VerifyView } from "@/components/views/verify-view";
 import { Icon } from "@/components/ui/icon";
 
-export const metadata = {
-  title: "Verify evidence bundle",
+export const metadata: Metadata = {
+  title: "Verify Evidence",
+  description:
+    "Verify a sealed Incident Witness evidence bundle locally in your browser. Checks schema, manifest digest, platform signature, source certificates, event signatures and ordering. The bundle is never uploaded.",
+  alternates: { canonical: "/verify" },
 };
 
 export default function VerifyPage() {

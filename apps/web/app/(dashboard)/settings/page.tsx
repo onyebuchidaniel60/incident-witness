@@ -8,6 +8,8 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata = {
   title: "Settings",
+  description:
+    "Incident Witness account session information, display name and sign-out controls. Host key revocation and archival happen on each host page.",
 };
 
 export default async function SettingsPage() {

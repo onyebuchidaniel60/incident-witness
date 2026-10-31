@@ -3,6 +3,8 @@ import { HostsView } from "@/components/views/hosts-view";
 
 export const metadata = {
   title: "Hosts",
+  description:
+    "Owned Incident Witness hosts with endpoint verification status, agent presence and lifecycle controls.",
 };
 
 export default function HostsPage() {

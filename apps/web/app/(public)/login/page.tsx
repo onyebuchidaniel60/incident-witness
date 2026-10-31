@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { E2eSignInButton } from "@/components/e2e-sign-in-button";
@@ -5,8 +6,11 @@ import { LoginForm } from "@/components/login-form";
 import { PageIntro } from "@/components/page-intro";
 import { Icon } from "@/components/ui/icon";
 
-export const metadata = {
-  title: "Provider sign-in",
+export const metadata: Metadata = {
+  title: "Provider Sign-In",
+  description:
+    "Sign in to the Incident Witness provider workspace with a Supabase magic link. Provider routes are private and are not indexed.",
+  robots: { index: false, follow: false },
 };
 
 export const dynamic = "force-dynamic";
@@ -43,9 +47,10 @@ export default async function LoginPage({
             </p>
             <p className="text-[11px] leading-5">
               Supabase sends the default email login link, so no custom SMTP template is required.
-              The deployment origin and <code className="font-mono text-[10px]">/auth/callback</code>{" "}
-              path must be allow-listed in the Supabase Auth redirect settings. If email delivery is
-              unavailable, the sign-in link cannot be issued.
+              The deployment origin and{" "}
+              <code className="font-mono text-[10px]">/auth/callback</code> path must be
+              allow-listed in the Supabase Auth redirect settings. If email delivery is unavailable,
+              the sign-in link cannot be issued.
             </p>
           </div>
           <E2eSignInButton />

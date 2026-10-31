@@ -7,7 +7,7 @@ export default function PublicLayout({ children }: Readonly<{ children: ReactNod
   return (
     <div className="flex min-h-screen flex-col">
       <SiteHeader />
-      <main id="main-content" className="iw-container flex-1 py-8 sm:py-12">
+      <main id="main-content" tabIndex={-1} className="iw-container flex-1 py-8 sm:py-12">
         {children}
       </main>
       <SiteFooter />

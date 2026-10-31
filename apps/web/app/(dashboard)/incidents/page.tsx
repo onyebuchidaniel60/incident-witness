@@ -2,7 +2,9 @@ import { PageIntro } from "@/components/page-intro";
 import { IncidentsView } from "@/components/views/incidents-view";
 
 export const metadata = {
-  title: "Evidence sessions",
+  title: "Evidence Sessions",
+  description:
+    "Owned Incident Witness capture sessions with status, host, capture window, event count and sealed assessment.",
 };
 
 export default function IncidentsPage() {

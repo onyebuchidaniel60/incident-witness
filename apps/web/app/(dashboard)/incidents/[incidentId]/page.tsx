@@ -2,7 +2,9 @@ import { PageIntro } from "@/components/page-intro";
 import { IncidentDetailView } from "@/components/views/incident-detail-view";
 
 export const metadata = {
-  title: "Evidence session detail",
+  title: "Evidence Session Detail",
+  description:
+    "Source-attributed observations, lifecycle controls, deterministic assessment and sealed-bundle download for one owned Incident Witness session.",
 };
 
 export default async function IncidentDetailPage({

@@ -4,7 +4,9 @@ import { PageIntro } from "@/components/page-intro";
 import { NewHostForm } from "@/components/views/new-host-form";
 
 export const metadata = {
-  title: "Add host",
+  title: "Add Host",
+  description:
+    "Register an owned Linux host, then verify its DNS TXT challenge and fixed HTTPS health endpoint before enrollment.",
 };
 
 export default function NewHostPage() {

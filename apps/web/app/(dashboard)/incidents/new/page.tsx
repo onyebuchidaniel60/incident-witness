@@ -4,7 +4,9 @@ import { PageIntro } from "@/components/page-intro";
 import { NewIncidentForm } from "@/components/views/new-incident-form";
 
 export const metadata = {
-  title: "New evidence session",
+  title: "New Evidence Session",
+  description:
+    "Start a bounded Incident Witness capture session against an active owned host. Capture cannot reconstruct events from before session creation.",
 };
 
 export default function NewIncidentPage() {

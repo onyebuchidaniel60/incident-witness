@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Icon } from "@/components/ui/icon";
+import { repositoryUrl } from "@/lib/site";
 
 export function SiteFooter() {
   return (
@@ -43,10 +44,11 @@ export function SiteFooter() {
               </li>
               <li>
                 <a
-                  href="https://github.com/onyebuchidaniel60/incident-witness"
+                  href={repositoryUrl}
                   className="hover:text-iw-ink"
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label="Incident Witness GitHub repository (opens in a new tab)"
                 >
                   GitHub
                 </a>
@@ -56,8 +58,8 @@ export function SiteFooter() {
         </div>
         <div className="flex flex-col gap-2 border-t border-iw-border pt-4 text-[9px] text-iw-faint md:flex-row md:items-center md:justify-between">
           <p>
-            Incident Witness — staging workspace. Evidence services are verified locally; no
-            production API is deployed.
+            Incident Witness — staging workspace. Evidence checks run locally; no production
+            evidence service is live.
           </p>
           <p className="font-mono uppercase tracking-[0.12em]">Provider-neutral · MVP</p>
         </div>

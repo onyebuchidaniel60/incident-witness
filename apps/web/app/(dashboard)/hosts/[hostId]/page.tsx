@@ -2,7 +2,9 @@ import { PageIntro } from "@/components/page-intro";
 import { HostDetailView } from "@/components/views/host-detail-view";
 
 export const metadata = {
-  title: "Host detail",
+  title: "Host Detail",
+  description:
+    "Endpoint proof, agent enrollment, source-key status and lifecycle controls for one owned Incident Witness host.",
 };
 
 export default async function HostDetailPage({ params }: { params: Promise<{ hostId: string }> }) {

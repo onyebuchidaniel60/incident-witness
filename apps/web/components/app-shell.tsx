@@ -7,7 +7,7 @@ export function AppShell({ children }: Readonly<{ children: ReactNode }>) {
     <div className="iw-app-stage">
       <div className="iw-app-frame">
         <DashboardSidebar />
-        <main id="main-content" className="iw-app-main">
+        <main id="main-content" tabIndex={-1} className="iw-app-main">
           {children}
         </main>
       </div>

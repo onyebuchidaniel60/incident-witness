@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Incident Witness">
+  <rect width="64" height="64" rx="12" fill="#0b0f0d" />
+  <rect x="2" y="2" width="60" height="60" rx="10" fill="none" stroke="#26d18c" stroke-opacity="0.45" />
+  <g fill="none" stroke="#67e9b4" stroke-width="4" stroke-linecap="round">
+    <path d="M25 15 21 49M43 15 39 49M15 26h34M13 38h34" />
+  </g>
+</svg>

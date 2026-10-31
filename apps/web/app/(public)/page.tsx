@@ -1,6 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Icon, type IconName } from "@/components/ui/icon";
+
+export const metadata: Metadata = {
+  title: { absolute: "Incident Witness — Portable incident evidence" },
+  description:
+    "A provider-neutral protocol for signed, bounded observations from a GPU host, a renter client and a platform-operated probe, sealed into an offline-verifiable evidence bundle.",
+  alternates: { canonical: "/" },
+  openGraph: { url: "/", images: ["/opengraph-image"] },
+};
 
 const sources: {
   title: string;
@@ -105,12 +114,11 @@ export default function HomePage() {
             </div>
             <div className="mt-3 rounded-[4px] border border-iw-border bg-[#111412] p-3 font-mono text-[8.5px] leading-5 text-iw-faint">
               <p>
-                <span className="text-iw-green-bright">correlate</span> observed_at → source →
-                key → sequence
+                <span className="text-iw-green-bright">correlate</span> observed_at → source → key →
+                sequence
               </p>
               <p>
-                <span className="text-iw-green-bright">seal</span> manifest · certificates ·
-                events
+                <span className="text-iw-green-bright">seal</span> manifest · certificates · events
               </p>
               <p>
                 <span className="text-iw-green-bright">verify</span> locally · no upload required
@@ -149,10 +157,7 @@ export default function HomePage() {
             <span className="iw-eyebrow-dot" />
             Three sources
           </p>
-          <h2
-            id="sources-heading"
-            className="mt-3 text-2xl leading-tight text-iw-ink sm:text-3xl"
-          >
+          <h2 id="sources-heading" className="mt-3 text-2xl leading-tight text-iw-ink sm:text-3xl">
             Separate observations. One correlatable record.
           </h2>
           <p className="mt-3 text-xs leading-6 text-iw-muted">
@@ -187,9 +192,9 @@ export default function HomePage() {
           </h2>
           <ul className="mt-5 space-y-3 text-[11px] leading-6 text-iw-muted">
             <li className="flex gap-2">
-              <Icon name="check" size="sm" className="mt-1 text-iw-green" />
-              A signature can show integrity and provenance from a key. It does not prove that a
-              sensor was truthful, a host was uncompromised or a cause is certain.
+              <Icon name="check" size="sm" className="mt-1 text-iw-green" />A signature can show
+              integrity and provenance from a key. It does not prove that a sensor was truthful, a
+              host was uncompromised or a cause is certain.
             </li>
             <li className="flex gap-2">
               <Icon name="check" size="sm" className="mt-1 text-iw-green" />
