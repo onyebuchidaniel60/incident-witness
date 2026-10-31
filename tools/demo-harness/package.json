@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "demo": "tsx src/run-demo.ts",
+    "seed:judge-demo": "npm run predemo && tsx src/seed-judge.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "predemo": "npm run build --workspace @incident-witness/protocol && npm run build --workspace @incident-witness/cli-verifier",

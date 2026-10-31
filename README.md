@@ -75,7 +75,33 @@ The provider login uses Supabase's default **magic-link email** flow rather than
 - Every deployment origin and `/auth/callback` must be allow-listed in Supabase Auth redirect settings.
 - Authenticated routes are protected by `proxy.ts` and a server-side user check before any provider API call. Unauthenticated requests redirect to `/login?next=…` without flashing an API error.
 
-No custom SMTP, external identity provider or service-role key is used in the web runtime.
+The normal provider login uses no custom SMTP, external identity provider or service-role key. The optional judge-demo bypass below uses a server-only service-role key for the fixed demo account only.
+
+### Hackathon judge demo login (opt-in)
+
+The home page can show a clearly labelled **Enter as Judge / Try Demo** button for judges. It POSTs to `/api/demo-login`, which creates a session only for the fixed, pre-seeded demo account `judge@incidentwitness.com`. The route accepts no email address from the browser and cannot sign in any other user.
+
+The route is disabled by default in production. It requires **both**:
+
+- `SUPABASE_SERVICE_ROLE_KEY` set as a server-only Vercel environment variable; and
+- `IW_ENABLE_DEMO_LOGIN=true` explicitly set for the deployment.
+
+To enable it for a hackathon:
+
+1. Seed the demo account and a sealed sample incident against staging:
+
+   ```bash
+   npm run seed:judge-demo
+   ```
+
+   The script creates/updates the confirmed demo user, a verified host, a signed demo session and a sealed bundle. It is safe to re-run; it resets only the demo account's data.
+
+2. In Vercel → Project → Settings → Environment Variables, add `SUPABASE_SERVICE_ROLE_KEY` for the desired environment (Preview and/or Production). Use the Supabase secret/service-role key. **Never** rename it to `NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY` or place it in browser code.
+3. Add `IW_ENABLE_DEMO_LOGIN=true` for the same environment.
+4. Redeploy so the server-only variables and the home-page button are available.
+5. After the hackathon, set `IW_ENABLE_DEMO_LOGIN=false` (or remove it) and redeploy. Rotating the service-role key is recommended if it was exposed for the event.
+
+The route is same-origin POST-only, returns `no-store` responses, uses the service-role key only on the server to generate a magic link for the fixed demo email, and writes the resulting Supabase session cookies through the existing route-handler client. The normal magic-link flow for real providers remains unchanged.
 
 ## Testing
 
@@ -87,20 +113,24 @@ npm test
 npm run test:integration --workspace @incident-witness/api
 npm run test:integration --workspace @incident-witness/probe-worker
 npm run test:e2e
+npm run test:integration --workspace @incident-witness/demo-harness
 npm run demo        # staging-only synthetic lifecycle
+npm run seed:judge-demo
 npm run verify -- path/to/bundle.json
 ```
 
-Recorded Phase 8 results on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
+Recorded results on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 
 - `npm run lint` — PASS across all workspaces.
 - `npm run typecheck` — PASS across all workspaces.
-- `npm run build` — PASS across the monorepo, including the Next.js 16.4.3 production build.
+- `npm run build` — PASS across the monorepo, including the Next.js 16.4.3 production build and the new `/api/demo-login` route.
 - `npm test` — PASS: 164 unit tests (20 protocol, 11 CLI verifier, 15 correlator, 14 ADR-001, 49 host-agent, 14 renter SDK, 20 probe worker, 21 API).
-- `npm run test:integration --workspace @incident-witness/api` — PASS: 60/60 against staging.
-- `npm run test:integration --workspace @incident-witness/probe-worker` — PASS: 2/2 against staging.
-- `npm run test:e2e` — PASS: 76 Playwright checks, 75 passed and one intentional mobile provider-flow skip. Coverage includes public metadata, `robots.txt`/`sitemap.xml`, noindex on private routes, the docs sections and commands, a full public link crawl, footer destinations, skip-link keyboard focus and accessible names.
-- `npm run test:integration --workspace @incident-witness/demo-harness` and `npm run demo` were last recorded as PASS in Phase 5 and were not re-run for this frontend/documentation-only phase.
+- `npm run test:integration --workspace @incident-witness/api` — PASS: 60/60 against staging (Phase 8 run; no API contract changed for the judge-demo work).
+- `npm run test:integration --workspace @incident-witness/probe-worker` — PASS: 2/2 against staging (Phase 8 run; no worker contract changed).
+- `npm run test:e2e` — PASS: 90 Playwright checks, 89 passed and one intentional mobile provider-flow skip. Coverage includes public metadata, link crawling, accessibility, the original provider journey, the production demo-login guard, fixed demo email, cross-origin rejection, missing-config failure and POST-only behaviour.
+- `npm run test:integration --workspace @incident-witness/demo-harness` — PASS: 2/2.
+- `npm run seed:judge-demo` — PASS against staging: judge user, email identity, one verified host, one sealed incident and one verified bundle.
+- The demo-login success/cookie path was exercised against a local fake Supabase Auth endpoint (200, session cookie set, `/dashboard` rendered). A real-key login remains operator verification after the Vercel secret is added.
 
 E2E uses test-only `IW_E2E_*`/`NEXT_PUBLIC_IW_E2E_*` seams for a static test session and file-backed DNS resolver. The API seam is disabled unless `NODE_ENV=test` and the explicit flag are both set; the web seam is disabled in production builds. These are test infrastructure, not production authentication or SSRF bypasses.
 

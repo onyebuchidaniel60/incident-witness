@@ -897,6 +897,44 @@ When unauthenticated or after the session disappeared, protected routes could br
 - **Git-connected Production deployment (auto-created by pushing `main`):** https://incident-witness-fqbgv60f1-uhhh2.vercel.app, deployment ID `dpl_9rdMekQvCtpx8bziWUYFFk8XZVWh`, target `production`, status `READY`, Git metadata commit `3122b3fe9d720982faf8f11f059e275203e8cb7c` on `main`. Stable alias https://incident-witness.vercel.app serves the Phase 8 `/docs` page (HTTP 200). No separate `vercel deploy --prod` command was run; the deployment was auto-created by the Git integration. Production release approval remains a separate Phase 9/operator decision.
 - Subsequent docs-only handoff commits may auto-deploy without an application-code change.
 
+## Judge demo login bypass (implemented 2026-10-31; pending operator verification)
+
+### Security model
+
+- Added `POST /api/demo-login` in `apps/web/app/api/demo-login/route.ts`. It is Node-runtime and dynamic, accepts no request body and never reads an email address from the caller.
+- The only account it can prepare is the fixed `judge@incidentwitness.com` demo user.
+- The Supabase service-role key is read only from the server-only `SUPABASE_SERVICE_ROLE_KEY` environment variable. It is never exported, never placed in a `NEXT_PUBLIC_*` variable and never sent to the browser.
+- The route is disabled in production unless `IW_ENABLE_DEMO_LOGIN=true` is explicitly set. When disabled it returns 404.
+- Requests are same-origin POST-only; cross-site requests and `GET` are rejected. Responses use `Cache-Control: no-store`.
+- The service-role client only calls `auth.admin.generateLink` for the fixed demo email. The resulting one-time token hash is exchanged through the existing Supabase route-handler client, which writes the normal session cookies onto the returned response.
+- The existing magic-link login and `/auth/callback` flow are unchanged for real users.
+- The home page renders the “Enter as Judge / Try Demo” button only when both the enablement flag and service-role key are configured.
+
+### Demo data seeding
+
+- Added `npm run seed:judge-demo` in `tools/demo-harness`.
+- The script creates/updates the confirmed judge auth user, an email identity, a profile, a DNS-verified host, an enrolled host source, a labelled demo capture session, signed synthetic events and a sealed bundle. It resets only the judge account’s data and is safe to re-run.
+- Seed result against staging: user `7f3c1a2e-5b4d-4c8f-9a6e-2d1b0c3e4f5a`, one host, one sealed incident, one bundle, assessment `POWER_RELATED` / `LOW`, simulation label present.
+- The demo harness was parameterized so its existing disposable Phase 3F demo behaviour is unchanged; the existing 2/2 demo-harness integration tests remain green.
+
+### Test evidence
+
+- `npm run lint` — **PASS** across all workspaces.
+- `npm run typecheck` — **PASS** across all workspaces.
+- `npm run build` — **PASS**, including the new `/api/demo-login` dynamic route.
+- `npm test` — **PASS**: 164 unit tests.
+- `npm run test:e2e` — **PASS**: 90 Playwright checks, 89 passed and one intentional mobile provider-flow skip. New coverage includes the production enablement guard, required service-role configuration, fixed demo email, cross-origin rejection, missing-config 503, POST-only behaviour and hidden-button state.
+- `npm run test:integration --workspace @incident-witness/demo-harness` — **PASS**: 2/2.
+- `npm run seed:judge-demo` — **PASS** against staging; sealed bundle passed the offline verifier and the one-byte tamper check failed as expected.
+- Local fake-Supabase route verification: `POST /api/demo-login` returned 200, set the Supabase session cookie, and an authenticated request to `/dashboard` rendered the provider dashboard. This proves the cookie/redirect path without a real service-role key. A real-key login remains operator verification after adding the Vercel secret.
+- The real service-role key is absent from this environment. No real Supabase Admin API call or real judge login was performed here.
+
+### Deployment requirement
+
+- Add `SUPABASE_SERVICE_ROLE_KEY` and `IW_ENABLE_DEMO_LOGIN=true` to the desired Vercel environment, then redeploy. The home-page button only appears when both are present.
+- After the hackathon, set `IW_ENABLE_DEMO_LOGIN=false` or remove it and redeploy; rotate the service-role key if appropriate.
+- Never expose the key in browser code or a `NEXT_PUBLIC_*` variable.
+
 ## Design reference and approval status
 
 - **Final visual design:** **APPROVED and IMPLEMENTED** (revision 0.3; Phase 7 **COMPLETE AND CLOSED**).

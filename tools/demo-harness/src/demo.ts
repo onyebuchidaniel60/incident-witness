@@ -25,8 +25,33 @@ import type {
   EndpointChecker,
 } from "../../../apps/api/src/services/endpoint.js";
 
-const DEMO_USER_ID = "e3333333-3333-4333-8333-333333333333";
-const DEMO_TOKEN = "phase3f-demo-provider-token";
+export type DemoProvider = {
+  userId: string;
+  email: string;
+  displayName: string;
+  token: string;
+  label: string;
+  titlePrefix: string;
+};
+
+const DEFAULT_DEMO_PROVIDER: DemoProvider = {
+  userId: "e3333333-3333-4333-8333-333333333333",
+  email: "iw-phase3f-demo@example.invalid",
+  displayName: "Phase 3F synthetic provider",
+  token: "phase3f-demo-provider-token",
+  label: "Phase 3F synthetic",
+  titlePrefix: "SIMULATED Phase 3F power-pattern demo",
+};
+
+export const JUDGE_DEMO_PROVIDER: DemoProvider = {
+  userId: "7f3c1a2e-5b4d-4c8f-9a6e-2d1b0c3e4f5a",
+  email: "judge@incidentwitness.com",
+  displayName: "Hackathon Judge",
+  token: "judge-demo-provider-token",
+  label: "Judge demo",
+  titlePrefix: "SIMULATED judge demo — power-pattern session",
+};
+
 const EVENT_CONTENT_TYPE = "application/vnd.incident-witness.event+json";
 const PRESENCE_CONTENT_TYPE = "application/vnd.incident-witness.presence+json";
 const CLI_PATH = fileURLToPath(new URL("../../iw-verify/dist/cli.js", import.meta.url));
@@ -55,6 +80,7 @@ export type DemoOptions = {
   outputDirectory?: string;
   keepArtifacts?: boolean;
   keepData?: boolean;
+  provider?: DemoProvider;
   log?: (line: string) => void;
 };
 
@@ -173,20 +199,25 @@ function signedEvent(input: {
   return Buffer.from(canonicalJsonBytes(signEvent(body, input.privateKey)));
 }
 
-async function cleanupDemoData(pool: Pool): Promise<void> {
+async function resolveProviderUserId(pool: Pool, provider: DemoProvider): Promise<string> {
+  const existing = await pool.query<{ id: string }>(
+    `select id from auth.users where lower(email) = lower($1) order by created_at nulls last limit 1`,
+    [provider.email],
+  );
+
+  return existing.rows[0]?.id ?? provider.userId;
+}
+
+async function cleanupDemoData(pool: Pool, userId: string): Promise<void> {
   const client = await pool.connect();
   try {
     await client.query("begin");
     const incidents = `select id from incidents where owner_user_id = $1`;
-    await client.query(`delete from evidence_events where incident_id in (${incidents})`, [
-      DEMO_USER_ID,
-    ]);
+    await client.query(`delete from evidence_events where incident_id in (${incidents})`, [userId]);
     await client.query(`delete from evidence_bundles where incident_id in (${incidents})`, [
-      DEMO_USER_ID,
+      userId,
     ]);
-    await client.query(`delete from probe_jobs where incident_id in (${incidents})`, [
-      DEMO_USER_ID,
-    ]);
+    await client.query(`delete from probe_jobs where incident_id in (${incidents})`, [userId]);
     await client.query(
       `delete from source_credentials
         where source_key_id in (
@@ -194,25 +225,24 @@ async function cleanupDemoData(pool: Pool): Promise<void> {
            where owner_user_id = $1
               or incident_id in (${incidents})
         )`,
-      [DEMO_USER_ID],
+      [userId],
     );
-    await client.query(`delete from enrollment_tokens where owner_user_id = $1`, [DEMO_USER_ID]);
-    await client.query(`delete from renter_invitations where owner_user_id = $1`, [DEMO_USER_ID]);
-    await client.query(`delete from host_endpoint_challenges where owner_user_id = $1`, [
-      DEMO_USER_ID,
-    ]);
+    await client.query(`delete from enrollment_tokens where owner_user_id = $1`, [userId]);
+    await client.query(`delete from renter_invitations where owner_user_id = $1`, [userId]);
+    await client.query(`delete from host_endpoint_challenges where owner_user_id = $1`, [userId]);
     await client.query(
       `delete from witness_keys
         where owner_user_id = $1
            or incident_id in (${incidents})`,
-      [DEMO_USER_ID],
+      [userId],
     );
-    await client.query(`delete from incidents where owner_user_id = $1`, [DEMO_USER_ID]);
-    await client.query(`delete from hosts where owner_user_id = $1`, [DEMO_USER_ID]);
-    await client.query(`delete from idempotency_records where owner_user_id = $1`, [DEMO_USER_ID]);
-    await client.query(`delete from audit_events where owner_user_id = $1`, [DEMO_USER_ID]);
-    await client.query(`delete from profiles where id = $1`, [DEMO_USER_ID]);
-    await client.query(`delete from auth.users where id = $1`, [DEMO_USER_ID]);
+    await client.query(`delete from incidents where owner_user_id = $1`, [userId]);
+    await client.query(`delete from hosts where owner_user_id = $1`, [userId]);
+    await client.query(`delete from idempotency_records where owner_user_id = $1`, [userId]);
+    await client.query(`delete from audit_events where owner_user_id = $1`, [userId]);
+    await client.query(`delete from profiles where id = $1`, [userId]);
+    await client.query(`delete from auth.identities where user_id = $1`, [userId]);
+    await client.query(`delete from auth.users where id = $1`, [userId]);
     await client.query("commit");
   } catch (error) {
     await client.query("rollback");
@@ -222,7 +252,7 @@ async function cleanupDemoData(pool: Pool): Promise<void> {
   }
 }
 
-async function seedDemoProvider(pool: Pool): Promise<void> {
+async function seedDemoProvider(pool: Pool, provider: DemoProvider): Promise<void> {
   const client = await pool.connect();
   try {
     await client.query("begin");
@@ -230,14 +260,36 @@ async function seedDemoProvider(pool: Pool): Promise<void> {
       `insert into auth.users
          (id, aud, role, email, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
        values ($1, 'authenticated', 'authenticated', $2, now(), '{}'::jsonb, '{}'::jsonb, now(), now())
-       on conflict (id) do nothing`,
-      [DEMO_USER_ID, "iw-phase3f-demo@example.invalid"],
+       on conflict (id) do update
+         set email = excluded.email,
+             email_confirmed_at = now(),
+             aud = excluded.aud,
+             role = excluded.role,
+             updated_at = now()`,
+      [provider.userId, provider.email],
+    );
+    await client.query(
+      `insert into auth.identities
+         (provider_id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
+       values (
+         $1,
+         $2,
+         jsonb_build_object('sub', $4::text, 'email', $3::text, 'email_verified', true),
+         'email',
+         now(),
+         now(),
+         now()
+       )
+       on conflict (provider_id, provider) do update
+         set identity_data = excluded.identity_data,
+             updated_at = now()`,
+      [provider.userId, provider.userId, provider.email, provider.userId],
     );
     await client.query(
       `insert into profiles (id, display_name)
-       values ($1, 'Phase 3F synthetic provider')
+       values ($1, $2)
        on conflict (id) do update set display_name = excluded.display_name`,
-      [DEMO_USER_ID],
+      [provider.userId, provider.displayName],
     );
     await client.query("commit");
   } catch (error) {
@@ -276,6 +328,7 @@ function runCli(args: string[]): Promise<CliRun> {
  */
 export async function runDemo(options: DemoOptions = {}): Promise<DemoResult> {
   const log = options.log ?? ((line: string) => process.stdout.write(`${line}\n`));
+  const provider = { ...(options.provider ?? DEFAULT_DEMO_PROVIDER) };
   const artifactDirectory = options.outputDirectory ?? (await mkdtemp(join(tmpdir(), "iw-demo-")));
   const keepArtifacts = options.keepArtifacts ?? true;
   const bundlePath = join(artifactDirectory, "phase3f-demo-bundle.json");
@@ -290,11 +343,11 @@ export async function runDemo(options: DemoOptions = {}): Promise<DemoResult> {
   const dns = new FakeDnsResolver();
   const endpointChecker = new FakeEndpointChecker();
   const jwtVerifier = async (token: string) => {
-    if (token !== DEMO_TOKEN) throw new Error("invalid demo token");
+    if (token !== provider.token) throw new Error("invalid demo token");
     return {
-      id: DEMO_USER_ID,
+      id: provider.userId,
       claims: {
-        sub: DEMO_USER_ID,
+        sub: provider.userId,
         iss: "https://phase3f-demo.invalid/auth/v1",
         aud: "authenticated",
         exp: Math.floor(Date.now() / 1000) + 3600,
@@ -346,23 +399,24 @@ export async function runDemo(options: DemoOptions = {}): Promise<DemoResult> {
       "[demo] All events are generated locally, marked simulation_mode=true, and are not real hardware telemetry.",
     );
     log("[demo] 1/10 Resetting disposable provider data in the configured staging database");
-    await cleanupDemoData(migrator);
-    await seedDemoProvider(migrator);
+    provider.userId = await resolveProviderUserId(migrator, provider);
+    await cleanupDemoData(migrator, provider.userId);
+    await seedDemoProvider(migrator, provider);
 
     const suffix = randomUUID().slice(0, 8);
     const hostname = `demo-${suffix}.incident-witness.dev`;
-    const alias = `Phase 3F synthetic host ${suffix}`;
+    const alias = `${provider.label} host ${suffix}`;
 
     log("[demo] 2/10 Creating provider host and completing synthetic DNS/HTTPS verification");
     const hostResponse = await call("POST", "/v1/hosts", {
-      token: DEMO_TOKEN,
+      token: provider.token,
       payload: { alias, hostname },
       headers: { "idempotency-key": randomUUID() },
     });
     const hostId = responseData<{ hostId: string }>(hostResponse, "host creation").hostId;
 
     const challengeResponse = await call("POST", `/v1/hosts/${hostId}/endpoint-challenge`, {
-      token: DEMO_TOKEN,
+      token: provider.token,
     });
     const challenge = responseData<{
       challengeId: string;
@@ -373,14 +427,14 @@ export async function runDemo(options: DemoOptions = {}): Promise<DemoResult> {
     dns.addresses.set(hostname, [{ address: "93.184.216.34", family: 4 }]);
 
     const verifyResponse = await call("POST", `/v1/hosts/${hostId}/endpoint-verify`, {
-      token: DEMO_TOKEN,
+      token: provider.token,
       payload: { challengeId: challenge.challengeId },
     });
     responseData<{ verified: boolean }>(verifyResponse, "endpoint verification");
 
     log("[demo] 3/10 Enrolling a simulated host agent with a fresh local Ed25519 key");
     const enrollmentCodeResponse = await call("POST", `/v1/hosts/${hostId}/enrollment-codes`, {
-      token: DEMO_TOKEN,
+      token: provider.token,
     });
     const enrollmentCode = responseData<{ enrollmentCode: string }>(
       enrollmentCodeResponse,
@@ -417,10 +471,10 @@ export async function runDemo(options: DemoOptions = {}): Promise<DemoResult> {
 
     log("[demo] 4/10 Creating a labelled demo evidence session");
     const incidentResponse = await call("POST", "/v1/incidents", {
-      token: DEMO_TOKEN,
+      token: provider.token,
       payload: {
         hostId,
-        title: `SIMULATED Phase 3F power-pattern demo ${suffix}`,
+        title: `${provider.titlePrefix} ${suffix}`,
         durationMinutes: 2,
         workloadRef: "synthetic-demo-workload",
         demoMode: true,
@@ -436,7 +490,7 @@ export async function runDemo(options: DemoOptions = {}): Promise<DemoResult> {
     const invitationResponse = await call(
       "POST",
       `/v1/incidents/${incident.incidentId}/renter-invitations`,
-      { token: DEMO_TOKEN },
+      { token: provider.token },
     );
     const invitationToken = responseData<{ invitationToken: string }>(
       invitationResponse,
@@ -554,13 +608,13 @@ export async function runDemo(options: DemoOptions = {}): Promise<DemoResult> {
 
     log("[demo] 7/10 Ending the capture window");
     const endResponse = await call("POST", `/v1/incidents/${incident.incidentId}/end`, {
-      token: DEMO_TOKEN,
+      token: provider.token,
     });
     responseData<{ status: string; endedAt: string }>(endResponse, "incident end");
 
     log("[demo] 8/10 Sealing the immutable evidence bundle");
     const sealResponse = await call("POST", `/v1/incidents/${incident.incidentId}/seal`, {
-      token: DEMO_TOKEN,
+      token: provider.token,
     });
     const sealed = responseData<{
       assessment: { code: string; evidenceGrade: string };
@@ -569,7 +623,7 @@ export async function runDemo(options: DemoOptions = {}): Promise<DemoResult> {
 
     log("[demo] 9/10 Downloading the sealed bundle");
     const bundleResponse = await call("GET", `/v1/incidents/${incident.incidentId}/bundle`, {
-      token: DEMO_TOKEN,
+      token: provider.token,
     });
     if (bundleResponse.statusCode !== 200) {
       throw new Error(`bundle download failed with HTTP ${bundleResponse.statusCode}`);
@@ -642,7 +696,7 @@ export async function runDemo(options: DemoOptions = {}): Promise<DemoResult> {
       await apiPool.end();
       if (!options.keepData) {
         try {
-          await cleanupDemoData(migrator);
+          await cleanupDemoData(migrator, provider.userId);
         } finally {
           await migrator.end();
         }
@@ -654,4 +708,20 @@ export async function runDemo(options: DemoOptions = {}): Promise<DemoResult> {
       }
     }
   }
+}
+
+/**
+ * Seeds the persistent hackathon judge account with a verified endpoint, an
+ * enrolled host source, a labelled demo session and a sealed bundle. This is
+ * deliberately additive: normal providers continue to use the magic-link flow.
+ */
+export async function seedJudgeDemo(
+  options: Omit<DemoOptions, "provider" | "keepData"> = {},
+): Promise<DemoResult> {
+  return runDemo({
+    ...options,
+    provider: JUDGE_DEMO_PROVIDER,
+    keepData: true,
+    keepArtifacts: false,
+  });
 }
