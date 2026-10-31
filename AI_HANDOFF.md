@@ -2,11 +2,11 @@
 
 **Last updated:** 2026-10-31
 
-**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented and tested; the Phase 5 checkpoint is pending operator acceptance.
+**Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**.
 
-**Current phase:** Phase 5 — IMPLEMENTED, PENDING OPERATOR ACCEPTANCE.
+**Current phase:** Phase 5 is **COMPLETE AND CLOSED**. Phase 6 has not yet started.
 
-**Next task:** Phase 6 only — awaiting explicit operator authorization.
+**Next task:** Phase 6 only — determine operator design direction before any mockups or final UI work.
 
 **Phase 2 acceptance:** Operator accepted the Phase 2 checkpoint and approved the `public.iw_uid()` security-definer wrapper on 2026-10-31.
 
@@ -19,6 +19,8 @@
 **Phase 3E acceptance:** Operator reviewed the Phase 3E checkpoint report and accepted it on 2026-10-31. The explicit `endpointHostname` requirement and the missing live probe key setup are accepted and documented. Phase 3E is **COMPLETE AND CLOSED**.
 
 **Phase 3F acceptance:** Operator reviewed the Phase 3F checkpoint report and accepted it on 2026-10-31. The offline CLI verifier and the staging E2E demo-harness proof are accepted. Phase 3F is **COMPLETE AND CLOSED**, and Phase 3 is entirely **COMPLETE**.
+
+**Phase 5 acceptance:** Operator reviewed the Phase 5 checkpoint report and the Magic Link authentication pivot on 2026-10-31. The operator confirmed that the Magic Link successfully logged them in; the current failure is a Supabase free-tier rate limit, not a code issue. The Hard Functionality Gate is officially **PASSED**. Phase 5 is **COMPLETE AND CLOSED**.
 
 **Authentication deviation (operator-approved 2026-10-31):** The provider login was changed from a six-digit Supabase email OTP to Supabase's default magic-link flow. This bypasses the Supabase free-tier requirement for custom SMTP and an editable email template. The form calls `signInWithOtp` with `emailRedirectTo=/auth/callback`; the callback exchanges the code for a session and redirects to `/dashboard`, or redirects to `/login?error=invalid_link` on failure. The Supabase Auth redirect allow-list must include the deployment origin and `/auth/callback`. No external email service or backend/database change was introduced.
 
@@ -451,7 +453,7 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
   explicit flag are both set; the web seam is disabled in production. These are test infrastructure,
   not production authentication or SSRF bypasses.
 
-## Completed in Phase 5 (MVP hardening and E2E gate; pending operator acceptance)
+## Completed in Phase 5 (MVP hardening and E2E gate; accepted and closed 2026-10-31)
 
 ### Render Infrastructure as Code
 
