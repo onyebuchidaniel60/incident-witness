@@ -1,0 +1,40 @@
+{
+  "name": "@incident-witness/cli-verifier",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Incident Witness offline evidence bundle verifier",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "iw-verify": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "trusted-platform-keys.json"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json && chmod +x dist/cli.js",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "pretest": "npm run build --workspace @incident-witness/protocol && npm run build",
+    "test": "vitest run --config vitest.config.ts",
+    "verify": "node dist/cli.js"
+  },
+  "dependencies": {
+    "@incident-witness/protocol": "0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "eslint": "9.39.5",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.72.1",
+    "vitest": "5.0.5"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "trust_set_version": 1,
+  "keys": [
+    {
+      "platform_key_id": "iw-platform-staging-1",
+      "public_key": "U0lXLgkEbyAWigI-_WWJjxAfYnYQQpfTcPtRZEqe4TI",
+      "fingerprint": "5xL-KJE2WSs1tQkh1zt7QYVWG3HtrZFwHeErOPqzP4A",
+      "status": "active",
+      "note": "Incident Witness staging platform key; public key only."
+    }
+  ]
+}
