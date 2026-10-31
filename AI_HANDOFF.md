@@ -936,6 +936,17 @@ The temporary one-click demo sign-in bypass was removed before release at the op
 - README updated to the final release-candidate status, magic-link-only authentication and Phase 9 results.
 - Temporary one-click demo sign-in route, button, seed script, tests, environment variables and documentation removed. A search for the former demo email, route, seed command and feature flags returns no matches outside ignored build artifacts.
 
+### Phase 9 deployment checkpoint
+
+- **Production web deployment:** https://incident-witness-6vu709fe7-uhhh2.vercel.app
+- **Deployment target/status:** `production`; `READY`.
+- **Deployed code SHA:** `ce46b4e5f2e2e777d1b9a23c3e09236573d5a56b` (`docs: add changelog and final phase 9 audit`), built from `main` after the code commits `e0566aa` and `ce46b4e`.
+- **Stable aliases:** https://incident-witness.vercel.app and https://incident-witness-git-main-uhhh2.vercel.app.
+- **Deployed checks:** `/`, `/login`, `/docs` and `/verify` returned HTTP 200. `/dashboard` returned `307` to `/login?next=%2Fdashboard` with `x-robots-tag: noindex`. The removed demo API route returned HTTP 404. The home page contains no demo button and the login page contains no magic-link implementation notice.
+- **Deployed browser check:** clicking the public-header Workspace link while unauthenticated landed on `/login?next=%2Fdashboard`, rendered “Provider sign-in”, showed no dashboard heading, showed no magic-link notice and made zero provider API requests.
+- **Deployment mechanism:** auto-created by the Git-connected Vercel project after the authorized `git push`. No separate `vercel deploy --prod` command was run. This is a staging-data deployment; production release approval remains a separate operator decision.
+- Subsequent docs-only handoff commits may auto-deploy without an application-code change.
+
 ## Design reference and approval status
 
 - **Final visual design:** **APPROVED and IMPLEMENTED** (revision 0.3; Phase 7 **COMPLETE AND CLOSED**).
