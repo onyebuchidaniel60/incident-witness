@@ -59,9 +59,14 @@ export function DashboardSidebar() {
           >
             <Icon name="settings" />
           </Link>
-          <span className="grid h-7 w-7 place-items-center rounded-full border border-iw-border-strong bg-iw-surface-2 font-mono text-[8px] text-iw-muted">
+          <Link
+            href="/settings"
+            aria-label="Account settings"
+            title="Account settings"
+            className="grid h-7 w-7 place-items-center rounded-full border border-iw-border-strong bg-iw-surface-2 font-mono text-[8px] text-iw-muted cursor-pointer transition-colors hover:border-iw-green/50 hover:bg-iw-green/10 hover:text-iw-green-bright"
+          >
             OP
-          </span>
+          </Link>
         </div>
       </div>
 
@@ -73,22 +78,42 @@ export function DashboardSidebar() {
             </span>
             Incident Witness
           </Link>
-          <button
-            type="button"
-            className="iw-btn iw-btn-secondary iw-btn-sm"
-            aria-expanded={isOpen}
-            aria-controls="workspace-navigation"
-            aria-label={isOpen ? "Close workspace menu" : "Open workspace menu"}
-            onClick={() => setIsOpen((current) => !current)}
-          >
-            <Icon name={isOpen ? "x" : "menu"} />
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/"
+              aria-label="Back to public home"
+              title="Back to public home"
+              className="grid h-8 w-8 place-items-center rounded-[4px] border border-iw-border bg-white/[0.02] text-iw-faint transition-colors hover:border-iw-green/40 hover:bg-iw-green/10 hover:text-iw-green-bright"
+            >
+              <Icon name="arrow-left" size="sm" />
+            </Link>
+            <button
+              type="button"
+              className="iw-btn iw-btn-secondary iw-btn-sm"
+              aria-expanded={isOpen}
+              aria-controls="workspace-navigation"
+              aria-label={isOpen ? "Close workspace menu" : "Open workspace menu"}
+              onClick={() => setIsOpen((current) => !current)}
+            >
+              <Icon name={isOpen ? "x" : "menu"} />
+            </button>
+          </div>
         </div>
 
         <div className="hidden lg:block lg:pt-1">
-          <p className="text-[8.5px] font-semibold uppercase tracking-[0.14em] text-iw-faint">
-            Provider workspace
-          </p>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/"
+              aria-label="Back to public home"
+              title="Back to public home"
+              className="grid h-7 w-7 shrink-0 place-items-center rounded-[3px] border border-iw-border bg-white/[0.02] text-iw-faint transition-colors hover:border-iw-green/40 hover:bg-iw-green/10 hover:text-iw-green-bright"
+            >
+              <Icon name="arrow-left" size="sm" />
+            </Link>
+            <p className="text-[8.5px] font-semibold uppercase tracking-[0.14em] text-iw-faint">
+              Provider workspace
+            </p>
+          </div>
           <p className="mt-2 text-[10.5px] leading-5 text-iw-muted">
             Hosts, evidence sessions and sealed records.
           </p>
@@ -125,13 +150,6 @@ export function DashboardSidebar() {
             })}
           </ul>
         </nav>
-
-        <div className="mt-auto hidden border-t border-iw-border pt-4 lg:block">
-          <span className="iw-chip iw-chip-warning">Staging workspace</span>
-          <p className="mt-2 text-[9px] leading-4 text-iw-faint">
-            Data is loaded from the authenticated API. Missing sources remain gaps.
-          </p>
-        </div>
       </div>
     </aside>
   );

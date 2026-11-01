@@ -157,3 +157,43 @@ test("Workspace is hidden when logged out and direct navigation stays protected"
   await expect(page.getByText(/authentication token is invalid/i)).toHaveCount(0);
   expect(apiRequests).toEqual([]);
 });
+
+test("workspace sidebar exposes back and account navigation without staging copy", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/auth/callback?code=e2e-magic-link");
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Provider dashboard" })).toBeVisible();
+
+  await expect(page.getByText("Staging workspace")).toHaveCount(0);
+  await expect(
+    page.getByText("Data is loaded from the authenticated API. Missing sources remain gaps."),
+  ).toHaveCount(0);
+
+  const backLink = page.locator('a[aria-label="Back to public home"]:visible');
+  await expect(backLink).toHaveCount(1);
+  await expect(backLink).toHaveAttribute("href", "/");
+
+  if (testInfo.project.name === "mobile-chromium") {
+    const hasHorizontalOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    );
+    expect(hasHorizontalOverflow).toBe(false);
+    await backLink.click();
+    await expect(page).toHaveURL(/\/$/);
+    return;
+  }
+
+  const accountLink = page.getByRole("link", { name: "Account settings" });
+  await expect(accountLink).toBeVisible();
+  await expect(accountLink).toHaveAttribute("href", "/settings");
+  await accountLink.click();
+  await expect(page).toHaveURL(/\/settings$/);
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Account and session" }),
+  ).toBeVisible();
+
+  await page.goto("/dashboard");
+  await page.locator('a[aria-label="Back to public home"]:visible').click();
+  await expect(page).toHaveURL(/\/$/);
+});
