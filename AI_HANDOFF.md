@@ -1007,7 +1007,7 @@ The temporary one-click demo sign-in bypass was removed before release at the op
 ## Sidebar navigation cleanup (2026-11-01)
 
 - `apps/web/components/dashboard-sidebar.tsx`:
-  - The circular `OP` avatar is now a Next.js `<Link href="/settings">` with `aria-label="Account settings"`, a title tooltip, pointer cursor, a visible emerald/charcoal hover state and the existing visual geometry.
+  - The circular `OP` avatar was initially converted to a settings link, then removed entirely at the operator’s request; see “Profile button removal” below.
   - Removed the entire “Staging workspace” yellow-chip block, including the “Data is loaded from the authenticated API. Missing sources remain gaps.” copy.
   - Added a small bordered arrow-left link to `/` beside the desktop “Provider workspace” label with `aria-label="Back to public home"`.
   - Added the same subtle home link to the mobile workspace top bar next to the menu toggle.
@@ -1022,13 +1022,31 @@ The temporary one-click demo sign-in bypass was removed before release at the op
   - The behavior commit `b48c4b2` was also deployed and verified `READY` at https://incident-witness-i6dmwai04-uhhh2.vercel.app before the formatting follow-up.
   - `/` returns HTTP 200; `/dashboard` and `/settings` return the expected 307 to `/login?next=…` without a session.
 - Verification:
-  - `npx playwright test tests/e2e/auth-session.spec.ts` — **PASS**: 12/12 desktop and mobile, including back-link navigation, OP → `/settings`, staging-copy absence and mobile horizontal-overflow check.
+  - `npx playwright test tests/e2e/auth-session.spec.ts` — **PASS**: 12/12 desktop and mobile, including back-link navigation, staging-copy absence and mobile horizontal-overflow check.
   - `npm run test:e2e` — **PASS**: 82 checks, 81 passed and one intentional mobile provider-flow skip.
   - `npm run lint --workspace @incident-witness/web` — **PASS**.
   - `npm run typecheck --workspace @incident-witness/web` — **PASS**.
   - `npm run build --workspace @incident-witness/web` — **PASS**.
-- The production build’s static chunks contain the new “Back to public home” and “Account settings” strings; the removed “Staging workspace” copy is absent from the built static chunks.
+- The production build’s static chunks contain “Back to public home” and no “Staging workspace” or “Account settings” profile link.
 - The formatting follow-up `08d1cd3` was Prettier-only; the same focused and full E2E suites were run on the behavior commit before formatting.
+
+## Profile button removal (2026-11-01)
+
+- Removed the circular `OP` profile link entirely from `apps/web/components/dashboard-sidebar.tsx`. The settings gear and the Settings navigation item remain as the settings entry points.
+- Updated `auth-session.spec.ts` to assert that no `Account settings` link or standalone `OP` text remains, while retaining back-link, staging-copy and mobile-overflow coverage.
+- Commit: `dba61383b4496f9d0179e203a77c47209f597c1c` — `fix(ui): remove profile button from sidebar`, pushed to `main`.
+- Also fixed a duplicate `#main-content` landmark exposed by the public-link crawl: `apps/web/app/loading.tsx` no longer renders its own `<main>` inside layouts that already provide one. Commit `ed87d03` — `fix(ui): remove duplicate loading landmark`.
+- Vercel production deployment: https://incident-witness-diuh0emsb-uhhh2.vercel.app
+  - Deployment ID: `dpl_ERc4BTENdHr5ELPEckuH5fv9Yah3`
+  - Target/status: `production`; `READY`
+  - Git metadata SHA: `dba61383b4496f9d0179e203a77c47209f597c1c`
+  - Stable alias: https://incident-witness.vercel.app
+- Verification after removal:
+  - `npx playwright test tests/e2e/auth-session.spec.ts` — **PASS**: 12/12 desktop and mobile.
+  - `npm run test:e2e` — **PASS**: 82 checks, 81 passed and one intentional mobile provider-flow skip.
+  - `npm run lint --workspace @incident-witness/web` — **PASS**.
+  - `npm run typecheck --workspace @incident-witness/web` — **PASS**.
+  - `npm run build --workspace @incident-witness/web` — **PASS**.
 
 ## Design reference and approval status
 
