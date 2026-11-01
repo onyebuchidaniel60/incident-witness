@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <main id="main-content" tabIndex={-1} className="iw-container py-16">
+    <div className="iw-container py-16">
       <div role="status" aria-live="polite" className="max-w-2xl">
         <p className="iw-eyebrow">
           <span className="iw-eyebrow-dot" />
@@ -13,6 +13,6 @@ export default function Loading() {
         </div>
         <p className="sr-only">Loading the requested page.</p>
       </div>
-    </main>
+    </div>
   );
 }
