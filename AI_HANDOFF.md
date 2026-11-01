@@ -975,16 +975,18 @@ The temporary one-click demo sign-in bypass was removed before release at the op
 - Added `scripts/demo/` with:
   - `seed.ts` — creates a dedicated disposable demo user/host/incident, signed host and renter events, a platform-probe event, ends/seals via the local E2E API, downloads the bundle, and cleans up with `--cleanup`. It refuses production and custom demo user IDs without explicit opt-in.
   - `record.ts` — Playwright 1280×720 recording of homepage → authenticated Workspace → sealed incident timeline → bundle download → `/verify` VALID → one-byte tampered upload → INVALID → public footer/GitHub. It pre-warms Next dev routes and writes `timeline.json`.
-  - `generate-voiceover.sh` — seven exact scene scripts through `espeak-ng` (`en-GB-x-rp`, 165 wpm), processed and padded to the 0:00–2:15 timeline, concatenated to `audio/voiceover.mp3`.
+  - `generate-voiceover.sh` — seven exact scene scripts through Microsoft Edge neural TTS (`edge-tts` 7.3.1, `en-US-GuyNeural`, −2% rate), lightly compressed/levelled and padded to the 0:00–2:15 timeline, concatenated to `audio/voiceover.mp3`. It retries transient Edge TTS network failures.
   - `assemble.sh` — starts the local test API/web app, seeds, records, synthesizes an ambient bed with FFmpeg, ducks the music under the voiceover, renders H.264/AAC 1280×720, and cleans the disposable staging rows unless `IW_DEMO_KEEP_DATA=1`.
 - Root command: `npm run demo:video`; equivalent `bash scripts/demo/assemble.sh`.
 - Final artifact (local, not committed): `scripts/demo/incident-witness-demo.mp4`
   - Duration 135.000 s (2:15); H.264 1280×720 30 fps + AAC 48 kHz stereo.
-  - Size `6,840,425` bytes; SHA-256 `b2e74bed1a5cb718c1280b2cfd104657572c10707b2e4f014479cf96e8952179`.
-  - Measured audio: integrated −16.2 LUFS, true peak −4.3 dBTP.
+  - Size `6,762,063` bytes; SHA-256 `a9a8d082e941ec277c0d8db74d2a9c701960d633f0c9d72d1ec9ca1120da96e4`.
+  - Measured final audio: integrated −13.9 LUFS, true peak −4.3 dBTP. Voiceover alone: integrated −13.6 LUFS, true peak −1.5 dBTP.
+  - Music ducking measured at approximately 15% amplitude during speech (`sidechaincompress`); music-only sections measured about −39.8 dB mean, speech sections about −56 dB on the ducked music bus.
 - The recorded incident is explicitly labelled: `demoMode: true`, every seeded event uses `simulation_mode: true`, and the UI shows “Demo / simulated evidence”. The video demonstrates the real seal and real browser verification, including the one-byte failure. It does not claim real hardware telemetry, a deployed production API or physical root cause.
 - Generated `.wav`, `.mp3`, `.webm`, `.mp4`, bundle, log, state and timeline files are gitignored. Only the scripts and README are committed.
-- Environment: `ffmpeg` 6.1.1 and `espeak-ng` 1.51 were installed from Ubuntu packages. No paid video/TTS API was used.
+- Environment: `ffmpeg` 6.1.1 is installed from Ubuntu packages; `edge-tts` 7.3.1 is installed system-wide. `espeak-ng` is no longer used. No paid video/TTS API is used; Edge TTS requires an internet connection.
+- Operator rejected the initial `espeak-ng` voice as too robotic on 2026-11-01. The pipeline was switched to Microsoft Edge neural TTS and the final artifact above was regenerated and re-measured.
 
 ### Verification evidence
 
@@ -994,8 +996,9 @@ The temporary one-click demo sign-in bypass was removed before release at the op
 - `npm run typecheck --workspace @incident-witness/web` — **PASS**.
 - `npm run build --workspace @incident-witness/web` — **PASS**.
 - `bash -n scripts/demo/assemble.sh scripts/demo/generate-voiceover.sh` — **PASS**.
+- `edge-tts --version` — **PASS**: 7.3.1; all seven scene MP3s synthesized with `en-US-GuyNeural` (6.84–11.83 s each) and converted/padded to a 135.000 s voiceover.
 - Standalone TypeScript check for `scripts/demo/seed.ts` and `scripts/demo/record.ts` with strict/no-unchecked-indexed-access options — **PASS**.
-- `bash scripts/demo/assemble.sh` — **PASS** end-to-end; final video rendered at the path above; sampled frames confirmed homepage, authenticated dashboard, three-source timeline with the cyan probe event, valid bundle state, invalid tampered state and footer/GitHub outro.
+- `npm run demo:video` — **PASS** end-to-end with Edge TTS; final video rendered at the path above (135.000 s); sampled frames confirmed homepage, authenticated dashboard, three-source timeline with the cyan probe event, valid bundle state, invalid tampered state and footer/GitHub outro.
 - The pipeline’s disposable staging rows are removed on exit by default; the last run exited successfully after cleanup.
 
 ## Design reference and approval status

@@ -28,10 +28,11 @@ TOTAL_SECONDS=135
 mkdir -p "$AUDIO_DIR" "$ASSETS_DIR" "$RAW_DIR" "$LOG_DIR"
 rm -f "$RAW_DIR"/*.webm
 
-for command in ffmpeg ffprobe espeak-ng curl node; do
+for command in ffmpeg ffprobe edge-tts curl node; do
   if ! command -v "$command" >/dev/null 2>&1; then
     echo "Missing required command: $command" >&2
-    echo "Install ffmpeg and espeak-ng with: sudo apt update && sudo apt install ffmpeg espeak-ng -y" >&2
+    echo "Install FFmpeg with: sudo apt update && sudo apt install ffmpeg -y" >&2
+    echo "Install Edge TTS with: python3 -m pip install --user edge-tts" >&2
     exit 1
   fi
 done

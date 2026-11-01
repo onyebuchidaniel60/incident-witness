@@ -25,10 +25,11 @@ Suggested technical story sequence:
 
 ## Automated demo video pipeline
 
-The local pipeline at `scripts/demo/` records the demo with Playwright, generates the voiceover with `espeak-ng`, and assembles the final MP4 with FFmpeg. It does not use a paid video or TTS API.
+The local pipeline at `scripts/demo/` records the demo with Playwright, generates the voiceover with the free Microsoft Edge neural TTS (`edge-tts`), and assembles the final MP4 with FFmpeg. It does not use a paid video or TTS API.
 
 ```bash
-sudo apt install ffmpeg espeak-ng -y
+sudo apt install ffmpeg -y
+python3 -m pip install --user edge-tts
 npm run demo:video
 ```
 
