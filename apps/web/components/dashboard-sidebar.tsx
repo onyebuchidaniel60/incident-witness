@@ -55,14 +55,6 @@ export function DashboardSidebar() {
           >
             <Icon name="settings" />
           </Link>
-          <Link
-            href="/settings"
-            aria-label="Account settings"
-            title="Account settings"
-            className="grid h-7 w-7 place-items-center rounded-full border border-iw-border-strong bg-iw-surface-2 font-mono text-[8px] text-iw-muted cursor-pointer transition-colors hover:border-iw-green/50 hover:bg-iw-green/10 hover:text-iw-green-bright"
-          >
-            OP
-          </Link>
         </div>
       </div>
 
