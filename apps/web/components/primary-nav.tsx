@@ -30,7 +30,6 @@ export function PrimaryNav({ showWorkspace }: { showWorkspace: boolean }) {
         { href: "/dashboard", label: "Workspace" },
         { href: "/docs", label: "Docs" },
         { href: "/verify", label: "Verify" },
-        { href: "/login", label: "Login" },
       ]
     : baseLinks;
 

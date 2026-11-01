@@ -68,6 +68,11 @@ test("proxy redirects without a session and accepts a test-injected session", as
       .getByRole("navigation", { name: "Primary" })
       .getByRole("link", { name: "Workspace" }),
   ).toHaveCount(0);
+  await expect(
+    anonymousPage
+      .getByRole("navigation", { name: "Primary" })
+      .getByRole("link", { name: "Login" }),
+  ).toHaveCount(1);
 
   expect(apiRequests).toEqual([]);
   await anonymous.close();
@@ -93,6 +98,11 @@ test("proxy redirects without a session and accepts a test-injected session", as
   await expect(
     authenticatedPage.locator('nav[aria-label="Primary"] a[href="/dashboard"]'),
   ).toHaveCount(1);
+  await expect(
+    authenticatedPage
+      .getByRole("navigation", { name: "Primary" })
+      .getByRole("link", { name: "Login" }),
+  ).toHaveCount(0);
 
   await authenticatedPage.goto("/hosts");
   await expect(authenticatedPage).toHaveURL(/\/hosts$/);
