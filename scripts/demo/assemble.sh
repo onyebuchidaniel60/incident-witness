@@ -5,14 +5,13 @@
 #   3. start a local test-mode API and web app
 #   4. seed a labelled, signed demo incident
 #   5. record the Playwright flow
-#   6. mix voiceover + ducked ambient bed
+#   6. use the normalized voiceover only (no background music)
 #   7. render incident-witness-demo.mp4
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 AUDIO_DIR="$SCRIPT_DIR/audio"
-ASSETS_DIR="$SCRIPT_DIR/assets"
 RAW_DIR="$SCRIPT_DIR/raw"
 LOG_DIR="$SCRIPT_DIR/logs"
 TIMELINE_FILE="$SCRIPT_DIR/timeline.json"
@@ -25,7 +24,7 @@ DEMO_USER_ID="${IW_E2E_USER_ID:-d4444444-4444-4444-8444-444444444444}"
 DEMO_TOKEN="${IW_E2E_TOKEN:-demo-provider-token}"
 TOTAL_SECONDS=135
 
-mkdir -p "$AUDIO_DIR" "$ASSETS_DIR" "$RAW_DIR" "$LOG_DIR"
+mkdir -p "$AUDIO_DIR" "$RAW_DIR" "$LOG_DIR"
 rm -f "$RAW_DIR"/*.webm
 
 for command in ffmpeg ffprobe edge-tts curl node; do
@@ -147,20 +146,12 @@ if [[ ! -f "$RAW_VIDEO" ]]; then
   exit 1
 fi
 
-echo "==> Building ambient background bed"
-ffmpeg -hide_banner -loglevel error -y \
-  -f lavfi -i "sine=frequency=110:sample_rate=48000:duration=$TOTAL_SECONDS" \
-  -f lavfi -i "sine=frequency=164.81:sample_rate=48000:duration=$TOTAL_SECONDS" \
-  -f lavfi -i "sine=frequency=220:sample_rate=48000:duration=$TOTAL_SECONDS" \
-  -filter_complex "[0:a]volume=0.14[a0];[1:a]volume=0.09[a1];[2:a]volume=0.06[a2];[a0][a1][a2]amix=inputs=3:normalize=0,lowpass=f=900,tremolo=f=0.11:d=0.12,aecho=0.8:0.6:120:0.22,volume=2.2,afade=t=in:st=0:d=4,afade=t=out:st=130:d=5[out]" \
-  -map "[out]" -t "$TOTAL_SECONDS" -ar 48000 -ac 2 -c:a pcm_s16le "$ASSETS_DIR/bg.wav"
+if [[ ! -f "$AUDIO_DIR/voiceover.mp3" ]]; then
+  echo "Normalized voiceover not found: $AUDIO_DIR/voiceover.mp3" >&2
+  exit 1
+fi
 
-echo "==> Ducking music under the voiceover"
-ffmpeg -hide_banner -loglevel error -y \
-  -i "$ASSETS_DIR/bg.wav" \
-  -i "$AUDIO_DIR/voiceover.wav" \
-  -filter_complex "[0:a]volume=0.9[music];[1:a]asplit=2[voice][side];[music][side]sidechaincompress=threshold=0.025:ratio=8:attack=35:release=450[duck];[duck][voice]amix=inputs=2:duration=longest:dropout_transition=0:normalize=0,alimiter=limit=0.95[out]" \
-  -map "[out]" -t "$TOTAL_SECONDS" -c:a libmp3lame -b:a 192k "$AUDIO_DIR/mix.mp3"
+echo "==> Using normalized voiceover only (no background music)"
 
 echo "==> Rendering final video"
 FONT="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
@@ -170,7 +161,7 @@ filter_complex="[0:v]trim=duration=$TOTAL_SECONDS,setpts=PTS-STARTPTS,tpad=stop_
 
 ffmpeg -hide_banner -loglevel error -y \
   -i "$RAW_VIDEO" \
-  -i "$AUDIO_DIR/mix.mp3" \
+  -i "$AUDIO_DIR/voiceover.mp3" \
   -filter_complex "$filter_complex" \
   -map "[v]" -map 1:a \
   -t "$TOTAL_SECONDS" -r 30 \

@@ -102,7 +102,7 @@ Recorded Phase 9 results on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`, f
 
 E2E uses test-only `IW_E2E_*`/`NEXT_PUBLIC_IW_E2E_*` seams for a static test session and file-backed DNS resolver. The API seam is disabled unless `NODE_ENV=test` and the explicit flag are both set; the web seam is disabled in production builds. These are test infrastructure, not production authentication or SSRF bypasses.
 
-The demo-video pipeline in `scripts/demo/` requires FFmpeg and the free `edge-tts` neural TTS package. It writes the gitignored `scripts/demo/incident-witness-demo.mp4`; see [`scripts/demo/README.md`](./scripts/demo/README.md). The seeded incident is labelled demo/simulated evidence.
+The demo-video pipeline in `scripts/demo/` requires FFmpeg and the free `edge-tts` neural TTS package. It writes the gitignored `scripts/demo/incident-witness-demo.mp4`; see [`scripts/demo/README.md`](./scripts/demo/README.md). The final audio is normalized voiceover only, with no background music, and the seeded incident is labelled demo/simulated evidence.
 
 ## Documentation
 

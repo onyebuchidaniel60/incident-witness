@@ -32,6 +32,10 @@ command -v ffprobe >/dev/null 2>&1 || {
   echo "ffprobe is required (normally installed with ffmpeg)." >&2
   exit 1
 }
+command -v node >/dev/null 2>&1 || {
+  echo "node is required to read the FFmpeg loudnorm analysis." >&2
+  exit 1
+}
 
 mkdir -p "$AUDIO_DIR"
 rm -f "$AUDIO_DIR"/scene-*.wav "$AUDIO_DIR"/scene-*.mp3 "$AUDIO_DIR"/scene-*.txt "$AUDIO_DIR"/concat.txt
@@ -74,11 +78,11 @@ for index in "${!SCENE_TEXTS[@]}"; do
     exit 1
   fi
 
-  # Light processing for a clear, consistent voice, then pad to the exact
-  # scene slot so the concatenated voiceover follows 0:00–2:15.
+  # Resample before filtering: Edge TTS produces 24 kHz MP3, and a 12 kHz
+  # lowpass at that source rate sits at Nyquist and clips the signal.
   ffmpeg -hide_banner -loglevel error -y \
     -i "$raw_file" \
-    -af "highpass=f=80,lowpass=f=12000,acompressor=threshold=-20dB:ratio=2.5:attack=8:release=120,loudnorm=I=-16:TP=-1.5:LRA=9,apad=whole_dur=${duration},atrim=0:${duration},aresample=48000" \
+    -af "aresample=48000,highpass=f=80,lowpass=f=12000,apad=whole_dur=${duration},atrim=0:${duration}" \
     -ac 1 -ar 48000 -c:a pcm_s16le "$scene_file"
 
   printf "file '%s'\n" "$scene_file" >>"$AUDIO_DIR/concat.txt"
@@ -88,10 +92,50 @@ done
 ffmpeg -hide_banner -loglevel error -y \
   -f concat -safe 0 -i "$AUDIO_DIR/concat.txt" \
   -af "apad=whole_dur=135" \
-  -c:a pcm_s16le -ar 48000 -ac 1 "$AUDIO_DIR/voiceover.wav"
+  -c:a pcm_s16le -ar 48000 -ac 1 "$AUDIO_DIR/voiceover-raw.wav"
+
+echo "==> Normalizing final voiceover to -16 LUFS"
+ANALYSIS_FILE="$AUDIO_DIR/loudnorm-analysis.json"
+ffmpeg -hide_banner -nostats -i "$AUDIO_DIR/voiceover-raw.wav" \
+  -af "loudnorm=I=-16:TP=-1.5:LRA=11:print_format=json" \
+  -f null - 2>"$ANALYSIS_FILE"
+
+if ! read -r measured_i measured_tp measured_lra measured_thresh target_offset < <(
+  node -e '
+    const fs = require("fs");
+    const text = fs.readFileSync(process.argv[1], "utf8");
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) process.exit(1);
+    const value = JSON.parse(match[0]);
+    console.log(
+      value.input_i,
+      value.input_tp,
+      value.input_lra,
+      value.input_thresh,
+      value.target_offset,
+    );
+  ' "$ANALYSIS_FILE"
+); then
+  echo "Could not measure the concatenated voiceover for loudness normalization." >&2
+  cat "$ANALYSIS_FILE" >&2
+  exit 1
+fi
+
+if [[ -z "$measured_i" || -z "$measured_tp" || -z "$measured_lra" || -z "$measured_thresh" || -z "$target_offset" ]]; then
+  echo "The loudness analysis did not return all five required values." >&2
+  cat "$ANALYSIS_FILE" >&2
+  exit 1
+fi
+
+ffmpeg -hide_banner -loglevel error -y \
+  -i "$AUDIO_DIR/voiceover-raw.wav" \
+  -af "loudnorm=I=-16:TP=-1.5:LRA=11:measured_I=${measured_i}:measured_TP=${measured_tp}:measured_LRA=${measured_lra}:measured_thresh=${measured_thresh}:offset=${target_offset}:linear=true,apad=whole_dur=135,atrim=0:135" \
+  -ac 1 -ar 48000 -c:a pcm_s16le "$AUDIO_DIR/voiceover.wav"
 
 ffmpeg -hide_banner -loglevel error -y \
   -i "$AUDIO_DIR/voiceover.wav" \
   -c:a libmp3lame -b:a 192k "$AUDIO_DIR/voiceover.mp3"
 
-echo "Voiceover ready: $AUDIO_DIR/voiceover.mp3"
+rm -f "$AUDIO_DIR/voiceover-raw.wav" "$ANALYSIS_FILE"
+
+echo "Voiceover ready (voice only, -16 LUFS): $AUDIO_DIR/voiceover.mp3"

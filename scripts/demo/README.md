@@ -25,11 +25,11 @@ bash scripts/demo/assemble.sh
 The pipeline:
 
 1. builds the shared protocol/correlator/db packages;
-2. generates the seven scene voiceover files with Edge TTS and concatenates `audio/voiceover.mp3`;
+2. generates the seven scene voiceover files with Edge TTS, normalizes the final voiceover to −16 LUFS, and writes `audio/voiceover.mp3`;
 3. starts a local test API on `127.0.0.1:4110` and a local web app on `127.0.0.1:3110`;
 4. seeds a labelled, simulated incident with host, renter and platform-probe observations, then seals and downloads the signed bundle;
 5. records the 1280×720 Playwright flow;
-6. synthesizes a quiet ambient bed, ducks it under the voiceover, and renders the MP4.
+6. renders the MP4 with the normalized voiceover only; there is no background music or ducking.
 
 To keep the seeded staging rows for inspection:
 
