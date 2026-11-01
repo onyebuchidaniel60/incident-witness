@@ -24,11 +24,7 @@ export function DashboardSidebar() {
   return (
     <aside className="flex w-full shrink-0 flex-col border-b border-iw-border bg-black/10 lg:w-[300px] lg:flex-row lg:border-b-0 lg:border-r">
       <div className="hidden w-[72px] flex-col items-center gap-5 border-r border-iw-border py-4 lg:flex">
-        <Link
-          href="/dashboard"
-          className="iw-brand-mark"
-          aria-label="Incident Witness dashboard"
-        >
+        <Link href="/dashboard" className="iw-brand-mark" aria-label="Incident Witness dashboard">
           <Icon name="hash" />
         </Link>
         <nav aria-label="Workspace shortcuts" className="flex flex-col gap-2.5">

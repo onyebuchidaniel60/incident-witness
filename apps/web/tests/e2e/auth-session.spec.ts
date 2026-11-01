@@ -68,9 +68,7 @@ test("proxy redirects without a session and accepts a test-injected session", as
       .getByRole("navigation", { name: "Primary" })
       .getByRole("link", { name: "Workspace" }),
   ).toHaveCount(0);
-  await expect(
-    anonymousPage.locator('nav[aria-label="Primary"] a[href="/login"]'),
-  ).toHaveCount(1);
+  await expect(anonymousPage.locator('nav[aria-label="Primary"] a[href="/login"]')).toHaveCount(1);
 
   expect(apiRequests).toEqual([]);
   await anonymous.close();
@@ -96,9 +94,9 @@ test("proxy redirects without a session and accepts a test-injected session", as
   await expect(
     authenticatedPage.locator('nav[aria-label="Primary"] a[href="/dashboard"]'),
   ).toHaveCount(1);
-  await expect(
-    authenticatedPage.locator('nav[aria-label="Primary"] a[href="/login"]'),
-  ).toHaveCount(0);
+  await expect(authenticatedPage.locator('nav[aria-label="Primary"] a[href="/login"]')).toHaveCount(
+    0,
+  );
 
   await authenticatedPage.goto("/hosts");
   await expect(authenticatedPage).toHaveURL(/\/hosts$/);
@@ -189,9 +187,7 @@ test("workspace sidebar exposes back and account navigation without staging copy
   await expect(accountLink).toHaveAttribute("href", "/settings");
   await accountLink.click();
   await expect(page).toHaveURL(/\/settings$/);
-  await expect(
-    page.getByRole("heading", { level: 1, name: "Account and session" }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Account and session" })).toBeVisible();
 
   await page.goto("/dashboard");
   await page.locator('a[aria-label="Back to public home"]:visible').click();
