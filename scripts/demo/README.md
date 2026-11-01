@@ -31,6 +31,8 @@ The pipeline:
 5. records the 1280×720 Playwright flow;
 6. renders the MP4 with the normalized voiceover only; there is no background music or ducking.
 
+Scene timing is derived from the audio, not from fixed slots. `record.ts` reads each `audio/scene-N.wav` with `ffprobe`, waits `narration + 1 second`, and stores the scene start offset in `timeline.json`. `assemble.sh` cuts matching video segments at those offsets, concatenates them, and muxes the already-matched voiceover. Non-speech TTS tails are trimmed so the beat stays at one second. No `tpad` or `apad` is used.
+
 To keep the seeded staging rows for inspection:
 
 ```bash

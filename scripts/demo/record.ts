@@ -2,9 +2,10 @@
  * Records the Incident Witness demo flow at 1280x720.
  *
  * The local E2E web/API servers and the demo seed must already be running.
- * The recorder writes the raw browser video plus a small timeline file that
- * the FFmpeg assembly step uses to align the voiceover.
+ * Scene durations are read from the generated narration files with ffprobe so
+ * the recording follows the voiceover instead of a hardcoded timeline.
  */
+import { execFileSync } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -13,6 +14,7 @@ import { chromium } from "@playwright/test";
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const ASSETS_DIR = resolve(SCRIPT_DIR, "assets");
+const AUDIO_DIR = resolve(SCRIPT_DIR, "audio");
 const RAW_DIR = resolve(SCRIPT_DIR, "raw");
 const STATE_FILE = resolve(SCRIPT_DIR, "demo-state.json");
 const TIMELINE_FILE = resolve(SCRIPT_DIR, "timeline.json");
@@ -20,14 +22,21 @@ const TIMELINE_FILE = resolve(SCRIPT_DIR, "timeline.json");
 const BASE_URL = process.env.DEMO_BASE_URL ?? "http://127.0.0.1:3110";
 const E2E_TOKEN = process.env.IW_E2E_TOKEN ?? "demo-provider-token";
 const E2E_COOKIE = "iw_e2e_session";
-
-const SCENE_STARTS = [0, 15, 35, 55, 70, 90, 105];
-const TOTAL_SECONDS = 135;
+const SCENE_BREATHING_SECONDS = 1;
 
 type DemoState = {
   incidentId: string;
   incidentTitle: string;
   bundlePath: string;
+};
+
+type SceneCapture = {
+  index: number;
+  label: string;
+  audioFile: string;
+  audioDurationSeconds: number;
+  durationSeconds: number;
+  startOffsetMs: number;
 };
 
 function tamperOneByte(source: Buffer): Buffer {
@@ -45,6 +54,19 @@ function tamperOneByte(source: Buffer): Buffer {
   else output[valueStart] = original === 0x42 ? 0x43 : 0x42;
 
   return output;
+}
+
+function ffprobeDuration(file: string): number {
+  const output = execFileSync(
+    "ffprobe",
+    ["-v", "error", "-show_entries", "format=duration", "-of", "default=nw=1:nk=1", file],
+    { encoding: "utf8" },
+  );
+  const duration = Number(output.trim());
+  if (!Number.isFinite(duration) || duration <= 0) {
+    throw new Error(`Could not read a positive duration from ${file}`);
+  }
+  return duration;
 }
 
 async function main(): Promise<void> {
@@ -177,16 +199,7 @@ async function main(): Promise<void> {
     `,
   });
 
-  const scene = (seconds: number) => startedAt + seconds * 1000;
-
-  async function holdUntil(seconds: number, label: string): Promise<void> {
-    const remaining = scene(seconds) - Date.now();
-    if (remaining > 0) {
-      await page.waitForTimeout(remaining);
-      return;
-    }
-    console.warn(`[demo] ${label} overran its scene by ${Math.abs(remaining)} ms`);
-  }
+  const scenes: SceneCapture[] = [];
 
   async function pointAt(locator: ReturnType<typeof page.locator>): Promise<void> {
     await locator.scrollIntoViewIfNeeded();
@@ -196,16 +209,46 @@ async function main(): Promise<void> {
     await page.waitForTimeout(220);
   }
 
-  // Scene 1 — public homepage (explicit 5 second hold).
+  async function captureScene(input: {
+    index: number;
+    label: string;
+    action?: () => Promise<void>;
+  }): Promise<void> {
+    const audioFile = resolve(AUDIO_DIR, `scene-${input.index}.wav`);
+    const audioDurationSeconds = ffprobeDuration(audioFile);
+    const durationSeconds = audioDurationSeconds + SCENE_BREATHING_SECONDS;
+    const startOffsetMs = Date.now() - startedAt;
+    const sceneEndsAt = startedAt + startOffsetMs + durationSeconds * 1000;
+
+    if (input.action) await input.action();
+
+    const remainingMs = sceneEndsAt - Date.now();
+    if (remainingMs > 0) {
+      await page.waitForTimeout(remainingMs);
+    } else {
+      console.warn(`[demo] ${input.label} overran its scene by ${Math.abs(remainingMs)} ms`);
+    }
+
+    scenes.push({
+      index: input.index,
+      label: input.label,
+      audioFile,
+      audioDurationSeconds,
+      durationSeconds,
+      startOffsetMs,
+    });
+
+    console.log(
+      `[demo] scene ${input.index}: ${audioDurationSeconds.toFixed(2)}s audio + ${SCENE_BREATHING_SECONDS}s hold`,
+    );
+  }
+
+  // Scene 1 — public homepage.
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.getByRole("heading", { level: 1 }).waitFor();
-  await page.waitForTimeout(5_000);
-  await page.evaluate(() => window.scrollBy({ top: 360, behavior: "smooth" }));
-  await holdUntil(11, "homepage scroll");
-  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
-  await holdUntil(13.5, "homepage");
+  await captureScene({ index: 1, label: "homepage" });
 
-  // Scene 2 — authenticated workspace via the header Workspace link.
+  // Scene 2 — authenticated workspace.
   const primaryNav = page.getByRole("navigation", { name: "Primary" });
   if ((await primaryNav.getByRole("link", { name: "Login" }).count()) !== 0) {
     throw new Error("Authenticated header still exposes the Login link");
@@ -217,72 +260,76 @@ async function main(): Promise<void> {
   await pointAt(workspaceLink);
   await workspaceLink.click();
   await page.getByRole("heading", { level: 1, name: "Provider dashboard" }).waitFor();
-  await holdUntil(SCENE_STARTS[1]!, "dashboard entry");
-  await page.waitForTimeout(1_500);
-  await page.evaluate(() => window.scrollBy({ top: 260, behavior: "smooth" }));
-  await holdUntil(27, "dashboard");
-  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
-  await holdUntil(33.5, "dashboard");
+  await captureScene({ index: 2, label: "dashboard" });
 
-  // Scene 3 — deterministic timeline from the seeded sealed incident.
+  // Scene 3 — deterministic three-source timeline.
   const incidentLink = page.getByRole("link", { name: state.incidentTitle, exact: true });
   await pointAt(incidentLink);
   await incidentLink.click();
   await page.getByRole("heading", { level: 1, name: "Evidence session" }).waitFor();
-  await holdUntil(SCENE_STARTS[2]!, "timeline entry");
   const timelineHeading = page.getByRole("heading", { name: "Evidence timeline" });
   await timelineHeading.scrollIntoViewIfNeeded();
-  await page.waitForTimeout(500);
-  const lastTimelineEvent = page.locator(".iw-timeline-event").last();
-  await lastTimelineEvent.scrollIntoViewIfNeeded();
-  await page.waitForTimeout(2_500);
-  const probeEventChip = lastTimelineEvent.locator(".iw-chip-probe");
-  if ((await probeEventChip.count()) > 0) {
-    await pointAt(probeEventChip);
-    await page.waitForTimeout(1_500);
-  }
-  await timelineHeading.scrollIntoViewIfNeeded();
-  await page.waitForTimeout(500);
-  await pointAt(page.locator(".iw-chip-host").first());
-  await pointAt(page.locator(".iw-chip-renter").first());
-  await pointAt(page.locator(".iw-chip-probe").first());
-  await holdUntil(SCENE_STARTS[3]!, "timeline");
+  await captureScene({
+    index: 3,
+    label: "timeline",
+    action: async () => {
+      await pointAt(page.locator(".iw-chip-host").first());
+      await pointAt(page.locator(".iw-chip-renter").first());
+      await pointAt(page.locator(".iw-chip-probe").first());
+    },
+  });
 
   // Scene 4 — sealed bundle download.
   const downloadButton = page.getByRole("button", { name: "Download sealed bundle" });
-  await pointAt(downloadButton);
-  const downloadPromise = page.waitForEvent("download");
-  await downloadButton.click();
-  const download = await downloadPromise;
-  await download.saveAs(validBundlePath);
-  await page.getByText(/Downloaded incident-witness-/).waitFor();
-  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
-  await holdUntil(SCENE_STARTS[4]!, "download");
+  await downloadButton.scrollIntoViewIfNeeded();
+  await captureScene({
+    index: 4,
+    label: "download",
+    action: async () => {
+      await pointAt(downloadButton);
+      const downloadPromise = page.waitForEvent("download");
+      await downloadButton.click();
+      const download = await downloadPromise;
+      await download.saveAs(validBundlePath);
+      await page.getByText(/Downloaded incident-witness-/).waitFor();
+      await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
+    },
+  });
 
   // Scene 5 — local browser verifier with the downloaded bundle.
   await page.goto("/verify", { waitUntil: "domcontentloaded" });
   await page.getByRole("heading", { level: 1, name: "Verify an evidence bundle" }).waitFor();
   const fileInput = page.locator("#bundle-file");
-  await fileInput.setInputFiles(validBundlePath);
-  await page.getByText("VALID", { exact: true }).waitFor();
-  await page.getByText("VALID", { exact: true }).scrollIntoViewIfNeeded();
-  await holdUntil(SCENE_STARTS[5]!, "valid verification");
+  await captureScene({
+    index: 5,
+    label: "valid verification",
+    action: async () => {
+      await fileInput.setInputFiles(validBundlePath);
+      await page.getByText("VALID", { exact: true }).waitFor();
+      await page.getByText("VALID", { exact: true }).scrollIntoViewIfNeeded();
+    },
+  });
 
   // Scene 6 — change one byte on disk and verify the tampered copy.
   const original = await readFile(validBundlePath);
   await writeFile(tamperedBundlePath, tamperOneByte(original));
-  const clearButton = page.getByRole("button", { name: "Clear result" });
-  if (await clearButton.isVisible().catch(() => false)) {
-    await pointAt(clearButton);
-    await clearButton.click();
-  }
-  await fileInput.setInputFiles(tamperedBundlePath);
-  await page.getByText("INVALID", { exact: true }).waitFor();
-  await page.getByText("INVALID", { exact: true }).scrollIntoViewIfNeeded();
-  await page
-    .getByText("One or more integrity or signature checks failed", { exact: false })
-    .waitFor();
-  await holdUntil(SCENE_STARTS[6]!, "tampered verification");
+  await captureScene({
+    index: 6,
+    label: "tampered verification",
+    action: async () => {
+      const clearButton = page.getByRole("button", { name: "Clear result" });
+      if (await clearButton.isVisible().catch(() => false)) {
+        await pointAt(clearButton);
+        await clearButton.click();
+      }
+      await fileInput.setInputFiles(tamperedBundlePath);
+      await page.getByText("INVALID", { exact: true }).waitFor();
+      await page.getByText("INVALID", { exact: true }).scrollIntoViewIfNeeded();
+      await page
+        .getByText("One or more integrity or signature checks failed", { exact: false })
+        .waitFor();
+    },
+  });
 
   // Scene 7 — close on the public project and repository link.
   await page.goto("/", { waitUntil: "domcontentloaded" });
@@ -290,10 +337,18 @@ async function main(): Promise<void> {
   const footer = page.locator("footer");
   await footer.scrollIntoViewIfNeeded();
   const githubLink = footer.getByRole("link", { name: /GitHub/i });
-  if (await githubLink.isVisible().catch(() => false)) {
-    await pointAt(githubLink);
-  }
-  await holdUntil(TOTAL_SECONDS, "outro");
+  await captureScene({
+    index: 7,
+    label: "outro",
+    action: async () => {
+      if (await githubLink.isVisible().catch(() => false)) {
+        await pointAt(githubLink);
+      }
+    },
+  });
+
+  // Give the final frame a moment to settle before closing the recording.
+  await page.waitForTimeout(500);
 
   const video = page.video();
   await context.close();
@@ -306,17 +361,28 @@ async function main(): Promise<void> {
   const rawVideo = video ? await video.path() : null;
   if (!rawVideo) throw new Error("Playwright did not produce a video recording");
 
+  const expectedDurationSeconds = scenes.reduce(
+    (maximum, scene) => Math.max(maximum, scene.startOffsetMs / 1000 + scene.durationSeconds),
+    0,
+  );
+  const rawVideoDuration = ffprobeDuration(rawVideo);
+  if (rawVideoDuration < expectedDurationSeconds - 0.5) {
+    throw new Error(
+      `Raw video is ${rawVideoDuration.toFixed(2)}s but the scene plan needs ${expectedDurationSeconds.toFixed(2)}s`,
+    );
+  }
+
   await writeFile(
     TIMELINE_FILE,
     JSON.stringify(
       {
         recordedAt: new Date().toISOString(),
         baseUrl: BASE_URL,
-        durationSeconds: TOTAL_SECONDS,
-        sceneStarts: SCENE_STARTS,
         rawVideo,
+        rawVideoDurationSeconds: rawVideoDuration,
         validBundlePath,
         tamperedBundlePath,
+        scenes,
       },
       null,
       2,
@@ -324,7 +390,7 @@ async function main(): Promise<void> {
     "utf8",
   );
 
-  console.log(`Recorded raw video at ${rawVideo}`);
+  console.log(`Recorded raw video at ${rawVideo} (${rawVideoDuration.toFixed(2)}s)`);
   console.log(`Valid bundle: ${validBundlePath}`);
   console.log(`Tampered bundle: ${tamperedBundlePath}`);
 }

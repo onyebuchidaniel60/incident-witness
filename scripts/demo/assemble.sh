@@ -22,7 +22,6 @@ WEB_PORT="${IW_DEMO_WEB_PORT:-3110}"
 DNS_FILE="${IW_E2E_DNS_FILE:-/tmp/opencode/iw-demo-dns.json}"
 DEMO_USER_ID="${IW_E2E_USER_ID:-d4444444-4444-4444-8444-444444444444}"
 DEMO_TOKEN="${IW_E2E_TOKEN:-demo-provider-token}"
-TOTAL_SECONDS=135
 
 mkdir -p "$AUDIO_DIR" "$RAW_DIR" "$LOG_DIR"
 rm -f "$RAW_DIR"/*.webm
@@ -153,20 +152,94 @@ fi
 
 echo "==> Using normalized voiceover only (no background music)"
 
-echo "==> Rendering final video"
+echo "==> Cutting video segments to the recorded scene boundaries"
+mapfile -t SCENE_ROWS < <(
+  node -e '
+    const fs = require("fs");
+    const plan = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+    for (const scene of plan.scenes) {
+      console.log([
+        scene.index,
+        scene.startOffsetMs,
+        scene.durationSeconds,
+        scene.label,
+      ].join("\t"));
+    }
+  ' "$TIMELINE_FILE"
+)
+
+if [[ "${#SCENE_ROWS[@]}" -eq 0 ]]; then
+  echo "No scene boundaries found in $TIMELINE_FILE" >&2
+  exit 1
+fi
+
+TOTAL_SECONDS="$(node -e '
+  const fs = require("fs");
+  const plan = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+  const total = plan.scenes.reduce((sum, scene) => sum + Number(scene.durationSeconds), 0);
+  console.log(total.toFixed(3));
+' "$TIMELINE_FILE")"
+
 FONT="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 if [[ ! -f "$FONT" ]]; then FONT="/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"; fi
 
-filter_complex="[0:v]trim=duration=$TOTAL_SECONDS,setpts=PTS-STARTPTS,tpad=stop_mode=clone:stop_duration=8,scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=30,drawtext=fontfile=$FONT:text='LABELLED DEMO | SYNTHETIC OBSERVATIONS':x=36:y=h-86:fontsize=19:fontcolor=0xE8F5EE:box=1:boxcolor=0x0B0F0D@0.78:boxborderw=10:enable='between(t,1,8)',drawtext=fontfile=$FONT:text='THREE ATTRIBUTED SOURCES':x=36:y=h-86:fontsize=19:fontcolor=0x26D18C:box=1:boxcolor=0x0B0F0D@0.78:boxborderw=10:enable='between(t,36,53)',drawtext=fontfile=$FONT:text='PORTABLE JSON BUNDLE | ED25519':x=36:y=h-86:fontsize=19:fontcolor=0xE8F5EE:box=1:boxcolor=0x0B0F0D@0.78:boxborderw=10:enable='between(t,56,68)',drawtext=fontfile=$FONT:text='VERIFIED LOCALLY | NO UPLOAD':x=36:y=h-86:fontsize=19:fontcolor=0xE8F5EE:box=1:boxcolor=0x0B0F0D@0.78:boxborderw=10:enable='between(t,71,88)',drawtext=fontfile=$FONT:text='ONE-BYTE TAMPER DETECTED':x=36:y=h-86:fontsize=19:fontcolor=0xFF7A7A:box=1:boxcolor=0x0B0F0D@0.78:boxborderw=10:enable='between(t,91,103)',drawtext=fontfile=$FONT:text='github.com/onyebuchidaniel60/incident-witness':x=36:y=h-86:fontsize=19:fontcolor=0x26D18C:box=1:boxcolor=0x0B0F0D@0.78:boxborderw=10:enable='between(t,108,134)',fade=t=in:st=0:d=1,fade=t=out:st=132:d=3,format=yuv420p[v]"
+SEGMENTS_LIST="$RAW_DIR/segments.txt"
+: >"$SEGMENTS_LIST"
+rm -f "$RAW_DIR"/segment-*.mp4 "$RAW_DIR"/video-only.mp4
+
+for row in "${SCENE_ROWS[@]}"; do
+  IFS=$'\t' read -r scene_index start_offset_ms scene_duration label <<<"$row"
+  start_seconds="$(awk -v ms="$start_offset_ms" 'BEGIN { printf "%.3f", ms / 1000 }')"
+  scene_duration="$(awk -v value="$scene_duration" 'BEGIN { printf "%.3f", value }')"
+  segment="$RAW_DIR/segment-${scene_index}.mp4"
+
+  overlay_text=""
+  overlay_color="0xE8F5EE"
+  overlay_start="0"
+  case "$scene_index" in
+    1) overlay_text="LABELLED DEMO | SYNTHETIC OBSERVATIONS" ;;
+    3) overlay_text="THREE ATTRIBUTED SOURCES"; overlay_color="0x26D18C" ;;
+    4) overlay_text="PORTABLE JSON BUNDLE | ED25519" ;;
+    5) overlay_text="VERIFIED LOCALLY | NO UPLOAD"; overlay_start="1" ;;
+    6) overlay_text="ONE-BYTE TAMPER DETECTED"; overlay_color="0xFF7A7A"; overlay_start="2" ;;
+    7) overlay_text="github.com/onyebuchidaniel60/incident-witness"; overlay_color="0x26D18C" ;;
+  esac
+
+  vf="scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=30"
+  if [[ -n "$overlay_text" ]]; then
+    vf="${vf},drawtext=fontfile=${FONT}:text='${overlay_text}':x=36:y=h-86:fontsize=19:fontcolor=${overlay_color}:box=1:boxcolor=0x0B0F0D@0.78:boxborderw=10:enable='between(t,${overlay_start},${scene_duration})'"
+  fi
+  vf="${vf},format=yuv420p"
+
+  ffmpeg -hide_banner -loglevel error -y \
+    -ss "$start_seconds" \
+    -t "$scene_duration" \
+    -i "$RAW_VIDEO" \
+    -vf "$vf" -an \
+    -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p -r 30 \
+    "$segment"
+
+  actual_duration="$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$segment")"
+  if awk -v actual="$actual_duration" -v expected="$scene_duration" 'BEGIN { exit !(actual < expected - 0.1) }'; then
+    echo "Video segment ${scene_index} is ${actual_duration}s, shorter than the planned ${scene_duration}s." >&2
+    exit 1
+  fi
+
+  printf "file '%s'\n" "$segment" >>"$SEGMENTS_LIST"
+  printf 'Segment %s (%s): start %ss, duration %ss\n' "$scene_index" "$label" "$start_seconds" "$scene_duration"
+done
 
 ffmpeg -hide_banner -loglevel error -y \
-  -i "$RAW_VIDEO" \
+  -f concat -safe 0 -i "$SEGMENTS_LIST" \
+  -c copy "$RAW_DIR/video-only.mp4"
+
+echo "==> Muxing voiceover with the aligned video segments"
+ffmpeg -hide_banner -loglevel error -y \
+  -i "$RAW_DIR/video-only.mp4" \
   -i "$AUDIO_DIR/voiceover.mp3" \
-  -filter_complex "$filter_complex" \
-  -map "[v]" -map 1:a \
-  -t "$TOTAL_SECONDS" -r 30 \
-  -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p \
-  -c:a aac -b:a 192k -movflags +faststart \
+  -map 0:v -map 1:a \
+  -c:v copy -c:a aac -b:a 192k \
+  -t "$TOTAL_SECONDS" -movflags +faststart \
   "$OUTPUT"
 
 echo "==> Final video"

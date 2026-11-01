@@ -974,20 +974,22 @@ The temporary one-click demo sign-in bypass was removed before release at the op
 
 - Added `scripts/demo/` with:
   - `seed.ts` — creates a dedicated disposable demo user/host/incident, signed host and renter events, a platform-probe event, ends/seals via the local E2E API, downloads the bundle, and cleans up with `--cleanup`. It refuses production and custom demo user IDs without explicit opt-in.
-  - `record.ts` — Playwright 1280×720 recording of homepage → authenticated Workspace → sealed incident timeline → bundle download → `/verify` VALID → one-byte tampered upload → INVALID → public footer/GitHub. It pre-warms Next dev routes and writes `timeline.json`.
-  - `generate-voiceover.sh` — seven exact scene scripts through Microsoft Edge neural TTS (`edge-tts` 7.3.1, `en-US-GuyNeural`, −2% rate), highpass/lowpass filtered after resampling to 48 kHz, concatenated, padded to 135 s, then normalized to −16 LUFS with a two-pass FFmpeg `loudnorm` measurement. It retries transient Edge TTS network failures.
-  - `assemble.sh` — starts the local test API/web app, seeds, records, renders H.264/AAC 1280×720 with the normalized voiceover only, and cleans the disposable staging rows unless `IW_DEMO_KEEP_DATA=1`. There is no background music, ambient bed or `sidechaincompress`/ducking path.
+  - `record.ts` — Playwright 1280×720 recording of homepage → authenticated Workspace → sealed incident timeline → bundle download → `/verify` VALID → one-byte tampered upload → INVALID → public footer/GitHub. It pre-warms Next dev routes, reads each scene's narration duration with `ffprobe`, waits `audioDuration + 1s`, and records each scene's start offset into `timeline.json`. No scene start/duration is hardcoded.
+  - `generate-voiceover.sh` — expanded seven-scene explanatory script through Microsoft Edge neural TTS (`edge-tts` 7.3.1, `en-US-GuyNeural`, −2% rate). Each scene is resampled to 48 kHz before highpass/lowpass filtering, non-speech tails are trimmed so the deliberate one-second beat is not doubled, a separate one-second silence is inserted after each scene, and the concatenated voiceover is normalized to −16 LUFS with a two-pass FFmpeg `loudnorm` measurement. It retries transient Edge TTS network failures.
+  - `assemble.sh` — starts the local test API/web app, seeds, records, then cuts one video segment per recorded scene boundary, concatenates the segments, and muxes the normalized voiceover only. It does not use `tpad` or `apad`, and there is no background music, ambient bed or `sidechaincompress`/ducking path.
 - Root command: `npm run demo:video`; equivalent `bash scripts/demo/assemble.sh`.
 - Final artifact (local, not committed): `scripts/demo/incident-witness-demo.mp4`
-  - Duration 135.000 s (2:15); H.264 1280×720 30 fps + AAC 48 kHz mono.
-  - Size `4,907,775` bytes; SHA-256 `70e549025998131e9aea0e1c531dfd248050c4964f39f658a693e994949e529a`.
-  - Measured final audio: integrated −16.3 LUFS, true peak −1.6 dBTP. Normalized voiceover WAV: −16.1 LUFS, true peak −1.5 dBTP. Scene narration segments measure −15.8 to −17.0 LUFS.
-  - Silence between scenes measures −91 dB; there is no background hum or music track.
+  - Duration 98.600 s (1:38.6); H.264 1280×720 30 fps + AAC 48 kHz mono.
+  - Size `4,013,879` bytes; SHA-256 `e6dcbbdadc4936a72a50cff9e36f3e78eafa72fde3a7579a585f7443d61d9ecc`.
+  - Measured final audio: integrated −16.4 LUFS, true peak −1.7 dBTP. Scene narration segments measure −16.0 to −16.7 LUFS.
+  - The final one-second tail measures −91 dB; there is no background hum or music track.
 - The recorded incident is explicitly labelled: `demoMode: true`, every seeded event uses `simulation_mode: true`, and the UI shows “Demo / simulated evidence”. The video demonstrates the real seal and real browser verification, including the one-byte failure. It does not claim real hardware telemetry, a deployed production API or physical root cause.
 - Generated `.wav`, `.mp3`, `.webm`, `.mp4`, bundle, log, state and timeline files are gitignored. Only the scripts and README are committed.
 - Environment: `ffmpeg` 6.1.1 is installed from Ubuntu packages; `edge-tts` 7.3.1 is installed system-wide. `espeak-ng` is no longer used. No paid video/TTS API is used; Edge TTS requires an internet connection.
 - Operator rejected the initial `espeak-ng` voice as too robotic on 2026-11-01. The pipeline was switched to Microsoft Edge neural TTS.
 - Operator then rejected the synthesized ambient background bed as unpleasant humming and reported voice-level fluctuation. The bed, music mixing and `sidechaincompress` path were removed entirely. The final voiceover is normalized to −16 LUFS and is the only audio track in the MP4.
+- Operator then reported that the narration was too brief and that hardcoded scene timings left long pauses. The narration script was expanded to explain the problem, workspace, three sources, sealing, browser verification, tamper detection and outro; the fixed 15/20/30-second scene slots were removed. Recording now derives every scene duration from `ffprobe`, and assembly cuts matching video segments at the recorded offsets.
+- Two supplied narration phrases were adjusted to comply with the project evidence-language rules: “external Platform Probe” became “platform-operated probe” (the probe is not an independent third party), and “ensuring the data cannot be tampered with” became “so any tampering after the fact is detectable” (signatures make tampering evident; they do not make a file impossible to modify).
 
 ### Verification evidence
 
@@ -997,9 +999,9 @@ The temporary one-click demo sign-in bypass was removed before release at the op
 - `npm run typecheck --workspace @incident-witness/web` — **PASS**.
 - `npm run build --workspace @incident-witness/web` — **PASS**.
 - `bash -n scripts/demo/assemble.sh scripts/demo/generate-voiceover.sh` — **PASS**.
-- `edge-tts --version` — **PASS**: 7.3.1; all seven scene MP3s synthesized with `en-US-GuyNeural` (6.84–11.83 s each), concatenated/padded to 135.000 s, and normalized to −16.0 LUFS with two-pass `loudnorm`.
+- `edge-tts --version` — **PASS**: 7.3.1; all seven expanded scene narrations synthesized with `en-US-GuyNeural` (10.21–16.94 s each), separated by explicit one-second silences and normalized to −16 LUFS with two-pass `loudnorm`.
 - Standalone TypeScript check for `scripts/demo/seed.ts` and `scripts/demo/record.ts` with strict/no-unchecked-indexed-access options — **PASS**.
-- `npm run demo:video` — **PASS** end-to-end with Edge TTS and voiceover-only audio; final video rendered at the path above (135.000 s, −16.3 LUFS integrated, −15.8 to −17.0 LUFS scene range, no music); sampled frames confirmed homepage, authenticated dashboard, three-source timeline with the cyan probe event, valid bundle state, invalid tampered state and footer/GitHub outro.
+- `npm run demo:video` — **PASS** end-to-end with audio-derived dynamic pacing; final video rendered at the path above (98.600 s, −16.4 LUFS integrated, −16.0 to −16.7 LUFS scene range, no music); sampled frames confirmed homepage, authenticated dashboard, three-source timeline with the cyan probe event, valid bundle state, invalid tampered state and footer/GitHub outro.
 - The pipeline’s disposable staging rows are removed on exit by default; the last run exited successfully after cleanup.
 
 ## Design reference and approval status
