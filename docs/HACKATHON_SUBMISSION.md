@@ -23,6 +23,19 @@ Suggested technical story sequence:
 9. Change one byte and show verification failure.
 10. Clearly separate actual collector measurements from simulated power/network signals.
 
+## Automated demo video pipeline
+
+The local pipeline at `scripts/demo/` records the demo with Playwright, generates the voiceover with `espeak-ng`, and assembles the final MP4 with FFmpeg. It does not use a paid video or TTS API.
+
+```bash
+sudo apt install ffmpeg espeak-ng -y
+npm run demo:video
+```
+
+The generated file is `scripts/demo/incident-witness-demo.mp4` (2:15, 1280×720). Audio, raw recordings, bundles, logs and the final MP4 are gitignored. The pipeline runs against the local test-mode API and staging database with the gated E2E seam; it cleans up the disposable demo rows unless `IW_DEMO_KEEP_DATA=1` is set. See `scripts/demo/README.md` for prerequisites, overrides and outputs.
+
+The recorded incident is a labelled demo: `demoMode: true`, every seeded event uses `simulation_mode: true`, and the UI shows “Demo / simulated evidence”. The video demonstrates the real API seal and the real local browser verifier, including the one-byte tamper failure. It does not claim real hardware telemetry, a deployed production API or a physical root cause.
+
 ## Demo honesty checklist
 
 - [ ] Working web app and real deployed URL.

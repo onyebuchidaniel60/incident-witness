@@ -81,6 +81,7 @@ npm run test:integration --workspace @incident-witness/probe-worker
 npm run test:e2e
 npm run test:integration --workspace @incident-witness/demo-harness
 npm run demo        # staging-only synthetic lifecycle
+npm run demo:video  # local Playwright + espeak-ng + FFmpeg hackathon demo
 npm run verify -- path/to/bundle.json
 ```
 
@@ -100,6 +101,8 @@ Recorded Phase 9 results on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`, f
 - Pino/probe/host-agent redaction paths reviewed; host-agent redaction test passes.
 
 E2E uses test-only `IW_E2E_*`/`NEXT_PUBLIC_IW_E2E_*` seams for a static test session and file-backed DNS resolver. The API seam is disabled unless `NODE_ENV=test` and the explicit flag are both set; the web seam is disabled in production builds. These are test infrastructure, not production authentication or SSRF bypasses.
+
+The demo-video pipeline in `scripts/demo/` requires FFmpeg and `espeak-ng`. It writes the gitignored `scripts/demo/incident-witness-demo.mp4`; see [`scripts/demo/README.md`](./scripts/demo/README.md). The seeded incident is labelled demo/simulated evidence.
 
 ## Documentation
 

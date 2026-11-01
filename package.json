@@ -25,6 +25,7 @@
     "test:demo": "npm run test:integration --workspace @incident-witness/demo-harness",
     "verify": "npm run verify --workspace @incident-witness/cli-verifier --",
     "demo": "npm run demo --workspace @incident-witness/demo-harness",
+    "demo:video": "bash scripts/demo/assemble.sh",
     "db:migrate": "npm run migrate --workspace @incident-witness/db",
     "db:migrate:status": "npm run migrate:status --workspace @incident-witness/db",
     "db:provision-roles": "npm run provision-roles --workspace @incident-witness/db",

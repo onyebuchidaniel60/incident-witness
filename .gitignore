@@ -63,3 +63,12 @@ Thumbs.db
 
 # Next.js generated agent rules
 apps/web/AGENTS.md
+
+# Generated demo video assets (operator downloads the final MP4 from the VPS)
+scripts/demo/audio/
+scripts/demo/raw/
+scripts/demo/assets/
+scripts/demo/logs/
+scripts/demo/demo-state.json
+scripts/demo/timeline.json
+scripts/demo/incident-witness-demo.mp4

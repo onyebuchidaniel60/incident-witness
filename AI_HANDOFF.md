@@ -1,6 +1,6 @@
 # AI_HANDOFF.md — Incident Witness
 
-**Last updated:** 2026-10-31
+**Last updated:** 2026-11-01
 
 **Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**. Phase 6 reference-driven mockups (revision 0.3) are **APPROVED**. Phase 7 final UI implementation is implemented, deployed and **COMPLETE AND CLOSED**; the magic-link session bug and the protected-route API-call race are fixed, verified and accepted. Phase 8 frontend and documentation completeness is implemented, test-verified, deployed and **COMPLETE AND CLOSED**. Phase 9 final regression, security audit and release readiness is **COMPLETE AND GREEN**. The MVP is a release candidate awaiting explicit production release authorization.
 
@@ -955,6 +955,48 @@ The temporary one-click demo sign-in bypass was removed before release at the op
 - Public routes are now dynamic because the header reads request cookies. Metadata, sitemap and robots remain unchanged.
 - **Final UI deployment:** https://incident-witness-ma2gomqrz-uhhh2.vercel.app, Git SHA `3967ccb92b4fa683baf2b9244790d7d7b03d593a`, target `production`, status `READY`. Deployed checks confirmed: zero Workspace links when logged out; no “Current functionality” or “Current deployment status” panels; documentation limitation text retained; no login implementation notice; login links below the form; direct `/dashboard` still redirects to `/login?next=%2Fdashboard` with no dashboard heading.
 - Test evidence: `npm run lint --workspace @incident-witness/web` — **PASS**; `npm run typecheck --workspace @incident-witness/web` — **PASS**; `npm run build --workspace @incident-witness/web` — **PASS**; full Playwright — **PASS**: 80 checks, 79 passed and one intentional mobile provider-flow skip. New coverage asserts the login links sit below the form, the obsolete panels are absent, Workspace is hidden when logged out, visible for an injected authenticated session, and direct protected navigation still redirects.
+
+## Authenticated header fix and automated demo video (2026-11-01)
+
+### Authenticated header Login removal
+
+- `apps/web/components/primary-nav.tsx` no longer includes the `Login` link in the authenticated link set. Logged-in users see Home, Workspace, Docs and Verify; logged-out users see Home, Docs, Verify and Login.
+- Regression coverage in `apps/web/tests/e2e/auth-session.spec.ts` asserts one Login link for anonymous visitors, zero Login links for an injected authenticated session, and exactly one Workspace link for the authenticated session. The mobile collapsed menu is checked through the nav DOM so the hidden accessible tree does not create a false negative.
+- Commit: `8c0a98499b1c5f4076a96735df5bdec683e7b2fe` — `fix(ui): hide login link when authenticated`, pushed to `main`.
+- Git-connected Vercel deployment: https://incident-witness-2td8piewm-uhhh2.vercel.app
+  - Deployment ID: `dpl_FZYFnL5v8DxdnEiXQuqQy2o8X5wT`
+  - Target/status: `production`; `READY`
+  - Git metadata SHA: `8c0a98499b1c5f4076a96735df5bdec683e7b2fe`; branch `main`
+  - Stable alias: https://incident-witness.vercel.app
+  - Deployed logged-out HTML check: primary navigation contains one `/login` link and zero `/dashboard` links. Authenticated visibility is covered by the local full-stack E2E test; no real Supabase session was created for the deployed check.
+
+### Automated demo video pipeline
+
+- Added `scripts/demo/` with:
+  - `seed.ts` — creates a dedicated disposable demo user/host/incident, signed host and renter events, a platform-probe event, ends/seals via the local E2E API, downloads the bundle, and cleans up with `--cleanup`. It refuses production and custom demo user IDs without explicit opt-in.
+  - `record.ts` — Playwright 1280×720 recording of homepage → authenticated Workspace → sealed incident timeline → bundle download → `/verify` VALID → one-byte tampered upload → INVALID → public footer/GitHub. It pre-warms Next dev routes and writes `timeline.json`.
+  - `generate-voiceover.sh` — seven exact scene scripts through `espeak-ng` (`en-GB-x-rp`, 165 wpm), processed and padded to the 0:00–2:15 timeline, concatenated to `audio/voiceover.mp3`.
+  - `assemble.sh` — starts the local test API/web app, seeds, records, synthesizes an ambient bed with FFmpeg, ducks the music under the voiceover, renders H.264/AAC 1280×720, and cleans the disposable staging rows unless `IW_DEMO_KEEP_DATA=1`.
+- Root command: `npm run demo:video`; equivalent `bash scripts/demo/assemble.sh`.
+- Final artifact (local, not committed): `scripts/demo/incident-witness-demo.mp4`
+  - Duration 135.000 s (2:15); H.264 1280×720 30 fps + AAC 48 kHz stereo.
+  - Size `6,840,425` bytes; SHA-256 `b2e74bed1a5cb718c1280b2cfd104657572c10707b2e4f014479cf96e8952179`.
+  - Measured audio: integrated −16.2 LUFS, true peak −4.3 dBTP.
+- The recorded incident is explicitly labelled: `demoMode: true`, every seeded event uses `simulation_mode: true`, and the UI shows “Demo / simulated evidence”. The video demonstrates the real seal and real browser verification, including the one-byte failure. It does not claim real hardware telemetry, a deployed production API or physical root cause.
+- Generated `.wav`, `.mp3`, `.webm`, `.mp4`, bundle, log, state and timeline files are gitignored. Only the scripts and README are committed.
+- Environment: `ffmpeg` 6.1.1 and `espeak-ng` 1.51 were installed from Ubuntu packages. No paid video/TTS API was used.
+
+### Verification evidence
+
+- `npx playwright test tests/e2e/auth-session.spec.ts` — **PASS**: 10/10 across desktop and mobile.
+- `npm run test:e2e` — **PASS**: 80 checks, 79 passed and one intentional mobile provider-flow skip.
+- `npm run lint --workspace @incident-witness/web` — **PASS**.
+- `npm run typecheck --workspace @incident-witness/web` — **PASS**.
+- `npm run build --workspace @incident-witness/web` — **PASS**.
+- `bash -n scripts/demo/assemble.sh scripts/demo/generate-voiceover.sh` — **PASS**.
+- Standalone TypeScript check for `scripts/demo/seed.ts` and `scripts/demo/record.ts` with strict/no-unchecked-indexed-access options — **PASS**.
+- `bash scripts/demo/assemble.sh` — **PASS** end-to-end; final video rendered at the path above; sampled frames confirmed homepage, authenticated dashboard, three-source timeline with the cyan probe event, valid bundle state, invalid tampered state and footer/GitHub outro.
+- The pipeline’s disposable staging rows are removed on exit by default; the last run exited successfully after cleanup.
 
 ## Design reference and approval status
 
