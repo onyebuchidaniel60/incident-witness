@@ -1004,6 +1004,32 @@ The temporary one-click demo sign-in bypass was removed before release at the op
 - `npm run demo:video` — **PASS** end-to-end with audio-derived dynamic pacing; final video rendered at the path above (98.600 s, −16.4 LUFS integrated, −16.0 to −16.7 LUFS scene range, no music); sampled frames confirmed homepage, authenticated dashboard, three-source timeline with the cyan probe event, valid bundle state, invalid tampered state and footer/GitHub outro.
 - The pipeline’s disposable staging rows are removed on exit by default; the last run exited successfully after cleanup.
 
+## Sidebar navigation cleanup (2026-11-01)
+
+- `apps/web/components/dashboard-sidebar.tsx`:
+  - The circular `OP` avatar is now a Next.js `<Link href="/settings">` with `aria-label="Account settings"`, a title tooltip, pointer cursor, a visible emerald/charcoal hover state and the existing visual geometry.
+  - Removed the entire “Staging workspace” yellow-chip block, including the “Data is loaded from the authenticated API. Missing sources remain gaps.” copy.
+  - Added a small bordered arrow-left link to `/` beside the desktop “Provider workspace” label with `aria-label="Back to public home"`.
+  - Added the same subtle home link to the mobile workspace top bar next to the menu toggle.
+- No API, database, authentication, evidence or business-logic changes.
+- Commit: `b48c4b2e3b7829cdf8a385dbc0de36bca211a2d1` — `fix(ui): dashboard sidebar and navigation cleanup`, pushed to `main`.
+- Formatting follow-up: `08d1cd3ce6f97ed329d1b852b75e137c136811df` — `style(ui): format sidebar cleanup` (Prettier-only line wrapping; no behavior change).
+- Vercel production deployment: https://incident-witness-5idbr1ejf-uhhh2.vercel.app
+  - Deployment ID: `dpl_5yGbx5WZuQnx3eQQCFzBEm224N8E`
+  - Target/status: `production`; `READY`
+  - Git metadata SHA: `08d1cd3ce6f97ed329d1b852b75e137c136811df`
+  - Stable alias: https://incident-witness.vercel.app
+  - The behavior commit `b48c4b2` was also deployed and verified `READY` at https://incident-witness-i6dmwai04-uhhh2.vercel.app before the formatting follow-up.
+  - `/` returns HTTP 200; `/dashboard` and `/settings` return the expected 307 to `/login?next=…` without a session.
+- Verification:
+  - `npx playwright test tests/e2e/auth-session.spec.ts` — **PASS**: 12/12 desktop and mobile, including back-link navigation, OP → `/settings`, staging-copy absence and mobile horizontal-overflow check.
+  - `npm run test:e2e` — **PASS**: 82 checks, 81 passed and one intentional mobile provider-flow skip.
+  - `npm run lint --workspace @incident-witness/web` — **PASS**.
+  - `npm run typecheck --workspace @incident-witness/web` — **PASS**.
+  - `npm run build --workspace @incident-witness/web` — **PASS**.
+- The production build’s static chunks contain the new “Back to public home” and “Account settings” strings; the removed “Staging workspace” copy is absent from the built static chunks.
+- The formatting follow-up `08d1cd3` was Prettier-only; the same focused and full E2E suites were run on the behavior commit before formatting.
+
 ## Design reference and approval status
 
 - **Final visual design:** **APPROVED and IMPLEMENTED** (revision 0.3; Phase 7 **COMPLETE AND CLOSED**).
