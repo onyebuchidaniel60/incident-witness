@@ -19,8 +19,10 @@
 ### Cleanup verification (2026-11-08)
 
 - Cleanup commit: `c2a80fa` — `docs: restructure repository and add server guide`, pushed to `main`.
-- Vercel Git deployment for `c2a80fa` completed successfully according to the GitHub commit status. Automated `curl` requests to the public alias are met by Vercel's security checkpoint (`403` challenge), so the live content smoke check is edge-blocked; the same build was verified locally with the full Playwright suite.
-- The first GitHub Actions run on `c2a80fa` exposed a clean-checkout ordering bug in the root `typecheck` script: `demo-harness` was typechecked before `db` and `correlator` were built, so a fresh clone lacked their declarations. The root script now builds `protocol`, `correlator` and `db` first, then typechecks all workspaces.
+- CI fix commit: `9805ce4` — `fix(ci): build workspace dependencies before typecheck`, pushed to `main`.
+- GitHub Actions run `42513532782` for `9805ce4` — **PASS**: install, lint, typecheck, protocol/correlator/API tests and build all succeeded. The failure on `c2a80fa` exposed a clean-checkout ordering bug; the root script now builds `protocol`, `correlator` and `db` before dependent workspace typechecks.
+- Vercel Git deployment for `9805ce4` completed successfully according to the GitHub commit status. The stable `/docs` route returned HTTP 200 with the new “Server guide / user manual” and “Judging and testing” content when fetched with a browser user agent. A plain `curl` request is met by Vercel's edge security checkpoint, so the browser-agent result is the deployment-content check.
+- GitHub root contents verified: only the standard repository files plus the deliberately retained `AGENTS.md` are present at the root. Planning documents are under `docs/planning/`; `CHANGELOG.md` is under `docs/`.
 - `npm run lint` — **PASS** across all workspaces.
 - Clean-`dist` `npm run typecheck` — **PASS** across all workspaces.
 - `npm run build` — **PASS** across the monorepo.
