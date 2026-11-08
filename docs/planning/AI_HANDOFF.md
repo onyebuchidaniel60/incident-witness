@@ -18,9 +18,12 @@
 
 ### Cleanup verification (2026-11-08)
 
-- `npm run lint --workspace @incident-witness/web` — **PASS**.
-- `npm run typecheck --workspace @incident-witness/web` — **PASS**.
-- `npm run build --workspace @incident-witness/web` — **PASS**, including the `/docs` route and all existing routes.
+- Cleanup commit: `c2a80fa` — `docs: restructure repository and add server guide`, pushed to `main`.
+- Vercel Git deployment for `c2a80fa` completed successfully according to the GitHub commit status. Automated `curl` requests to the public alias are met by Vercel's security checkpoint (`403` challenge), so the live content smoke check is edge-blocked; the same build was verified locally with the full Playwright suite.
+- The first GitHub Actions run on `c2a80fa` exposed a clean-checkout ordering bug in the root `typecheck` script: `demo-harness` was typechecked before `db` and `correlator` were built, so a fresh clone lacked their declarations. The root script now builds `protocol`, `correlator` and `db` first, then typechecks all workspaces.
+- `npm run lint` — **PASS** across all workspaces.
+- Clean-`dist` `npm run typecheck` — **PASS** across all workspaces.
+- `npm run build` — **PASS** across the monorepo.
 - `npm run test:e2e` — **PASS**: 82 checks, 81 passed and one intentional mobile provider-flow skip. The docs test covers the new `server-guide` section, judging/testing heading and sample-command content; the public-link crawl and metadata checks remain green.
 - Tracked Markdown link audit — **PASS**: no broken local Markdown links after the move.
 - The demo video and HackerNoon article are still unpublished; the README and handoff state that explicitly rather than inventing links.
