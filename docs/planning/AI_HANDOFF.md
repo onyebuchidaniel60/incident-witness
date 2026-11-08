@@ -30,6 +30,12 @@
 - Tracked Markdown link audit — **PASS**: no broken local Markdown links after the move.
 - The demo video and HackerNoon article are still unpublished; the README and handoff state that explicitly rather than inventing links.
 
+### Product-focused README restoration (2026-11-09)
+
+- Replaced the generic open-source boilerplate README with a product-focused structure: title/tagline, live-product user quickstart, three-source architecture, local developer quickstart, testing, trust limitations and hackathon submission.
+- The live-app quickstart now appears before local setup. The “How to Build Your Own Protocol” section was removed at the operator’s request; this repository is presented as the Incident Witness product, not a generic template.
+- The hosted site is explicitly described as a staging deployment that requires a reachable Fastify API. The YouTube and HackerNoon destinations remain clearly labelled placeholders because no published URLs exist.
+
 
 **Next task:** Obtain explicit production release authorization. Do not deploy Production before it.
 
