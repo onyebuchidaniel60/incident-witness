@@ -47,7 +47,7 @@ await client.stop();
 provider's verified hostname, so the integrator must obtain it from the provider's invitation
 context. Only the fixed path `/.well-known/incident-witness/health` on HTTPS port 443 is checked;
 the SDK does not accept a URL, port, path or query from workload input. This integration gap is
-reported in `AI_HANDOFF.md` and must be handled by the Phase 4 provider UI.
+reported in `docs/planning/AI_HANDOFF.md` and must be handled by the Phase 4 provider UI.
 
 The invitation token is sent only in the enrollment request body. It is not stored in SDK state,
 logs, URLs or command-line arguments. Invitations are single-use and expire after 15 minutes.

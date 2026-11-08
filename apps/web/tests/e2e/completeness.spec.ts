@@ -110,6 +110,7 @@ test("docs page contains working sections and the real operating steps", async (
 
   for (const id of [
     "overview",
+    "server-guide",
     "host-agent",
     "renter-sdk",
     "protocol",
@@ -127,8 +128,14 @@ test("docs page contains working sections and the real operating steps", async (
   await tableOfContents.getByRole("link", { name: "Host agent" }).click();
   await expect(page).toHaveURL(/\/docs#host-agent$/);
 
-  await expect(page.getByText("iw-agent enroll --api-url")).toBeVisible();
-  await expect(page.getByText("iw-agent run --incident <incident-uuid>")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 2, name: "Server guide / user manual" }),
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { level: 3, name: "Judging and testing" })).toBeVisible();
+  await expect(page.getByText("npm run demo:video", { exact: true })).toBeVisible();
+
+  await expect(page.getByText("iw-agent enroll --api-url").first()).toBeVisible();
+  await expect(page.getByText("iw-agent run --incident <incident-uuid>").first()).toBeVisible();
   await expect(page.getByText("RenterClient.enroll")).toBeVisible();
   await expect(page.getByText("iw-rules-v1")).toBeVisible();
   await expect(

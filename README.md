@@ -1,40 +1,47 @@
+<div align="center">
+
 # Incident Witness
 
-**When infrastructure fails, evidence speaks.**
+**A Portable Incident-Evidence Protocol for Decentralized Compute**
 
-Incident Witness is a portable incident-evidence protocol for decentralized compute. It collects signed observations from a GPU host, a renter-side workload client and a separately operated platform probe; correlates them into a bounded, time-ordered record; and seals a JSON evidence bundle that can be checked locally for integrity and signatures.
+Signed, bounded observations from independent infrastructure sources — correlated into one deterministic timeline and sealed into an offline-verifiable evidence bundle.
 
-> **Important limitation:** a valid signature proves that data has not changed after it was signed by a particular key. It does not prove that a sensor was truthful, a host was uncompromised or an inferred cause is correct. Incident Witness reports evidence patterns and unknowns; it does not adjudicate a marketplace dispute, change a reliability score or automatically excuse downtime. The platform probe is operated by Incident Witness, not by an independent third party.
+<p>
+  <img alt="Node.js 26" src="https://img.shields.io/badge/Node.js-26.13.0-339933?logo=node.js&logoColor=white" />
+  <img alt="Fastify 5" src="https://img.shields.io/badge/Fastify-5-000000?logo=fastify&logoColor=white" />
+  <img alt="Next.js 16" src="https://img.shields.io/badge/Next.js-16.4-000000?logo=next.js&logoColor=white" />
+  <img alt="Ed25519" src="https://img.shields.io/badge/Ed25519-signatures-26D18C" />
+</p>
 
-## Project status
+[Quickstart](#-quickstart) · [Architecture](#-architecture) · [Features](#-features-of-the-boilerplate) · [Build your own](#-how-to-build-your-own-protocol) · [Reference implementation](#-the-incident-witness-reference-implementation-hackathon-demo)
 
-Phases 0–8 are complete and accepted. **Phase 9 final regression, security audit and release readiness is complete and green.** Incident Witness MVP is a release candidate, pending explicit operator authorization for production release.
+</div>
 
-The MVP includes the signed evidence protocol, Fastify API, Linux host agent, renter SDK, platform probe worker, deterministic correlator, transactional bundle sealing, offline CLI and browser verifiers, provider workspace, public documentation, legal status pages, metadata/SEO, accessible responsive UI and link auditing.
+---
 
-Authentication uses the standard **Supabase magic-link email flow**. The temporary judge-demo bypass has been removed; there is no alternate sign-in path. The API and probe worker are **not deployed to Render** from this repository state. The Next.js web app is deployed on Vercel against the staging Supabase project; provider data pages require a reachable API origin configured through `NEXT_PUBLIC_API_BASE_URL`.
+> **Evidence, not adjudication.** A valid signature proves that a record has not changed since it was signed by a particular key. It does not prove that a sensor was truthful, a host was uncompromised, or an inferred cause is correct. This project reports source-attributed observations and evidence patterns — not root causes or marketplace decisions.
 
-Production release requires separate explicit operator authorization, production secrets/services, legal copy and a verified backup/restore plan.
-
-## Quick start
+## 🚀 Quickstart
 
 ### Prerequisites
 
-- Node.js 26.13.0 (pinned in `.node-version`) and npm 11.20.0.
-- A Supabase staging project with Postgres and Auth enabled.
-- Network access to the staging database for migrations and integration tests.
-- Optional: NVIDIA `nvidia-smi` and Network UPS Tools `upsc` on a Linux x86_64 host.
+- **Node.js 26.13.0** and npm 11.x (pinned in `.node-version` / `package.json`)
+- A **Supabase** project with Postgres and Auth enabled
+- Network access to the database for migrations
+- Optional for real host telemetry: Linux x86_64, `nvidia-smi`, and Network UPS Tools (`upsc`)
 
 ### Install and configure
 
 ```bash
+git clone https://github.com/onyebuchidaniel60/incident-witness.git
+cd incident-witness
 npm ci
 cp .env.example .env
 ```
 
-Fill `.env` with local/staging values. Never commit `.env`, database URLs, signing keys, service-role keys or credentials. Browser-visible values must be limited to the `NEXT_PUBLIC_*` entries. The web app reads the root `.env`; `apps/web/.env.local.example` lists the relevant public names.
+Fill `.env` with **local or staging** values. Never commit `.env`, database URLs, signing keys, credentials, or service-role material. Browser-visible configuration must stay limited to `NEXT_PUBLIC_*` values. Configuration reference: [`docs/CONFIGURATION.md`](docs/CONFIGURATION.md).
 
-Database and platform-key provisioning:
+### Prepare the database and signing key
 
 ```bash
 npm run db:provision-roles
@@ -43,7 +50,7 @@ npm run db:provision-platform-key
 npm run db:migrate:status
 ```
 
-The migration runner uses `DATABASE_URL_MIGRATOR`. The API uses `DATABASE_URL_IW_API`; the probe worker uses `DATABASE_URL_IW_WORKER`. Both runtime roles are non-superuser and do not bypass RLS. See [`docs/CONFIGURATION.md`](./docs/CONFIGURATION.md) and the accepted ADR in [`docs/adr/`](./docs/adr/).
+`DATABASE_URL_MIGRATOR` is used only for migrations. The API connects as `iw_api`; the probe worker connects as `iw_worker`. Both runtime roles are non-superuser and do not bypass RLS.
 
 ### Run locally
 
@@ -55,23 +62,170 @@ npm run dev:api
 npm run dev
 ```
 
-The web app runs at `http://localhost:3000`; the API defaults to `http://localhost:4000`. Set `IW_ALLOWED_WEB_ORIGINS` and `NEXT_PUBLIC_API_BASE_URL` consistently.
+Default local endpoints:
 
-### Authentication
+| Service | URL |
+| --- | --- |
+| Web app | `http://localhost:3000` |
+| API | `http://localhost:4000` |
+| API readiness | `http://localhost:4000/health/ready` |
 
-The provider login uses Supabase's default **magic-link email** flow rather than a six-digit OTP. This is an operator-approved deviation from the original OTP wording: it avoids the Supabase free-tier custom-SMTP and editable-template requirement.
+Set `NEXT_PUBLIC_API_BASE_URL`, `IW_ALLOWED_WEB_ORIGINS`, and the Supabase public values consistently.
 
-- The form calls `signInWithOtp` with `emailRedirectTo=/auth/callback`.
-- `/auth/callback` exchanges the code for a session, writes the Supabase cookies onto the redirect response and sends the provider to `/dashboard`.
-- A failed callback redirects to `/login?error=invalid_link`.
-- Every deployment origin and `/auth/callback` must be allow-listed in Supabase Auth redirect settings.
-- Authenticated routes are protected by `proxy.ts` and a server-side user check before any provider API call. Unauthenticated requests redirect to `/login?next=…` without flashing an API error.
+### Deploy
 
-The provider login uses no custom SMTP or external identity provider. The standard magic-link flow is the only sign-in path; the temporary judge-demo bypass was removed before release.
+| Component | Target | Notes |
+| --- | --- | --- |
+| Web app | **Vercel** | Project root `apps/web`; set the `NEXT_PUBLIC_*` values in the Vercel project. |
+| API | **Render Web Service** | `render.yaml` defines the build and `node apps/api/dist/index.js` start command. |
+| Probe worker | **Render Background Worker** | Separate service and separate restricted database role. No public ingress. |
+| Database / Auth | **Supabase** | Apply migrations through the migrator role; keep staging and production projects separate. |
 
-## Testing
+See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) and [`render.yaml`](render.yaml) for the complete deployment and environment-variable contracts.
+
+### Verify the build
 
 ```bash
+npm run lint
+npm run typecheck
+npm run build
+npm test
+npm run test:e2e
+```
+
+For a full local provider journey, see [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md). For a labelled synthetic evidence lifecycle, run `npm run demo`; it seals a bundle and verifies a one-byte tamper failure with the offline CLI.
+
+## 🏗️ Architecture
+
+```mermaid
+flowchart LR
+  subgraph Sources["Observation sources"]
+    Agent["Host agent<br/>signed host / GPU / UPS events"]
+    Renter["Renter SDK<br/>incident-scoped workload events"]
+    Probe["Platform probe worker<br/>SSRF-safe reachability checks"]
+  end
+
+  Web["Next.js web app<br/>provider workspace + local verifier"]
+  Auth["Supabase Auth<br/>magic-link sessions"]
+  API["Fastify API<br/>auth, validation, ingestion, sealing"]
+  DB[("Postgres<br/>RLS + append-only evidence")]
+  Bundle["Sealed JSON evidence bundle<br/>manifest + certificates + events"]
+  Verify["Browser / CLI verifier<br/>pinned public keys, no upload"]
+
+  Web <--> Auth
+  Web <--> API
+  Agent -- "Ed25519 signed events" --> API
+  Renter -- "Ed25519 signed events" --> API
+  Probe -- "Ed25519 signed events" --> API
+  API <--> DB
+  API --> Bundle
+  Bundle --> Verify
+```
+
+The protocol separates **observation sources** from the **evidence record**:
+
+- The **host agent** runs on the provider's Linux host and records bounded heartbeats plus available GPU, UPS, and lifecycle observations.
+- The **renter SDK** runs alongside a renter workload and records only heartbeat and endpoint observations. It never collects workload content.
+- The **platform probe** is a separate platform-operated worker that checks the provider's verified HTTPS health endpoint. It is **not an independent third party**.
+
+The API correlates accepted observations deterministically, then seals a portable bundle. The browser verifier and CLI both use the same protocol package and pinned trust anchors; neither uploads the bundle. See [`docs/planning/ARCHITECTURE.md`](docs/planning/ARCHITECTURE.md) for the complete trust model, schema, API, concurrency and security contracts.
+
+## ✨ Features of the Boilerplate
+
+| Capability | What is included |
+| --- | --- |
+| **Signed evidence** | Ed25519 event signatures, RFC 8785 JCS canonical JSON, SHA-256 digests, source registration certificates and signed bundle manifests. |
+| **Deterministic rules** | Pure `@incident-witness/correlator` package with versioned rules, explicit `UNKNOWN`, evidence grades, gap handling and simulation caps. No LLM, no probability score. |
+| **SSRF-safe probe** | Fixed HTTPS hostname/path/port, DNS validation, private/reserved/loopback/metadata address rejection, pinned validated address, no redirects or proxy environment. |
+| **Offline verification** | Browser verifier using public-key-only Ed25519 and a Node CLI (`iw-verify`) sharing the same protocol fixtures and trust-set model. |
+| **Provider workspace** | Next.js App Router UI for hosts, DNS ownership proof, enrollment, bounded sessions, renter invitations, timeline, source health, sealing and downloads. |
+| **Observer tooling** | Linux host agent with owner-only key storage and SQLite spool; incident-scoped TypeScript renter SDK with bounded queue and retry; separate probe worker with Postgres job leases. |
+| **Defense in depth** | Supabase JWT verification, restricted database roles, RLS policies, owner-scoped 404 responses, append-only evidence and transactional sealing. |
+| **Testable by default** | Vitest unit suites, Playwright browser journeys, staging integration tests, cross-runtime canonical/signature vectors and a reproducible demo harness. |
+
+The project deliberately does **not** include payments, financial logic, AI diagnosis, blockchain/Arweave storage, marketplace reputation changes, arbitrary log ingestion, arbitrary command execution, or public-by-default evidence.
+
+## 🛠️ How to Build Your Own Protocol
+
+This repository is a working reference architecture, not a locked product. A fork can define a different evidence domain while preserving the signed-record and verification pattern.
+
+### 1. Fork and rename
+
+```bash
+git clone https://github.com/onyebuchidaniel60/incident-witness.git my-evidence-protocol
+cd my-evidence-protocol
+```
+
+Update package names, UI copy, vertical labels, and the pinned platform trust set. Keep the protocol/version boundary explicit so old bundles remain verifiable.
+
+### 2. Define your sources and trust boundaries
+
+Decide which categories produce observations and what each source is honestly able to prove. The reference implementation uses three categories:
+
+- provider-controlled host agent
+- renter-controlled workload client
+- platform-operated network probe
+
+Do not relabel a platform-operated source as an independent third party. Do not imply that a signature proves sensor truth or physical cause.
+
+### 3. Customize the event schema
+
+The single source of truth for the signed envelope and allowed payload fields is:
+
+```text
+packages/protocol/src/core/schemas.ts
+```
+
+Keep every payload typed, bounded, and free of free-form logs, prompts, datasets, credentials, or arbitrary process output. If you add a field:
+
+1. Add it to the strict Zod schema.
+2. Add protocol fixtures and canonical-byte tests.
+3. Reject unknown fields at the API boundary.
+4. Update the host agent / renter SDK / probe producer.
+5. Update the offline verifier allow-list and test vectors.
+
+The API must continue to require exact canonical request bytes, signature verification, key scope/status, sequence monotonicity, incident time-window checks, and idempotency.
+
+### 4. Change the deterministic rules
+
+Rules live in:
+
+```text
+packages/correlator/src/rules.ts
+packages/correlator/src/types.ts
+```
+
+The correlator is a pure function: the same normalized events plus the same rule version must always produce the same output. If you change a rule:
+
+- bump `RULE_VERSION` in `types.ts`;
+- keep the rule inputs explicit and deterministic;
+- add positive, negative, contradictory, missing-source and simulation cases;
+- preserve `UNKNOWN` when evidence is insufficient;
+- update the assessment wording and in-app rules explanation;
+- keep the rule version in every sealed manifest.
+
+### 5. Adapt persistence, API, and UI
+
+Use the existing boundaries as a checklist:
+
+| Area | Location |
+| --- | --- |
+| Database schema and migrations | `packages/db/migrations/` |
+| API routes and domain services | `apps/api/src/routes/`, `apps/api/src/domain/` |
+| Host collectors and spool | `packages/host-agent/src/collectors/`, `packages/host-agent/src/spool.ts` |
+| Renter event behavior | `packages/renter-sdk/src/` |
+| Probe policy and network client | `apps/probe-worker/src/probe.ts`, `apps/probe-worker/src/dns.ts`, `apps/probe-worker/src/ip.ts` |
+| Provider workspace | `apps/web/app/(dashboard)/`, `apps/web/components/views/` |
+| Local verification | `apps/web/lib/verify/`, `tools/iw-verify/` |
+
+Any schema, permission, state-machine, or trust-boundary change is a product/security decision. Record it in an ADR before implementation.
+
+### 6. Re-pin trust and rerun the evidence tests
+
+Before publishing a fork:
+
+```bash
+npm ci
 npm run lint
 npm run typecheck
 npm run build
@@ -79,178 +233,97 @@ npm test
 npm run test:integration --workspace @incident-witness/api
 npm run test:integration --workspace @incident-witness/probe-worker
 npm run test:e2e
-npm run test:integration --workspace @incident-witness/demo-harness
-npm run demo        # staging-only synthetic lifecycle
-npm run demo:video  # local Playwright + Edge TTS + FFmpeg hackathon demo
-npm run verify -- path/to/bundle.json
+npm run demo
 ```
 
-Recorded Phase 9 results on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`, from a clean `npm ci`:
+Update both pinned trust sets when rotating platform keys:
 
-- `npm ci` — PASS (549 packages audited; 20 moderate development-only advisories).
-- `npm run lint` — PASS across all workspaces.
-- `npm run typecheck` — PASS across all workspaces.
-- `npm run build` — PASS across the monorepo, including the Next.js 16.4.3 production build.
-- `npm test` — PASS: 165 unit tests (20 protocol, 11 CLI verifier, 15 correlator, 14 ADR-001, 49 host-agent, 14 renter SDK, 20 probe worker, 22 API).
-- `npm run test:integration --workspace @incident-witness/api` — PASS: 60/60 against staging.
-- `npm run test:integration --workspace @incident-witness/probe-worker` — PASS: 2/2 against staging.
-- `npm run test:e2e` — PASS: 80 Playwright checks, 79 passed and one intentional mobile provider-flow skip. Coverage includes the provider journey, protected-route redirects with zero API calls, the auth-aware Workspace link, login layout, removed status panels, metadata, link crawling, accessibility and local verification.
-- `npm run demo` — PASS: sealed `POWER_RELATED`/`LOW` bundle verified with exit 0; one-byte tampered copy failed with exit 1.
-- `npm audit --omit=dev` — PASS: 0 production vulnerabilities.
-- Secret scan — PASS: no `.env`, private-key or service-role files tracked; no sensitive environment value found in the client static bundle.
-- Pino/probe/host-agent redaction paths reviewed; host-agent redaction test passes.
+- `tools/iw-verify/trusted-platform-keys.json`
+- `apps/web/lib/verify/trusted-platform-keys.ts`
 
-E2E uses test-only `IW_E2E_*`/`NEXT_PUBLIC_IW_E2E_*` seams for a static test session and file-backed DNS resolver. The API seam is disabled unless `NODE_ENV=test` and the explicit flag are both set; the web seam is disabled in production builds. These are test infrastructure, not production authentication or SSRF bypasses.
+Validate a valid bundle, a modified manifest, a modified event signature, an unknown key, an unsupported version, and a one-byte tamper. Keep the browser and CLI results identical.
 
-The demo-video pipeline in `scripts/demo/` requires FFmpeg and the free `edge-tts` neural TTS package. It writes the gitignored `scripts/demo/incident-witness-demo.mp4`; see [`scripts/demo/README.md`](./scripts/demo/README.md). Scene pacing is derived from each narration file with `ffprobe`, the final audio is normalized voiceover only with no background music, and the seeded incident is labelled demo/simulated evidence.
+### Documentation map
 
-## Documentation
+| Need | Document |
+| --- | --- |
+| Product behaviour and acceptance criteria | [`docs/planning/PROJECT_SPEC.md`](docs/planning/PROJECT_SPEC.md) |
+| Architecture, trust model and data contracts | [`docs/planning/ARCHITECTURE.md`](docs/planning/ARCHITECTURE.md) |
+| Build sequence and gates | [`docs/planning/IMPLEMENTATION_PLAN.md`](docs/planning/IMPLEMENTATION_PLAN.md) |
+| Current execution checkpoint | [`docs/planning/AI_HANDOFF.md`](docs/planning/AI_HANDOFF.md) |
+| Provider journey | [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md) |
+| Host agent | [`docs/HOST_AGENT.md`](docs/HOST_AGENT.md) |
+| Renter SDK | [`docs/RENTER_SDK.md`](docs/RENTER_SDK.md) |
+| Probe worker | [`docs/PROBE_WORKER.md`](docs/PROBE_WORKER.md) |
+| Protocol and bundle format | [`docs/PROTOCOL.md`](docs/PROTOCOL.md) |
+| API index | [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md) |
+| Deployment | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) |
+| Operations and troubleshooting | [`docs/OPERATIONS.md`](docs/OPERATIONS.md), [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) |
+| Privacy and security model | [`docs/PRIVACY_SECURITY.md`](docs/PRIVACY_SECURITY.md) |
 
-- In-app documentation: `/docs`
-- [Changelog](./CHANGELOG.md)
-- Repository documentation index: [`docs/README.md`](./docs/README.md)
-- [Provider user guide](./docs/USER_GUIDE.md)
-- [Host agent operator guide](./docs/HOST_AGENT.md)
-- [Renter SDK integration guide](./docs/RENTER_SDK.md)
-- [Protocol v1](./docs/PROTOCOL.md)
-- [API reference](./docs/API_REFERENCE.md)
-- [Configuration](./docs/CONFIGURATION.md)
-- [Deployment](./docs/DEPLOYMENT.md)
-- [Operations](./docs/OPERATIONS.md)
-- [Troubleshooting](./docs/TROUBLESHOOTING.md)
-- [Privacy and security model](./docs/PRIVACY_SECURITY.md)
-
-Source-of-truth project files: [`PROJECT_SPEC.md`](./PROJECT_SPEC.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`IMPLEMENTATION_PLAN.md`](./IMPLEMENTATION_PLAN.md), [`AGENTS.md`](./AGENTS.md) and [`AI_HANDOFF.md`](./AI_HANDOFF.md).
-
-## Host agent
-
-Build from the repository (there is no published binary or installer in the MVP):
-
-```bash
-npm run build --workspace @incident-witness/protocol
-npm run build --workspace @incident-witness/host-agent
-```
-
-Issue a one-time enrollment code in the provider dashboard, then enroll and run:
-
-```bash
-iw-agent enroll --api-url https://<incident-witness-api>
-iw-agent run --incident <incident-uuid>
-iw-agent status
-```
-
-The agent runs as an unprivileged Linux x86_64 user, generates its Ed25519 key locally, stores key/credential/spool files `0600` in a `0700` directory, and never accepts the enrollment code as an argument. It uses fixed `execFile` calls for `nvidia-smi` and `upsc`; GPU collection currently covers device index 0. The operator must supply the incident ID explicitly because there is no agent-side session discovery. See [`docs/HOST_AGENT.md`](./docs/HOST_AGENT.md).
-
-## Renter SDK
-
-```bash
-npm run build --workspace @incident-witness/renter-sdk
-```
-
-```ts
-import { RenterClient } from "@incident-witness/renter-sdk";
-
-const client = await RenterClient.enroll({
-  apiBaseUrl: "https://<incident-witness-api>",
-  invitationToken: invitationFromProvider,
-  endpointHostname: providerHostnameFromInvitation,
-  workloadRef: "job-123",
-  stateDir: "/run/incident-witness-renter",
-});
-
-client.start();
-// ... workload runs ...
-await client.stop();
-```
-
-Invitations are single use and expire after 15 minutes. The SDK records signed heartbeats and fixed endpoint observations only; it does not collect workload content. `endpointHostname` must come from the provider invitation context. See [`docs/RENTER_SDK.md`](./docs/RENTER_SDK.md).
-
-## Probe worker and platform key
-
-The probe worker is a separate Render background process using the restricted `iw_worker` role. It leases probe jobs, resolves and pins a validated public IP, performs the fixed HTTPS health check, signs `platform_probe_result` events and appends them with incident counters.
-
-Before a live worker can start, provision a platform-probe key:
-
-```bash
-export IW_PLATFORM_PROBE_KEY_ID="<witness_keys UUID>"
-npm run db:provision-probe-key -- --generate --out secrets/probe-worker.pk8
-```
-
-The private half is written only to the requested `0600` file and must be stored in the worker-only `IW_PLATFORM_PROBE_PRIVATE_KEY` secret. Never commit it, expose it to the web/API runtime or print it. `secrets/` is git-ignored. The staging environment currently has no live probe key or worker deployment. See [`docs/PROBE_WORKER.md`](./docs/PROBE_WORKER.md).
-
-## Bundle verification
-
-Verification is anchored to pinned platform public keys; a key included inside a bundle is not trusted merely because the file contains it.
-
-Browser: open `/verify` and select a sealed JSON bundle. The File API reads it locally; no bundle content is uploaded and no API request is made.
-
-CLI:
-
-```bash
-npm run build --workspace @incident-witness/cli-verifier
-node tools/iw-verify/dist/cli.js path/to/incident-witness-bundle.json
-# or
-npm run verify -- path/to/incident-witness-bundle.json
-```
-
-Exit codes: `0` fully valid, `1` invalid/tampered, `2` missing/unreadable/unparseable file or unusable trust set. The CLI trust set is [`tools/iw-verify/trusted-platform-keys.json`](./tools/iw-verify/trusted-platform-keys.json); the browser trust set is `apps/web/lib/verify/trusted-platform-keys.ts`. Both contain public keys only.
-
-The protocol uses RFC 8785 JCS through pinned `canonicalize@5.1.0`, SHA-256 and Ed25519. Node services use `node:crypto`; the browser verifier uses `@noble/ed25519` through the browser-safe package export. No private platform key is present in browser code.
-
-## Deployment
-
-### Frontend (Vercel)
-
-- Framework preset: Next.js. Build from the repository root with the normal workspace install/build.
-- Required public variables: `NEXT_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
-- Optional canonical origin: `NEXT_PUBLIC_SITE_URL`. When omitted, metadata falls back to the stable production alias.
-- Add every deployment origin and `/auth/callback` to the Supabase Auth redirect allow-list.
-- Preview and Production must use staging/sandbox data and separate secrets. Never put server-only secrets in `NEXT_PUBLIC_*` variables.
-
-### API and worker (Render)
-
-`render.yaml` defines the `incident-witness-api` web service and builds `apps/api/dist/index.js`. The service is **not linked or verified** from this repository state. To enable it:
-
-1. Link `render.yaml` in Render.
-2. Set the server-only environment variables from [`docs/CONFIGURATION.md`](./docs/CONFIGURATION.md), including `DATABASE_URL_IW_API`, `IW_TOKEN_PEPPER`, `IW_PLATFORM_SIGNING_PRIVATE_KEY`, `IW_PLATFORM_KEY_ID`, `APP_BASE_URL`, `IW_ALLOWED_WEB_ORIGINS` and `IW_HEALTHCHECK_TOKEN`.
-3. Apply migrations through `0022` with `DATABASE_URL_MIGRATOR`.
-4. Set the Vercel `NEXT_PUBLIC_API_BASE_URL` to the deployed API origin and redeploy the web app.
-
-The API readiness endpoint checks the migration ledger and returns 503 until the expected migration is applied. Production release requires separate explicit operator authorization and the Phase 9 gate. See [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md).
-
-## Security and evidence boundaries
-
-- Every API operation checks authentication, permission and resource ownership on the server. Non-owned resources return 404.
-- Runtime database roles do not have superuser or `BYPASSRLS`; grants and RLS are tested from the actual roles.
-- Event payloads are typed and bounded. No free-form logs, prompts, datasets, credentials, arbitrary commands or raw network addresses are accepted.
-- The host agent uses fixed binaries and fixed argument arrays with `execFile`; it runs unprivileged.
-- The probe worker performs DNS resolution, rejects private/reserved/link-local/metadata and IPv4-mapped addresses, pins the validated IP and does not follow redirects or use proxy environment variables.
-- Evidence events are append-only; sealed bundles are immutable. Key revocation prevents new events but does not invalidate valid historic signatures.
-- Simulation and demo evidence is permanently labelled and capped at `LOW`.
-- Assessments are deterministic, versioned and explainable. There is no LLM, probability score, payment, token, blockchain or marketplace integration.
-
-Report suspected vulnerabilities privately to the repository owner; no public support address or legal contact has been approved for publication.
-
-## Repository layout
+### Repository layout
 
 ```text
-apps/web              Next.js 16 App Router frontend
-apps/api              Fastify 5 API
-apps/probe-worker     Render background probe worker
-packages/protocol     Signed event and bundle protocol
-packages/correlator   Deterministic rule engine
-packages/db           Drizzle schema, SQL migrations, DB scripts
-packages/host-agent   Linux x86_64 host agent
-packages/renter-sdk   Incident-scoped renter SDK
-tools/iw-verify       Offline CLI verifier
-tools/demo-harness    Labelled synthetic staging lifecycle
-docs/                 Product, protocol, operator and security documentation
+.
+├── apps/
+│   ├── web/                 # Next.js provider workspace, public docs and local verifier
+│   ├── api/                 # Fastify API, auth, ingestion, sealing
+│   └── probe-worker/        # SSRF-safe platform probe worker
+├── packages/
+│   ├── protocol/            # JCS, Ed25519, schemas, certificates, bundle verification
+│   ├── correlator/          # pure deterministic rule engine
+│   ├── db/                  # Drizzle schema and SQL migrations
+│   ├── host-agent/          # Linux host agent and SQLite spool
+│   ├── renter-sdk/          # incident-scoped renter client
+│   └── ui/                  # shared behavioral UI primitives
+├── tools/
+│   ├── iw-verify/           # offline Node bundle verifier
+│   └── demo-harness/        # labelled synthetic evidence lifecycle
+├── scripts/demo/            # Playwright + Edge TTS + FFmpeg demo pipeline
+├── docs/                    # user, operator, protocol and planning documentation
+└── .github/                 # CI and repository automation
 ```
 
-## Contributions and AI coding agents
+### Contributing and agent rules
 
-Read [`AGENTS.md`](./AGENTS.md) before changing anything. Implement one assigned phase/task only, add or update tests, run focused and broader checks, inspect the diff for secrets and unrelated changes, commit, update [`AI_HANDOFF.md`](./AI_HANDOFF.md) and stop. Architecture, product behaviour, business rules, security and evidence claims require operator approval before change.
+The repository is implemented one task/phase at a time. Read [`AGENTS.md`](AGENTS.md) before changing code. Architecture, product behaviour, security, evidence claims, and state-machine changes require operator approval.
 
-## Research and validation status
+For a safer contribution:
 
-The source research found a plausible infrastructure-evidence gap and adjacent tooling, but user demand, marketplace acceptance, willingness to pay and full novelty remain unresolved. The project is selected for implementation by the operator; that decision does not convert open research questions into validated claims. See [`docs/RESEARCH_AND_ASSUMPTIONS.md`](./docs/RESEARCH_AND_ASSUMPTIONS.md).
+1. Identify the requirement and acceptance criteria.
+2. Add or update tests with the change.
+3. Run focused tests, then lint, typecheck, build, and the relevant broader suite.
+4. Inspect the diff for secrets, unrelated changes, and evidence-language overclaims.
+5. Update docs and the handoff in the same change.
+
+## 🔗 The "Incident Witness" Reference Implementation (Hackathon Demo)
+
+This repository was used to build **Incident Witness** for the **Decentralize AI Hackathon** (HackerNoon / Nosana / Arweave / MEXC). The reference implementation demonstrates the full pattern:
+
+- a provider workspace backed by Supabase Auth and a Fastify API;
+- a host agent, renter SDK and platform-operated probe producing signed observations;
+- a deterministic three-source timeline;
+- a sealed Ed25519-signed JSON bundle;
+- local browser and CLI verification, including one-byte tamper detection.
+
+### Links
+
+| Destination | Status / link |
+| --- | --- |
+| **Live staging dashboard** | https://incident-witness.vercel.app |
+| **Source repository** | https://github.com/onyebuchidaniel60/incident-witness |
+| **Demo video** | **YouTube publication pending.** The reproducible local pipeline is documented in [`scripts/demo/README.md`](scripts/demo/README.md); it writes `scripts/demo/incident-witness-demo.mp4` (gitignored). |
+| **HackerNoon article** | **Publication pending.** The submission workstream and demo honesty checklist live in [`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md). |
+| **Hackathon** | https://decentralizeai.tech/ |
+
+> **Staging status:** the Vercel deployment uses the staging Supabase project and public configuration. The Fastify API and probe worker are not deployed from this repository state; provider data pages require a reachable API origin via `NEXT_PUBLIC_API_BASE_URL`. The live site is a reference demo, not a production service or a marketplace integration.
+
+### What the reference demo does not claim
+
+- It does not prove a physical root cause, sensor truth, or host integrity.
+- It does not excuse downtime, change a reliability score, or adjudicate a marketplace dispute.
+- It does not treat missing observations as normal.
+- It does not describe the platform-operated probe as an independent third party.
+- It does not integrate with a GPU marketplace, blockchain, payment provider, or AI model.
+
+See [`docs/planning/AI_HANDOFF.md`](docs/planning/AI_HANDOFF.md) for the exact current implementation state and known limitations, and [`docs/CHANGELOG.md`](docs/CHANGELOG.md) for released changes.

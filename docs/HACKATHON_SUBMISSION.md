@@ -2,6 +2,14 @@
 
 **Status:** Planning notes only. Confirm current official rules before submission.
 
+## Publication status (2026-11-08)
+
+- **Live staging dashboard:** https://incident-witness.vercel.app
+- **Public repository:** https://github.com/onyebuchidaniel60/incident-witness
+- **Demo video:** reproducible locally with `npm run demo:video`; the MP4 is gitignored. **YouTube publication is still pending**, so no YouTube URL is claimed.
+- **HackerNoon article:** **not published yet**. No article URL is claimed until the submission is live.
+- **API deployment:** the Fastify API and probe worker are not deployed from this repository state. The Vercel site uses staging Supabase public configuration; provider data pages require a reachable API origin.
+
 ## Competition context from the research snapshot
 
 The project was researched for the Decentralize AI Hackathon organized by HackerNoon, Nosana, Arweave and MEXC. The 30 October 2026 research snapshot described an overall competition period of 1 June 2026 through 27 February 2027, with Round 1 ending 31 October and Round 2 running November 2026 through 27 February 2027. It described the focus as open decentralized AI infrastructure, including compute, verifiable AI/provenance, data sovereignty, open inference and agent infrastructure.

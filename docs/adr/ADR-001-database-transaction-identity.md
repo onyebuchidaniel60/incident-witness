@@ -7,7 +7,7 @@
 **Decision owner:** Operator
 **Implementation executor:** Coding agent (proposal only)
 **Related phase:** Phase 2 — backend/data/auth foundation
-**Related documents:** `ARCHITECTURE.md` §§5.1–5.3, §11; `docs/DEPLOYMENT.md`; `AGENTS.md` §§4, 7, 12; `PROJECT_SPEC.md` §§8.4, 14
+**Related documents:** `docs/planning/ARCHITECTURE.md` §§5.1–5.3, §11; `docs/DEPLOYMENT.md`; `AGENTS.md` §§4, 7, 12; `docs/planning/PROJECT_SPEC.md` §§8.4, 14
 
 ## 1. Context
 
@@ -17,7 +17,7 @@ Two documents describe the connection/identity mechanism differently. The differ
 
 ## 2. Exact conflicting text
 
-### `ARCHITECTURE.md` §5.2 — "User transaction context"
+### `docs/planning/ARCHITECTURE.md` §5.2 — "User transaction context"
 
 > Fastify verifies the Supabase JWT first. Every provider DB request opens a transaction using the `iw_api` login role and sets transaction-local `request.jwt.claim.sub` to the verified JWT subject; it may set `iw.request_mode=provider` as a transaction-local context marker. The subject must come only from the verified JWT, never the request body. RLS uses `auth.uid()` for ownership and policies targeted to `iw_api`. Do not `SET ROLE authenticated`; the Supabase `authenticated` role has no direct table grants. Machine-ingestion transactions set a separate, explicit context (`iw.request_mode=machine_ingest`, source key ID and incident/host scope) only after the API has validated the scoped bearer credential and event signature. Worker requests use the separate `iw_worker` login.
 
@@ -35,11 +35,11 @@ Two documents describe the connection/identity mechanism differently. The differ
 
 > Test DB grants as well as RLS. RLS policies alone do not prove safe access.
 
-`ARCHITECTURE.md` §5.1:
+`docs/planning/ARCHITECTURE.md` §5.1:
 
 > `iw_api` login role is used only by Fastify, must not have `BYPASSRLS` or superuser, and is the role to which provider and machine RLS policies are targeted. It is never exposed to the browser.
 
-`PROJECT_SPEC.md` §8.4:
+`docs/planning/PROJECT_SPEC.md` §8.4:
 
 > The web app never receives platform signing secrets, DB credentials or device credentials.
 
@@ -47,7 +47,7 @@ Two documents describe the connection/identity mechanism differently. The differ
 
 > No production secrets/data in preview environment.
 
-`PROJECT_SPEC.md` §14, database failure row:
+`docs/planning/PROJECT_SPEC.md` §14, database failure row:
 
 | Area | Edge/failure | Expected behaviour |
 |---|---|---|
@@ -63,7 +63,7 @@ This reads the `docs/DEPLOYMENT.md` phrase literally as an instruction for the A
 
 **Security risks**
 
-- `ARCHITECTURE.md` §5.1 and §5.3 state that `authenticated` has no direct grants on product tables. To make A work, those grants would need to be added, creating a broader access surface than the approved model.
+- `docs/planning/ARCHITECTURE.md` §5.1 and §5.3 state that `authenticated` has no direct grants on product tables. To make A work, those grants would need to be added, creating a broader access surface than the approved model.
 - Product-table RLS policies are currently specified as targeted to `iw_api`. Under `authenticated`, those policies would not apply; the implementation would need a duplicate policy set, or broad policies, increasing the chance of policy drift and accidental exposure.
 - `iw_api` would need membership in `authenticated` in order to switch to it. That is not `BYPASSRLS`, but it is an unnecessary role-escalation capability and complicates the least-privilege claim.
 - Supabase's `authenticated` role is also used by Supabase client/PostgREST pathways. Broadening its grants could expose product tables through a second database access path, contrary to the architecture's statement that the browser calls Fastify for all product data.
@@ -79,14 +79,14 @@ This reads the `docs/DEPLOYMENT.md` phrase literally as an instruction for the A
 
 ### Interpretation B — stay as `iw_api`, set only transaction-local GUCs
 
-This follows `ARCHITECTURE.md` §5.2: Fastify connects as `iw_api`; each transaction sets transaction-local JWT and mode values; RLS policies are targeted to `iw_api` and use `auth.uid()`.
+This follows `docs/planning/ARCHITECTURE.md` §5.2: Fastify connects as `iw_api`; each transaction sets transaction-local JWT and mode values; RLS policies are targeted to `iw_api` and use `auth.uid()`.
 
 **Security risks**
 
 - The connection must genuinely authenticate as `iw_api`. If `DATABASE_URL_IW_API` accidentally points at the migration owner, `postgres`, `service_role` or any role with `BYPASSRLS`, setting GUCs would not enforce the intended boundary. Startup assertions and integration tests must verify the real login role.
 - The GUCs must be set in the same transaction as the queries. `SET` outside a transaction, or `SET LOCAL` after a transaction ends, can lose the claim or affect the wrong scope.
 - `auth.uid()` must be callable by `iw_api` and must read the exact claim format used by the staging Supabase project.
-- Direct connection or a verified session pooler is required. A transaction pooler can lose or cross-contaminate transaction-local state and is disallowed by `ARCHITECTURE.md` §5.2.
+- Direct connection or a verified session pooler is required. A transaction pooler can lose or cross-contaminate transaction-local state and is disallowed by `docs/planning/ARCHITECTURE.md` §5.2.
 - RLS policies must default-deny when the subject or mode is missing; tests must prove that an absent GUC cannot read or write product rows.
 - Table grants remain essential. The role must not be able to bypass RLS, and `authenticated`, `anon` and `PUBLIC` must have no product-table grants.
 
@@ -145,7 +145,7 @@ These tests must run against a **real Supabase staging database** with real logi
 | ADR-001-T11 | Direct versus session-pooler behaviour | With the approved direct connection and approved session pooler, transaction-local GUCs are visible only inside the transaction and `current_user` is `iw_api` for every query. A transaction-pooler configuration must be rejected or must fail this test; it must never be used silently. |
 | ADR-001-T12 | `auth.uid()` compatibility | Against the actual staging Supabase project, `auth.uid()` reads the staged claim format correctly, is executable by `iw_api`, and returns the same subject as the verified JWT. Test both the normal subject claim and any documented full-claims fallback. |
 | ADR-001-T13 | Immutable evidence and audit | `iw_api` cannot update/delete `evidence_events`, `evidence_bundles` or `audit_events`. Event append, bundle insert and audit append succeed only through the approved transaction context. |
-| ADR-001-T14 | Transaction failure/connection loss | A failure during event insertion or sealing rolls back completely; no success response is returned; retry is idempotent; no partial sealed bundle is persisted. This directly covers the `PROJECT_SPEC.md` §14 DB failure row. |
+| ADR-001-T14 | Transaction failure/connection loss | A failure during event insertion or sealing rolls back completely; no success response is returned; retry is idempotent; no partial sealed bundle is persisted. This directly covers the `docs/planning/PROJECT_SPEC.md` §14 DB failure row. |
 
 The Phase 2 checkpoint must report the exact test command(s), actual pass/fail results, staging service category (test-only), and the verified `iw_api`/`iw_worker` roles. Local tests may supplement, but they do not replace the real staging-role test.
 
@@ -155,10 +155,10 @@ If the operator accepts recommendation B:
 
 - **New file, only after approval:** `docs/adr/ADR-001-database-transaction-identity.md` (or the operator-approved ADR path).
 - **`docs/DEPLOYMENT.md`:** replace the ambiguous "Database connection" wording with explicit `iw_api` login, transaction-local JWT/mode GUCs, no `SET ROLE authenticated`, direct/session-pooler requirement and transaction-pooler prohibition.
-- **`AI_HANDOFF.md`:** record ADR-001 approval, the selected connection mechanism, and the Phase 2 test gate.
+- **`docs/planning/AI_HANDOFF.md`:** record ADR-001 approval, the selected connection mechanism, and the Phase 2 test gate.
 - **`docs/CONFIGURATION.md`:** only if connection-string or role notes need consistency with the clarified mechanism.
 - **No application code, migrations, roles or RLS policies are changed as part of accepting this ADR.** Those belong to Phase 2 implementation after approval.
-- **`ARCHITECTURE.md`:** no change under B. Under A, §§5.1–5.3 would require an architecture change, new/expanded grants and duplicate or re-targeted policies; that would require separate operator approval and would not be the recommended path.
+- **`docs/planning/ARCHITECTURE.md`:** no change under B. Under A, §§5.1–5.3 would require an architecture change, new/expanded grants and duplicate or re-targeted policies; that would require separate operator approval and would not be the recommended path.
 
 ## 7. Open questions for the operator
 

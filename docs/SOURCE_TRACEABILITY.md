@@ -29,7 +29,7 @@ Carried into the blueprint:
 - Early skeletal frontend and stable Preview URL.
 - Small independently testable tasks and one phase at a time.
 - Evidence from tests over an agent's “it works” assertion.
-- Git commits/checkpoints and `AGENTS.md` / `AI_HANDOFF.md` continuity.
+- Git commits/checkpoints and `AGENTS.md` / `docs/planning/AI_HANDOFF.md` continuity.
 - Core functionality and end-to-end verification before final visual design.
 - Reference-led mockups and explicit operator approval before final UI implementation.
 - Complete frontend shell, responsive/accessibility states, docs and real home-footer Documentation/GitHub links where appropriate.

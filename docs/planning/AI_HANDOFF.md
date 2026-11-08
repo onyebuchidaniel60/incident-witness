@@ -1,10 +1,30 @@
 # AI_HANDOFF.md — Incident Witness
 
-**Last updated:** 2026-11-01
+**Last updated:** 2026-11-08
 
 **Project status:** Phase 0, Phase 1, Phase 2 and all Phase 3 subphases (3A, 3B, 3C, 3D, 3E, 3F) are complete and accepted. Phase 3 is entirely **COMPLETE**. Phase 4 functional frontend integration is implemented and test-verified. Phase 5 MVP hardening and the E2E verification gate are implemented, tested and accepted; the Hard Functionality Gate is **PASSED**. Phase 6 reference-driven mockups (revision 0.3) are **APPROVED**. Phase 7 final UI implementation is implemented, deployed and **COMPLETE AND CLOSED**; the magic-link session bug and the protected-route API-call race are fixed, verified and accepted. Phase 8 frontend and documentation completeness is implemented, test-verified, deployed and **COMPLETE AND CLOSED**. Phase 9 final regression, security audit and release readiness is **COMPLETE AND GREEN**. The MVP is a release candidate awaiting explicit production release authorization.
 
-**Current phase:** Phase 9 — complete. Final operator UI polish corrections applied on 2026-11-01. Awaiting explicit production release authorization.
+**Current phase:** Phase 9 — complete. Final operator UI polish corrections applied on 2026-11-01. Repository cleanup and open-source documentation pass applied on 2026-11-08. Awaiting operator review and explicit production release authorization.
+
+## Repository cleanup and open-source documentation (2026-11-08)
+
+- Root handoff and planning files moved under `docs/planning/`: `AI_HANDOFF.md`, `ARCHITECTURE.md`, `BLUEPRINT.md`, `IMPLEMENTATION_PLAN.md`, `PACKAGE_MANIFEST.md`, `PROJECT_SPEC.md` and `SHA256SUMS.txt`. `CHANGELOG.md` moved to `docs/CHANGELOG.md`.
+- `AGENTS.md` intentionally remains at the repository root because the coding-agent harness requires it there. References in `AGENTS.md` now point to `docs/planning/`.
+- Root `README.md` rewritten as a generic open-source guide for building signed evidence protocols, while retaining the Incident Witness reference-implementation section.
+- The public `/docs` route now includes a consolidated **Server guide / user manual** section covering the three sources, provider quickstart, sample-bundle testing, the local verifier, Ed25519 security boundaries and explicit non-claims.
+- The root README links only to real destinations. The Vercel staging dashboard and public repository are linked. The demo video and HackerNoon article are explicitly marked **publication pending**; no YouTube or article URL was fabricated because neither has been published.
+- Documentation index and cross-references updated for the new `docs/planning/` layout; architecture references in the API, configuration, protocol, ADR and in-app docs point to the moved file.
+- Verification for this cleanup is recorded below after the final regression run.
+
+### Cleanup verification (2026-11-08)
+
+- `npm run lint --workspace @incident-witness/web` — **PASS**.
+- `npm run typecheck --workspace @incident-witness/web` — **PASS**.
+- `npm run build --workspace @incident-witness/web` — **PASS**, including the `/docs` route and all existing routes.
+- `npm run test:e2e` — **PASS**: 82 checks, 81 passed and one intentional mobile provider-flow skip. The docs test covers the new `server-guide` section, judging/testing heading and sample-command content; the public-link crawl and metadata checks remain green.
+- Tracked Markdown link audit — **PASS**: no broken local Markdown links after the move.
+- The demo video and HackerNoon article are still unpublished; the README and handoff state that explicitly rather than inventing links.
+
 
 **Next task:** Obtain explicit production release authorization. Do not deploy Production before it.
 
@@ -43,10 +63,10 @@ It does not prove sensor truth or physical root cause, decide whether downtime s
 - `PROJECT_SPEC.md` — product, MVP, flows, behaviour, acceptance criteria and UI routes.
 - `ARCHITECTURE.md` — stack, trust boundaries, schema, API, cryptography, security and integrations.
 - `IMPLEMENTATION_PLAN.md` — phase order, task boundaries and acceptance gates.
-- `AGENTS.md` — mandatory coding-agent instructions.
-- `README.md` — repository introduction and operating instructions.
-- `docs/` — research, protocol, operational, user and security docs.
-- `docs/adr/ADR-001-database-transaction-identity.md` — accepted database identity decision.
+- `../../AGENTS.md` — mandatory coding-agent instructions.
+- `../../README.md` — repository introduction and operating instructions.
+- `../` — research, protocol, operational, user and security docs.
+- `../adr/ADR-001-database-transaction-identity.md` — accepted database identity decision.
 
 ## Current architecture
 
@@ -690,12 +710,12 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 
 ## Phase 6 revision 0.3 mockups (approved 2026-10-31)
 
-- The operator rejected the 0.1 hybrid mockups and supplied two WebP references in `docs/design-references/`. The reference-driven direction is approved.
-- Revision 0.3 uses locally bundled **Satoshi** WOFF2 files, with Inter only as a fallback. Font attribution/license is recorded in `docs/mockups/assets/fonts/FONT_LICENSE.md`.
+- The operator rejected the 0.1 hybrid mockups and supplied two WebP references in `../design-references/`. The reference-driven direction is approved.
+- Revision 0.3 uses locally bundled **Satoshi** WOFF2 files, with Inter only as a fallback. Font attribution/license is recorded in `../mockups/assets/fonts/FONT_LICENSE.md`.
 - Buttons, inputs, chips, session cards, stat tiles, evidence panels and state cards use sharp **4px** corners (chips 3px). The app window keeps a 16px frame radius; the verifier window is 10px and the preview frame 8px.
 - The primary emerald is `#26D18C`; the action gradient ends at `#16845E`. Surfaces retain subtle green/blue-tinted charcoal values rather than pure black.
 - Requested screens are covered in desktop and mobile: public home, authenticated dashboard, incident timeline and local verifier. The mockup index links the full set.
-- Reference analysis, translation, intentional deviations and the five translation choices are recorded in `docs/DESIGN_DECISIONS.md`.
+- Reference analysis, translation, intentional deviations and the five translation choices are recorded in `../DESIGN_DECISIONS.md`.
 - **Operator approval:** explicit **"I approve these mockups."** on 2026-10-31. Phase 7 is authorized for visual implementation only.
 
 ## Completed in Phase 7 (COMPLETE AND CLOSED 2026-10-31)
@@ -707,7 +727,7 @@ Run on 2026-10-31 with Node `v26.13.0` and npm `11.20.0`:
 - Restyled all existing routes: `/`, `/login`, `/dashboard`, `/hosts`, `/hosts/new`, `/hosts/[hostId]`, `/incidents`, `/incidents/new`, `/incidents/[incidentId]`, `/settings`, `/verify`, `/docs`, `/privacy`, `/terms`, `error`, `loading` and `not-found`.
 - Timeline now distinguishes Host agent (emerald), Renter client (blue) and platform-operated probe (cyan), with mono event types, UTC times and sequence numbers.
 - No business logic, API contract, database schema, evidence wording or verifier behaviour changed.
-- Phase 7 implementation deviations are recorded in `docs/DESIGN_DECISIONS.md`.
+- Phase 7 implementation deviations are recorded in `../DESIGN_DECISIONS.md`.
 - Test evidence: `npm run test:e2e` — **PASS**, 44 checks, 43 passed and one intentional mobile provider-flow skip; `npm run lint` — **PASS** across all workspaces; `npm run typecheck` — **PASS** across all workspaces; `npm run build` — **PASS** across the monorepo.
 - Preview/deployment verification: a Vercel Preview deployment is READY at the URL below. One successful browser load of the deployed `/` returned HTTP 200, loaded Satoshi, applied the 4px button geometry and reported no overflow or console errors. Subsequent automated requests to the Preview were met by Vercel's security checkpoint (`HTTP 403`, `x-vercel-mitigated: challenge`), so repeated automated browser checks are blocked at the edge. Local build and E2E verification cover the same code.
 
@@ -846,9 +866,9 @@ When unauthenticated or after the session disappeared, protected routes could br
   - signed event envelope, certificates, manifest, offline browser/CLI verification, exit codes and `iw-rules-v1` assessments;
   - limitations of signatures, sources, missing observations, bounded capture and staging status;
   - reference links to the repository documents.
-- Commands and limits match `docs/HOST_AGENT.md`, `docs/RENTER_SDK.md` and `docs/PROTOCOL.md`. No fabricated package names, installers, hosted API URLs or production claims were added.
+- Commands and limits match `../HOST_AGENT.md`, `../RENTER_SDK.md` and `../PROTOCOL.md`. No fabricated package names, installers, hosted API URLs or production claims were added.
 - Updated stale document status lines for the host agent, renter SDK, probe worker, user guide, design decisions, configuration, deployment and operations.
-- Replaced the stale `docs/README.md` blueprint note with a maintained documentation index and in-app documentation consistency rules.
+- Replaced the stale `../README.md` blueprint note with a maintained documentation index and in-app documentation consistency rules.
 
 ### Legal and footer links
 
@@ -1052,11 +1072,11 @@ The temporary one-click demo sign-in bypass was removed before release at the op
 
 - **Final visual design:** **APPROVED and IMPLEMENTED** (revision 0.3; Phase 7 **COMPLETE AND CLOSED**).
 - **Approved design direction:** Reference-driven dark emerald command center with Satoshi, sharp 4px geometry and `#26D18C` emerald.
-- **Design references:** OPERATOR-SUPPLIED — `docs/design-references/incident-reference 1.webp` and `incident-reference 2.webp`. No reference imagery, logos, avatars or copy is embedded in the mockups.
+- **Design references:** OPERATOR-SUPPLIED — `../design-references/incident-reference 1.webp` and `incident-reference 2.webp`. No reference imagery, logos, avatars or copy is embedded in the mockups.
 - **Mockups:** v0.3 **APPROVED** on 2026-10-31.
 - **Operator approval:** **GRANTED** — "I approve these mockups."
 - **Implementation authorization:** Phase 7 visual implementation only. Business logic, API contracts, database schemas, security and evidence language must not change.
-- Phase 6 scope, reference analysis, translation, deviations and the approval record are in `docs/DESIGN_DECISIONS.md`.
+- Phase 6 scope, reference analysis, translation, deviations and the approval record are in `../DESIGN_DECISIONS.md`.
 - Phase 3C, Phase 3D, Phase 3E and Phase 3F did not change frontend styling or visual behaviour.
 - Phase 4/5 connect functional UI and state handling; Phase 7 applies the approved final visual design. Business logic, API contracts and schemas remain unchanged.
 - Phase 4 connects functional UI and state handling; the final visual design is implemented, accepted and closed.
@@ -1064,21 +1084,21 @@ The temporary one-click demo sign-in bypass was removed before release at the op
 
 ## Documentation/footer status
 
-- `docs/HOST_AGENT.md` documents the Phase 3D CLI, configuration, permissions, spool/quota, collectors, retry and limitations.
-- `docs/RENTER_SDK.md` rewritten with Phase 3E enrollment, endpoint, queue, state, deadline and error behavior.
-- `docs/PROBE_WORKER.md` added with Render deployment, key provisioning, SSRF/DNS-rebinding controls, result mapping and database access.
-- `docs/CONFIGURATION.md` updated for renter SDK options and probe-worker variables/provisioning.
-- `docs/API_REFERENCE.md` updated to show both witnesses consume existing contracts; no new public API route.
-- `docs/DEPLOYMENT.md`, `docs/OPERATIONS.md` and `docs/PRIVACY_SECURITY.md` updated for the worker.
-- `README.md` rewritten for Phase 8 with current setup, magic-link deviation, testing, deployment, protocol, host-agent, renter-SDK and security guidance.
-- `docs/README.md` is now a maintained documentation index with in-app `/docs` consistency rules rather than a blueprint note.
-- `docs/HOST_AGENT.md`, `docs/RENTER_SDK.md`, `docs/PROBE_WORKER.md`, `docs/USER_GUIDE.md`, `docs/CONFIGURATION.md`, `docs/DEPLOYMENT.md`, `docs/OPERATIONS.md` and `docs/DESIGN_DECISIONS.md` have current status lines; no Phase 3 acceptance debt remains.
+- `../HOST_AGENT.md` documents the Phase 3D CLI, configuration, permissions, spool/quota, collectors, retry and limitations.
+- `../RENTER_SDK.md` rewritten with Phase 3E enrollment, endpoint, queue, state, deadline and error behavior.
+- `../PROBE_WORKER.md` added with Render deployment, key provisioning, SSRF/DNS-rebinding controls, result mapping and database access.
+- `../CONFIGURATION.md` updated for renter SDK options and probe-worker variables/provisioning.
+- `../API_REFERENCE.md` updated to show both witnesses consume existing contracts; no new public API route.
+- `../DEPLOYMENT.md`, `../OPERATIONS.md` and `../PRIVACY_SECURITY.md` updated for the worker.
+- `../../README.md` rewritten for Phase 8 with current setup, magic-link deviation, testing, deployment, protocol, host-agent, renter-SDK and security guidance.
+- `../README.md` is now a maintained documentation index with in-app `/docs` consistency rules rather than a blueprint note.
+- `../HOST_AGENT.md`, `../RENTER_SDK.md`, `../PROBE_WORKER.md`, `../USER_GUIDE.md`, `../CONFIGURATION.md`, `../DEPLOYMENT.md`, `../OPERATIONS.md` and `../DESIGN_DECISIONS.md` have current status lines; no Phase 3 acceptance debt remains.
 - `.env.example` includes `NEXT_PUBLIC_SITE_URL` and conservative probe-worker defaults/key-provisioning guidance.
 - `/docs` is a real, reachable documentation destination with quick start, host-agent, renter-SDK, protocol, verification and limitation sections.
 - Footer Documentation, Privacy, Terms, Verify and GitHub links are present and were checked on the deployed Preview. The GitHub repository and a representative docs file returned HTTP 200.
 - `/privacy` and `/terms` are real routes with explicit legal-review-pending status; no fabricated company, jurisdiction, contact or contractual legal copy is published.
-- `docs/DESIGN_DECISIONS.md` records the rejected 0.1 hybrid, the operator-supplied references, the reference analysis/translation, Satoshi/4px revision 0.3 refinements, the explicit approval, Phase 7 implementation deviations and the completed Phase 7 acceptance.
-- `docs/mockups/README.md` explains how to open and review the reference-driven mockup set; `docs/mockups/index.html` is the local review entry point. Font attribution/license is in `docs/mockups/assets/fonts/FONT_LICENSE.md`.
+- `../DESIGN_DECISIONS.md` records the rejected 0.1 hybrid, the operator-supplied references, the reference analysis/translation, Satoshi/4px revision 0.3 refinements, the explicit approval, Phase 7 implementation deviations and the completed Phase 7 acceptance.
+- `../mockups/README.md` explains how to open and review the reference-driven mockup set; `../mockups/index.html` is the local review entry point. Font attribution/license is in `../mockups/assets/fonts/FONT_LICENSE.md`.
 
 ## Known risks and operator actions
 
@@ -1117,5 +1137,5 @@ The temporary one-click demo sign-in bypass was removed before release at the op
 
 ## Exact next task
 
-**Phase 7 — Operator acceptance checkpoint.**
-The approved visual system is implemented, tested and deployed. Wait for operator acceptance. Do not begin Phase 8 without explicit authorization.
+**Operator review of the repository cleanup and open-source documentation.**
+Confirm the moved `docs/planning/` layout, the generic root README, the public `/docs` server guide and the honest publication status for the demo video and HackerNoon article. Do not start another phase or deploy production without explicit authorization.

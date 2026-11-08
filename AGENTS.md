@@ -1,6 +1,6 @@
 # AGENTS.md — Incident Witness Coding Agent Rules
 
-These instructions are mandatory for every AI coding agent or human implementer working in this repository. `PROJECT_SPEC.md` defines product behaviour; `ARCHITECTURE.md` defines technical decisions; `IMPLEMENTATION_PLAN.md` defines sequencing and acceptance gates; `AI_HANDOFF.md` defines the current execution state.
+These instructions are mandatory for every AI coding agent or human implementer working in this repository. `docs/planning/PROJECT_SPEC.md` defines product behaviour; `docs/planning/ARCHITECTURE.md` defines technical decisions; `docs/planning/IMPLEMENTATION_PLAN.md` defines sequencing and acceptance gates; `docs/planning/AI_HANDOFF.md` defines the current execution state.
 
 ## 1. Project purpose
 
@@ -12,14 +12,14 @@ It is not a GPU marketplace, outage adjudicator, automatic reliability-score cha
 
 Before changing any file, read:
 
-1. `AI_HANDOFF.md`.
-2. `PROJECT_SPEC.md`.
-3. `ARCHITECTURE.md`.
-4. `IMPLEMENTATION_PLAN.md`.
+1. `docs/planning/AI_HANDOFF.md`.
+2. `docs/planning/PROJECT_SPEC.md`.
+3. `docs/planning/ARCHITECTURE.md`.
+4. `docs/planning/IMPLEMENTATION_PLAN.md`.
 5. `docs/PROPER_VIBE_CODING_WORKFLOW_REFERENCE.md`.
 6. Relevant `docs/` material and the current task prompt.
 
-If this file conflicts with `PROJECT_SPEC.md` or `ARCHITECTURE.md`, stop and report the contradiction. Do not decide which source to override. The operator must approve the correction.
+If this file conflicts with `docs/planning/PROJECT_SPEC.md` or `docs/planning/ARCHITECTURE.md`, stop and report the contradiction. Do not decide which source to override. The operator must approve the correction.
 
 ## 3. Architecture is fixed
 
@@ -32,7 +32,7 @@ The approved MVP stack is:
 - Drizzle ORM + `pg`, restricted database roles and RLS.
 - `jose` JWT verification.
 - Shared Zod/domain schemas and Fastify JSON Schema boundaries.
-- RFC 8785 JCS canonical JSON using the exact pinned `canonicalize@5.1.0` package, SHA-256 and Ed25519 signatures. No custom canonicalizer; enforce I-JSON and exact canonical raw request bytes as specified in `ARCHITECTURE.md`. Node runtimes use built-in `node:crypto`; the offline browser verifier uses pinned `@noble/ed25519` 3.2.x for public-key verification only through a browser-safe package export. No private signing key is ever present in browser code.
+- RFC 8785 JCS canonical JSON using the exact pinned `canonicalize@5.1.0` package, SHA-256 and Ed25519 signatures. No custom canonicalizer; enforce I-JSON and exact canonical raw request bytes as specified in `docs/planning/ARCHITECTURE.md`. Node runtimes use built-in `node:crypto`; the offline browser verifier uses pinned `@noble/ed25519` 3.2.x for public-key verification only through a browser-safe package export. No private signing key is ever present in browser code.
 - Linux x86_64 host agent with SQLite local spool.
 - Incident-scoped TypeScript renter SDK.
 - Separate Render background probe worker using Postgres job leases.
@@ -99,7 +99,7 @@ Do not start final visual design until every MUST HAVE core flow and critical fa
 - Explain borrowed attributes and intentional deviations.
 - Present mockups and revise from operator feedback.
 - **Do not implement final visual styling until the operator explicitly approves the mockup direction.** No implicit approval and no skipping this stop.
-- Preserve approved references/assets/mockups and decisions in `docs/DESIGN_DECISIONS.md` and `AI_HANDOFF.md`.
+- Preserve approved references/assets/mockups and decisions in `docs/DESIGN_DECISIONS.md` and `docs/planning/AI_HANDOFF.md`.
 - Final visual implementation must not change product behaviour, business logic, data model, APIs, security or architecture. Request separate approval for any such change.
 
 ## 6. Product and business invariants
@@ -159,7 +159,7 @@ Do not disable tests, lint rules, TypeScript strictness, security headers or che
 - Maintain `docs/` covering setup, environment, architecture, API, event protocol, host agent install, renter SDK, user/operator guide, privacy/data lifecycle, security, deployment, operations and troubleshooting as applicable.
 - Update docs in the same phase that changes behaviour/contracts.
 - Add ADR for every approved architecture decision.
-- Update `AI_HANDOFF.md` at every checkpoint.
+- Update `docs/planning/AI_HANDOFF.md` at every checkpoint.
 - Home footer must link to real, reachable Documentation destination (`/docs` or operator-approved published site).
 - Add GitHub link only if actual repository URL is confirmed and public disclosure is approved. If private/inappropriate, record reason and ask operator before omission/alternative.
 - Never fabricate docs/repo URLs, company details, metrics, claims, contact information or legal copy.

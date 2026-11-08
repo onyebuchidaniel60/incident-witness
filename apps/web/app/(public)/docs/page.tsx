@@ -3,13 +3,14 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 
 import { PageIntro } from "@/components/page-intro";
+import { InlineNotice } from "@/components/async-state";
 import { Icon } from "@/components/ui/icon";
 import { repositoryUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Documentation",
   description:
-    "Incident Witness documentation: what the protocol records, host-agent installation and enrollment, renter SDK integration, signed bundle verification and evidence limitations.",
+    "Incident Witness server guide and documentation: host-agent installation and enrollment, renter SDK integration, signed bundle verification, the three evidence sources and evidence limitations.",
   alternates: { canonical: "/docs" },
   openGraph: {
     title: "Incident Witness documentation",
@@ -22,6 +23,7 @@ export const metadata: Metadata = {
 
 const sections = [
   { id: "overview", label: "Overview and quick start" },
+  { id: "server-guide", label: "Server guide / user manual" },
   { id: "host-agent", label: "Host agent" },
   { id: "renter-sdk", label: "Renter SDK" },
   { id: "protocol", label: "Evidence protocol" },
@@ -53,7 +55,17 @@ const referenceDocuments = [
   {
     title: "Architecture",
     detail: "Components, trust boundaries, database, API, cryptography, security and deployment.",
-    path: "ARCHITECTURE.md",
+    path: "docs/planning/ARCHITECTURE.md",
+  },
+  {
+    title: "Project specification",
+    detail: "Product behaviour, flows, limits, acceptance criteria and UI route inventory.",
+    path: "docs/planning/PROJECT_SPEC.md",
+  },
+  {
+    title: "Implementation plan",
+    detail: "Phase sequencing, verification gates and the path from skeleton to release candidate.",
+    path: "docs/planning/IMPLEMENTATION_PLAN.md",
   },
   {
     title: "API reference",
@@ -118,11 +130,11 @@ export default function DocsPage() {
       <PageIntro
         eyebrow="Documentation"
         title="Incident Witness documentation"
-        description="What the protocol records, how to enroll a host and a renter client, how an evidence bundle is sealed and verified, and what the evidence cannot show. The repository documents remain the detailed source of truth."
+        description="The server guide and user manual: what the protocol records, how to enroll a host and a renter client, how an evidence bundle is sealed and verified, and what the evidence cannot show. The repository documents remain the detailed source of truth."
       >
         <div className="flex flex-wrap gap-1.5">
           <span className="iw-chip iw-chip-neutral">Protocol v1</span>
-          <span className="iw-chip iw-chip-neutral">Phase 8 documentation</span>
+          <span className="iw-chip iw-chip-neutral">Server guide</span>
           <span className="iw-chip iw-chip-warning">Staging deployment</span>
         </div>
       </PageIntro>
@@ -208,6 +220,191 @@ export default function DocsPage() {
                 or with the offline CLI.
               </li>
             </ol>
+          </DocsSection>
+
+          <DocsSection id="server-guide" title="Server guide / user manual">
+            <p>
+              This is the short operating manual for the reference server. It covers the three
+              observation sources, the provider workflow, how reviewers can test the verifier, and
+              the security boundary around the signatures.
+            </p>
+
+            <h3 className="pt-2 text-sm font-semibold text-iw-ink">
+              Overview: the three observation sources
+            </h3>
+            <div className="grid gap-2 sm:grid-cols-3">
+              <div className="rounded-[4px] border border-iw-border bg-white/[0.025] p-3">
+                <span className="iw-chip iw-chip-host">Host agent</span>
+                <p className="mt-2 text-[10px] leading-5 text-iw-muted">
+                  Runs on the provider&apos;s Linux x86_64 host. Signs operational and evidence
+                  heartbeats plus available GPU, UPS and lifecycle observations. Missing collectors
+                  are reported as unavailable.
+                </p>
+              </div>
+              <div className="rounded-[4px] border border-iw-border bg-white/[0.025] p-3">
+                <span className="iw-chip iw-chip-renter">Renter SDK</span>
+                <p className="mt-2 text-[10px] leading-5 text-iw-muted">
+                  Runs inside or beside the renter workload. Signs only incident-scoped heartbeats
+                  and fixed endpoint observations. It does not collect prompts, model data, files,
+                  stdout/stderr or credentials.
+                </p>
+              </div>
+              <div className="rounded-[4px] border border-iw-border bg-white/[0.025] p-3">
+                <span className="iw-chip iw-chip-probe">Platform probe</span>
+                <p className="mt-2 text-[10px] leading-5 text-iw-muted">
+                  A separate platform-operated worker checks the provider&apos;s verified HTTPS
+                  health endpoint. It is not an independent third-party organisation.
+                </p>
+              </div>
+            </div>
+            <p>
+              Accepted events are ordered deterministically by observation time, source type, source
+              key, sequence and event ID. Missing sources are shown as gaps, not as healthy
+              defaults. The assessment is a versioned rule-engine output; it is not an AI diagnosis
+              or a probability score.
+            </p>
+
+            <h3 className="pt-2 text-sm font-semibold text-iw-ink">
+              Quickstart: create a host and start a session
+            </h3>
+            <ol className="list-decimal space-y-1.5 pl-5">
+              <li>
+                Sign in at <Link href="/login" className="iw-link">/login</Link> with the Supabase
+                magic link.
+              </li>
+              <li>
+                Create a host at <Link href="/hosts/new" className="iw-link">/hosts/new</Link> and
+                publish the one-time DNS TXT challenge. The host must serve the fixed HTTPS health
+                path <code className="font-mono text-[10px]">/.well-known/incident-witness/health</code>.
+              </li>
+              <li>
+                Verify the endpoint, issue a single-use enrollment code and enroll the agent. The
+                code is entered interactively; it is never passed as a command-line argument.
+              </li>
+              <li>
+                Start a bounded session at <Link href="/incidents/new" className="iw-link">/incidents/new</Link>{" "}
+                (2–240 minutes). Copy the session ID for the agent.
+              </li>
+              <li>
+                Optionally issue a renter invitation at the session detail page. It is single-use
+                and expires after 15 minutes. The renter SDK needs the provider hostname from the
+                invitation context.
+              </li>
+              <li>
+                End capture when the operating window closes. After accepted evidence has synced,
+                seal the session and download the JSON bundle.
+              </li>
+              <li>
+                Open <Link href="/verify" className="iw-link">/verify</Link> and select the bundle,
+                or verify it with the offline CLI.
+              </li>
+            </ol>
+            <CodeBlock label="Host agent enrollment and run">{`iw-agent enroll --api-url https://<incident-witness-api>
+iw-agent run --incident <incident-uuid>
+iw-agent status`}</CodeBlock>
+
+            <h3 className="pt-2 text-sm font-semibold text-iw-ink">Judging and testing</h3>
+            <p>
+              The web app does not host a public sample bundle. Generate a labelled sample on the
+              machine running this repository, then select the resulting JSON file locally in{" "}
+              <Link href="/verify" className="iw-link">/verify</Link>. The file is never uploaded.
+            </p>
+            <CodeBlock label="Generate sample evidence">{`# Full synthetic provider → host → renter → seal → verify lifecycle
+npm run demo
+
+# Optional: regenerate the hackathon demo video and local bundle artifacts
+npm run demo:video`}</CodeBlock>
+            <ul className="space-y-1.5">
+              <li>
+                <code className="font-mono text-[10px]">npm run demo</code> prints its artifact
+                directory and runs the CLI verifier against a valid bundle and a one-byte tampered
+                copy.
+              </li>
+              <li>
+                <code className="font-mono text-[10px]">npm run demo:video</code> writes{" "}
+                <code className="font-mono text-[10px]">scripts/demo/assets/demo-bundle.json</code>{" "}
+                and <code className="font-mono text-[10px]">demo-bundle-tampered.json</code>.
+              </li>
+              <li>
+                Expected verifier result for the original: schema, manifest digest, pinned platform
+                key/signature, source certificates, event signatures and ordering all pass.
+              </li>
+              <li>
+                Expected verifier result for the tampered copy: <strong className="text-iw-ink-soft">INVALID</strong>{" "}
+                with manifest digest and signature failures. The bundle is not repaired or uploaded.
+              </li>
+            </ul>
+            <CodeBlock label="Offline CLI verification">{`npm run verify -- path/to/incident-witness-bundle.json`}</CodeBlock>
+            <InlineNotice tone="warning" title="Sample evidence is disposable and labelled">
+              <p>
+                The demo harness and video pipeline use a labelled simulated session. Artifacts are
+                local, gitignored and intended for testing only. Do not treat a demo result as proof
+                of real hardware telemetry or physical cause.
+              </p>
+            </InlineNotice>
+
+            <h3 className="pt-2 text-sm font-semibold text-iw-ink">
+              Security: signatures, scope and limits
+            </h3>
+            <ul className="space-y-1.5">
+              <li>
+                Events and bundle manifests are signed with Ed25519 over RFC 8785 JCS canonical JSON.
+                SHA-256 provides digests; the verifier checks a locally pinned platform public key,
+                source certificates, event signatures, sequence uniqueness and deterministic order.
+              </li>
+              <li>
+                The API enforces authentication, resource ownership, source-key scope/status,
+                monotonic sequences, the capture window and canonical raw request bytes. Runtime
+                database roles are restricted and RLS is defense in depth.
+              </li>
+              <li>
+                The platform probe is restricted to a verified hostname, HTTPS port 443, the fixed
+                health path and GET. It rejects private, loopback, link-local, metadata and other
+                unsafe addresses, does not follow redirects and pins the validated address.
+              </li>
+              <li>
+                Evidence is append-only. Sealed bundles are immutable through the application. Key
+                revocation blocks new events but does not invalidate valid historic signatures.
+              </li>
+            </ul>
+            <InlineNotice tone="danger" title="What a signature does not prove">
+              <p>
+                Verification confirms integrity and provenance relative to trusted keys. It does not
+                prove that a sensor was accurate, that a host or key was uncompromised, or that an
+                inferred cause is true. The platform probe is not an independent third party.
+                Missing sources remain gaps, and simulated evidence is capped at LOW.
+              </p>
+            </InlineNotice>
+            <p>
+              Full contracts:{" "}
+              <a
+                href={`${repositoryUrl}/blob/main/docs/PROTOCOL.md`}
+                className="iw-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                docs/PROTOCOL.md
+              </a>
+              ,{" "}
+              <a
+                href={`${repositoryUrl}/blob/main/docs/PRIVACY_SECURITY.md`}
+                className="iw-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                docs/PRIVACY_SECURITY.md
+              </a>{" "}
+              and{" "}
+              <a
+                href={`${repositoryUrl}/blob/main/docs/planning/ARCHITECTURE.md`}
+                className="iw-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                docs/planning/ARCHITECTURE.md
+              </a>
+              .
+            </p>
           </DocsSection>
 
           <DocsSection id="host-agent" title="Host agent installation and enrollment">

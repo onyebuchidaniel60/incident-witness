@@ -26,6 +26,19 @@ of truth behind it.
 - [Hackathon submission workstream](./HACKATHON_SUBMISSION.md)
 - [Source traceability](./SOURCE_TRACEABILITY.md)
 
+## Planning and architecture
+
+- [Project specification](./planning/PROJECT_SPEC.md)
+- [Architecture and technical contracts](./planning/ARCHITECTURE.md)
+- [Implementation plan](./planning/IMPLEMENTATION_PLAN.md)
+- [Blueprint index](./planning/BLUEPRINT.md)
+- [Package manifest](./planning/PACKAGE_MANIFEST.md)
+- [Package checksums](./planning/SHA256SUMS.txt)
+- [AI handoff / current execution state](./planning/AI_HANDOFF.md)
+- [Changelog](./CHANGELOG.md)
+
+The root `AGENTS.md` remains at the repository root because the coding-agent harness requires it there. All other internal planning and source-of-truth documents live in this `docs/planning/` directory.
+
 ## Documentation maintenance rules
 
 - Update these documents when API, business rules, protocol, installation or deployment behaviour changes.
@@ -37,4 +50,4 @@ of truth behind it.
 
 ## Source methodology
 
-- [Proper Vibe Coding Workflow reference](./PROPER_VIBE_CODING_WORKFLOW_REFERENCE.md) — the supplied methodology; the project-specific `AGENTS.md` and `IMPLEMENTATION_PLAN.md` adapt it to Incident Witness.
+- [Proper Vibe Coding Workflow reference](./PROPER_VIBE_CODING_WORKFLOW_REFERENCE.md) — the supplied methodology; the repository `AGENTS.md` and [`planning/IMPLEMENTATION_PLAN.md`](./planning/IMPLEMENTATION_PLAN.md) adapt it to Incident Witness.

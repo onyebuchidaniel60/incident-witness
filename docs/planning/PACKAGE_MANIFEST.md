@@ -1,5 +1,7 @@
 # Incident Witness — Handoff Package Manifest
 
+> **Historical snapshot.** This manifest describes the original root-level handoff package. The planning files now live in `docs/planning/`; `AGENTS.md` remains at the repository root and `CHANGELOG.md` lives in `docs/`.
+
 **Package status:** Blueprint and coding-agent handoff only; application implementation has not started.
 
 ## Root handoff files

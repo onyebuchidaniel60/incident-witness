@@ -1,3 +1,4 @@
+# Historical checksums of the original root-level handoff package. Not current release checksums; paths refer to the original layout.
 6db7d47e388a9849c33cb1ab6098d36a1edc3ce726983217f2f150de8ccd3ef0  .env.example
 2226455a969b6635238e4266af6d0c2b049f04d4d811983c65464f7dd135a455  AGENTS.md
 0295e35cc319e4d0c6294f9073ee94e985979a830682ae101500499140058a13  AI_HANDOFF.md

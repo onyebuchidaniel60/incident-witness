@@ -50,7 +50,7 @@ No private signing key, DB URL, service-role/secret key, host credential or invi
 npm run db:provision-platform-key
 ```
 
-The command reads the private key and key ID from the environment, writes only the public key and SHA-256 fingerprint to `platform_signing_keys`, and prints only public metadata. It refuses to overwrite an existing key ID with a different public key. Do not rotate a platform key by simply replacing the environment value; follow the overlapping public-key pin/release process in `ARCHITECTURE.md`.
+The command reads the private key and key ID from the environment, writes only the public key and SHA-256 fingerprint to `platform_signing_keys`, and prints only public metadata. It refuses to overwrite an existing key ID with a different public key. Do not rotate a platform key by simply replacing the environment value; follow the overlapping public-key pin/release process in `docs/planning/ARCHITECTURE.md`.
 
 ## Probe worker variables
 
@@ -121,4 +121,4 @@ Self-service account deletion is not implemented or exposed in v1. Before produc
 
 ## Secret rotation
 
-Rotate host/renter credentials by revocation and new enrollment/invitation. Rotate platform signing key only through the documented overlapping public-key pin/release process in `ARCHITECTURE.md`. Do not simply replace the key in Render; historical bundle verification would break.
+Rotate host/renter credentials by revocation and new enrollment/invitation. Rotate platform signing key only through the documented overlapping public-key pin/release process in `docs/planning/ARCHITECTURE.md`. Do not simply replace the key in Render; historical bundle verification would break.
